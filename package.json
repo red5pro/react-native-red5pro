@@ -37,9 +37,8 @@
     "url": "https://github.com/infrared5/react-native-red5pro/issues"
   },
   "homepage": "https://github.com/infrared5/react-native-red5pro#readme",
-  "dependencies": {
+  "devDependencies": {
     "react": "^16.1.1",
-    "react-native": "^0.50.3",
-    "react-native-permissions": "^1.0.1"
+    "react-native": "^0.50.3"
   }
 }
