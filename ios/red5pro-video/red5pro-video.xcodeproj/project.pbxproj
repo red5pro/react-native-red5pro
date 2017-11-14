@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		48B914131FBA90B3002CA6D9 /* R5VideoViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 48B914111FBA90B3002CA6D9 /* R5VideoViewManager.m */; };
 		48B914141FBA90B3002CA6D9 /* R5VideoView.m in Sources */ = {isa = PBXBuildFile; fileRef = 48B914121FBA90B3002CA6D9 /* R5VideoView.m */; };
-		48B914161FBA90BB002CA6D9 /* R5Streaming.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48B914151FBA90BB002CA6D9 /* R5Streaming.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,7 +28,6 @@
 		48B914101FBA90B3002CA6D9 /* R5VideoView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = R5VideoView.h; sourceTree = "<group>"; };
 		48B914111FBA90B3002CA6D9 /* R5VideoViewManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = R5VideoViewManager.m; sourceTree = "<group>"; };
 		48B914121FBA90B3002CA6D9 /* R5VideoView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = R5VideoView.m; sourceTree = "<group>"; };
-		48B914151FBA90BB002CA6D9 /* R5Streaming.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = R5Streaming.framework; path = "red5pro-video/R5Streaming.framework"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,7 +35,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48B914161FBA90BB002CA6D9 /* R5Streaming.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -47,7 +44,6 @@
 		48B913FB1FBA9073002CA6D9 = {
 			isa = PBXGroup;
 			children = (
-				48B914151FBA90BB002CA6D9 /* R5Streaming.framework */,
 				48B914061FBA9073002CA6D9 /* red5pro-video */,
 				48B914051FBA9073002CA6D9 /* Products */,
 			);
