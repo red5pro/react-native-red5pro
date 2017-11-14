@@ -38,7 +38,5 @@
   },
   "homepage": "https://github.com/infrared5/react-native-red5pro#readme",
   "devDependencies": {
-    "react": "^16.1.1",
-    "react-native": "^0.50.3"
   }
 }
