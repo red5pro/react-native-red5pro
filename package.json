@@ -2,7 +2,7 @@
   "name": "react-native-red5pro",
   "version": "1.0.0",
   "description": "React Native Red5 Pro Publisher/Subscriber",
-  "main": "src/view/R5VideoView.js",
+  "main": "index.js",
   "scripts": {
     "test": "test"
   },
