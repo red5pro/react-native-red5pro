@@ -1,0 +1,25 @@
+{
+  "name": "example",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "babel-preset-react-native-stage-0": "^1.0.1",
+    "jest-expo": "^22.0.0",
+    "react-test-renderer": "16.0.0-beta.5"
+  },
+  "scripts": {
+    "start": "react-native start",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "test": "node node_modules/jest/bin/jest.js --watch"
+  },
+  "jest": {
+    "preset": "jest-expo"
+  },
+  "dependencies": {
+    "react": "16.0.0-beta.5",
+    "react-native": "^0.49.5",
+    "react-native-permissions": "^1.0.1",
+    "react-native-red5pro": "https://github.com/infrared5/react-native-red5pro/tarball/develop"
+  }
+}
