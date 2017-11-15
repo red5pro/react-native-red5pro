@@ -10,8 +10,9 @@
 #import <R5Streaming/R5Streaming.h>
 
 #import "R5VideoView.h"
+#import "R5VideoViewManager.h"
 
-@interface R5VideoViewManager : RCTViewManager {
+@interface R5VideoViewManager() {
 
   R5VideoView *r5View;
 

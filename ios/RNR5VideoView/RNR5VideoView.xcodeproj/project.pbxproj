@@ -3,136 +3,168 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 48;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		48B914131FBA90B3002CA6D9 /* R5VideoViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 48B914111FBA90B3002CA6D9 /* R5VideoViewManager.m */; };
-		48B914141FBA90B3002CA6D9 /* R5VideoView.m in Sources */ = {isa = PBXBuildFile; fileRef = 48B914121FBA90B3002CA6D9 /* R5VideoView.m */; };
+		48302EEC1FBB9F6900CF4938 /* R5Streaming.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 48302EEB1FBB9F6900CF4938 /* R5Streaming.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		48302EED1FBB9F9200CF4938 /* R5Streaming.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48302EEB1FBB9F6900CF4938 /* R5Streaming.framework */; };
+		48B917981FBB8BAE002CA6D9 /* R5VideoView.m in Sources */ = {isa = PBXBuildFile; fileRef = 48B917961FBB8BAE002CA6D9 /* R5VideoView.m */; };
+		48B917991FBB8BAE002CA6D9 /* R5VideoViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 48B917971FBB8BAE002CA6D9 /* R5VideoViewManager.m */; };
+		48B9179B1FBB8BE2002CA6D9 /* R5VideoView.h in Headers */ = {isa = PBXBuildFile; fileRef = 48B917951FBB8BAE002CA6D9 /* R5VideoView.h */; };
+		48B9179D1FBB8C55002CA6D9 /* R5VideoViewManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 48B9179C1FBB8BFD002CA6D9 /* R5VideoViewManager.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		48B914021FBA9073002CA6D9 /* CopyFiles */ = {
+		48B917871FBB8B86002CA6D9 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "include/$(PRODUCT_NAME)";
-			dstSubfolderSpec = 16;
+			dstPath = "";
+			dstSubfolderSpec = 0;
 			files = (
+				48302EEC1FBB9F6900CF4938 /* R5Streaming.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		48B914041FBA9073002CA6D9 /* libred5pro-video.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libred5pro-video.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		48B914101FBA90B3002CA6D9 /* R5VideoView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = R5VideoView.h; sourceTree = "<group>"; };
-		48B914111FBA90B3002CA6D9 /* R5VideoViewManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = R5VideoViewManager.m; sourceTree = "<group>"; };
-		48B914121FBA90B3002CA6D9 /* R5VideoView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = R5VideoView.m; sourceTree = "<group>"; };
+		48302EEB1FBB9F6900CF4938 /* R5Streaming.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = R5Streaming.framework; path = ../../example/ios/Red5ProVideoExample/R5Streaming.framework; sourceTree = "<group>"; };
+		48B917891FBB8B86002CA6D9 /* libRNR5VideoView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNR5VideoView.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		48B917951FBB8BAE002CA6D9 /* R5VideoView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = R5VideoView.h; sourceTree = "<group>"; };
+		48B917961FBB8BAE002CA6D9 /* R5VideoView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = R5VideoView.m; sourceTree = "<group>"; };
+		48B917971FBB8BAE002CA6D9 /* R5VideoViewManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = R5VideoViewManager.m; sourceTree = "<group>"; };
+		48B9179C1FBB8BFD002CA6D9 /* R5VideoViewManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = R5VideoViewManager.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		48B914011FBA9073002CA6D9 /* Frameworks */ = {
+		48B917861FBB8B86002CA6D9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				48302EED1FBB9F9200CF4938 /* R5Streaming.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		48B913FB1FBA9073002CA6D9 = {
+		48302EC31FBB985B00CF4938 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				48B914061FBA9073002CA6D9 /* red5pro-video */,
-				48B914051FBA9073002CA6D9 /* Products */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		48B917801FBB8B86002CA6D9 = {
+			isa = PBXGroup;
+			children = (
+				48302EEB1FBB9F6900CF4938 /* R5Streaming.framework */,
+				48B9178B1FBB8B86002CA6D9 /* RNR5VideoView */,
+				48B9178A1FBB8B86002CA6D9 /* Products */,
+				48302EC31FBB985B00CF4938 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
-		48B914051FBA9073002CA6D9 /* Products */ = {
+		48B9178A1FBB8B86002CA6D9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				48B914041FBA9073002CA6D9 /* libred5pro-video.a */,
+				48B917891FBB8B86002CA6D9 /* libRNR5VideoView.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		48B914061FBA9073002CA6D9 /* red5pro-video */ = {
+		48B9178B1FBB8B86002CA6D9 /* RNR5VideoView */ = {
 			isa = PBXGroup;
 			children = (
-				48B914101FBA90B3002CA6D9 /* R5VideoView.h */,
-				48B914121FBA90B3002CA6D9 /* R5VideoView.m */,
-				48B914111FBA90B3002CA6D9 /* R5VideoViewManager.m */,
+				48B917951FBB8BAE002CA6D9 /* R5VideoView.h */,
+				48B917961FBB8BAE002CA6D9 /* R5VideoView.m */,
+				48B917971FBB8BAE002CA6D9 /* R5VideoViewManager.m */,
+				48B9179C1FBB8BFD002CA6D9 /* R5VideoViewManager.h */,
 			);
-			path = "red5pro-video";
+			path = RNR5VideoView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		48B9179A1FBB8BDC002CA6D9 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				48B9179D1FBB8C55002CA6D9 /* R5VideoViewManager.h in Headers */,
+				48B9179B1FBB8BE2002CA6D9 /* R5VideoView.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
-		48B914031FBA9073002CA6D9 /* red5pro-video */ = {
+		48B917881FBB8B86002CA6D9 /* RNR5VideoView */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 48B9140D1FBA9073002CA6D9 /* Build configuration list for PBXNativeTarget "red5pro-video" */;
+			buildConfigurationList = 48B917921FBB8B86002CA6D9 /* Build configuration list for PBXNativeTarget "RNR5VideoView" */;
 			buildPhases = (
-				48B914001FBA9073002CA6D9 /* Sources */,
-				48B914011FBA9073002CA6D9 /* Frameworks */,
-				48B914021FBA9073002CA6D9 /* CopyFiles */,
+				48B917851FBB8B86002CA6D9 /* Sources */,
+				48B917861FBB8B86002CA6D9 /* Frameworks */,
+				48B917871FBB8B86002CA6D9 /* CopyFiles */,
+				48B9179A1FBB8BDC002CA6D9 /* Headers */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = "red5pro-video";
-			productName = "red5pro-video";
-			productReference = 48B914041FBA9073002CA6D9 /* libred5pro-video.a */;
+			name = RNR5VideoView;
+			productName = RNR5VideoView;
+			productReference = 48B917891FBB8B86002CA6D9 /* libRNR5VideoView.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		48B913FC1FBA9073002CA6D9 /* Project object */ = {
+		48B917811FBB8B86002CA6D9 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0910;
 				ORGANIZATIONNAME = Red5Pro;
 				TargetAttributes = {
-					48B914031FBA9073002CA6D9 = {
+					48B917881FBB8B86002CA6D9 = {
 						CreatedOnToolsVersion = 9.1;
+						DevelopmentTeam = E964K44BWW;
 						ProvisioningStyle = Automatic;
 					};
 				};
 			};
-			buildConfigurationList = 48B913FF1FBA9073002CA6D9 /* Build configuration list for PBXProject "red5pro-video" */;
-			compatibilityVersion = "Xcode 8.0";
+			buildConfigurationList = 48B917841FBB8B86002CA6D9 /* Build configuration list for PBXProject "RNR5VideoView" */;
+			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = 48B913FB1FBA9073002CA6D9;
-			productRefGroup = 48B914051FBA9073002CA6D9 /* Products */;
+			mainGroup = 48B917801FBB8B86002CA6D9;
+			productRefGroup = 48B9178A1FBB8B86002CA6D9 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				48B914031FBA9073002CA6D9 /* red5pro-video */,
+				48B917881FBB8B86002CA6D9 /* RNR5VideoView */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		48B914001FBA9073002CA6D9 /* Sources */ = {
+		48B917851FBB8B86002CA6D9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48B914131FBA90B3002CA6D9 /* R5VideoViewManager.m in Sources */,
-				48B914141FBA90B3002CA6D9 /* R5VideoView.m in Sources */,
+				48B917981FBB8BAE002CA6D9 /* R5VideoView.m in Sources */,
+				48B917991FBB8BAE002CA6D9 /* R5VideoViewManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		48B9140B1FBA9073002CA6D9 /* Debug */ = {
+		48B917901FBB8B86002CA6D9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -180,6 +212,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../example/ios/Red5ProVideoExample/R5Streaming.framework/Headers";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -187,7 +220,7 @@
 			};
 			name = Debug;
 		};
-		48B9140C1FBA9073002CA6D9 /* Release */ = {
+		48B917911FBB8B86002CA6D9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -229,6 +262,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../example/ios/Red5ProVideoExample/R5Streaming.framework/Headers";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
@@ -236,15 +270,14 @@
 			};
 			name = Release;
 		};
-		48B9140E1FBA9073002CA6D9 /* Debug */ = {
+		48B917931FBB8B86002CA6D9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = E964K44BWW;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/red5pro-video",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../example/ios/Red5ProVideoExample/R5Streaming.framework";
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				MACH_O_TYPE = staticlib;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -252,15 +285,14 @@
 			};
 			name = Debug;
 		};
-		48B9140F1FBA9073002CA6D9 /* Release */ = {
+		48B917941FBB8B86002CA6D9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = E964K44BWW;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/red5pro-video",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../example/ios/Red5ProVideoExample/R5Streaming.framework";
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				MACH_O_TYPE = staticlib;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -271,25 +303,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		48B913FF1FBA9073002CA6D9 /* Build configuration list for PBXProject "red5pro-video" */ = {
+		48B917841FBB8B86002CA6D9 /* Build configuration list for PBXProject "RNR5VideoView" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				48B9140B1FBA9073002CA6D9 /* Debug */,
-				48B9140C1FBA9073002CA6D9 /* Release */,
+				48B917901FBB8B86002CA6D9 /* Debug */,
+				48B917911FBB8B86002CA6D9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		48B9140D1FBA9073002CA6D9 /* Build configuration list for PBXNativeTarget "red5pro-video" */ = {
+		48B917921FBB8B86002CA6D9 /* Build configuration list for PBXNativeTarget "RNR5VideoView" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				48B9140E1FBA9073002CA6D9 /* Debug */,
-				48B9140F1FBA9073002CA6D9 /* Release */,
+				48B917931FBB8B86002CA6D9 /* Debug */,
+				48B917941FBB8B86002CA6D9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 48B913FC1FBA9073002CA6D9 /* Project object */;
+	rootObject = 48B917811FBB8B86002CA6D9 /* Project object */;
 }
