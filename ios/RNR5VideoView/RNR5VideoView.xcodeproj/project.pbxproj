@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		48302EEC1FBB9F6900CF4938 /* R5Streaming.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 48302EEB1FBB9F6900CF4938 /* R5Streaming.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		48302EED1FBB9F9200CF4938 /* R5Streaming.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48302EEB1FBB9F6900CF4938 /* R5Streaming.framework */; };
 		48B917981FBB8BAE002CA6D9 /* R5VideoView.m in Sources */ = {isa = PBXBuildFile; fileRef = 48B917961FBB8BAE002CA6D9 /* R5VideoView.m */; };
 		48B917991FBB8BAE002CA6D9 /* R5VideoViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 48B917971FBB8BAE002CA6D9 /* R5VideoViewManager.m */; };
 		48B9179B1FBB8BE2002CA6D9 /* R5VideoView.h in Headers */ = {isa = PBXBuildFile; fileRef = 48B917951FBB8BAE002CA6D9 /* R5VideoView.h */; };
@@ -22,14 +20,12 @@
 			dstPath = "";
 			dstSubfolderSpec = 0;
 			files = (
-				48302EEC1FBB9F6900CF4938 /* R5Streaming.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		48302EEB1FBB9F6900CF4938 /* R5Streaming.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = R5Streaming.framework; path = ../../example/ios/Red5ProVideoExample/R5Streaming.framework; sourceTree = "<group>"; };
 		48B917891FBB8B86002CA6D9 /* libRNR5VideoView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNR5VideoView.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		48B917951FBB8BAE002CA6D9 /* R5VideoView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = R5VideoView.h; sourceTree = "<group>"; };
 		48B917961FBB8BAE002CA6D9 /* R5VideoView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = R5VideoView.m; sourceTree = "<group>"; };
@@ -42,7 +38,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48302EED1FBB9F9200CF4938 /* R5Streaming.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,7 +54,6 @@
 		48B917801FBB8B86002CA6D9 = {
 			isa = PBXGroup;
 			children = (
-				48302EEB1FBB9F6900CF4938 /* R5Streaming.framework */,
 				48B9178B1FBB8B86002CA6D9 /* RNR5VideoView */,
 				48B9178A1FBB8B86002CA6D9 /* Products */,
 				48302EC31FBB985B00CF4938 /* Frameworks */,
@@ -212,7 +206,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../example/ios/Red5ProVideoExample/R5Streaming.framework/Headers";
+				HEADER_SEARCH_PATHS = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -262,7 +256,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../example/ios/Red5ProVideoExample/R5Streaming.framework/Headers";
+				HEADER_SEARCH_PATHS = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
@@ -275,7 +269,8 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = E964K44BWW;
-				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../example/ios/Red5ProVideoExample/R5Streaming.framework";
+				FRAMEWORK_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = "";
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				MACH_O_TYPE = staticlib;
 				OTHER_LDFLAGS = "-ObjC";
@@ -290,7 +285,8 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = E964K44BWW;
-				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../example/ios/Red5ProVideoExample/R5Streaming.framework";
+				FRAMEWORK_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = "";
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				MACH_O_TYPE = staticlib;
 				OTHER_LDFLAGS = "-ObjC";
