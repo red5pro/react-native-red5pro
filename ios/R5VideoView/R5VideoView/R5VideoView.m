@@ -196,6 +196,12 @@
   
 }
 
+- (void)updateScaleMode:(int)mode {
+    
+    [self setScaleMode:mode];
+    
+}
+
 - (void)tearDown {
   
   if (self.stream != nil) {

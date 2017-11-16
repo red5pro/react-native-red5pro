@@ -38,6 +38,7 @@
 - (void)unsubscribe;
 - (void)unpublish;
 - (void)swapCamera;
+- (void)updateScaleMode:(int)mode;
 
 # pragma RN Properties
 - (BOOL)getShowDebugInfo;

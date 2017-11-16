@@ -51,6 +51,10 @@ RCT_EXPORT_METHOD(swapCamera) {
   [r5View swapCamera];
 }
 
+RCT_EXPORT_METHOD(updateScaleMode:(int)mode) {
+    [r5View updateScaleMode:mode];
+}
+
 # pragma RN Properties
 RCT_EXPORT_VIEW_PROPERTY(logLevel, int);
 RCT_EXPORT_VIEW_PROPERTY(scaleMode, int);

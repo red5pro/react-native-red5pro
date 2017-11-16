@@ -1,5 +1,5 @@
 import React from 'react'
-import { findNodeHandle, Button, StyleSheet, Text, View } from 'react-native'
+import { findNodeHandle, Button, StyleSheet, Text, TextInput, View } from 'react-native'
 import Permissions from 'react-native-permissions'
 import { R5VideoView } from 'react-native-red5pro'
 import { R5ScaleMode, R5LogLevel } from 'react-native-red5pro'
@@ -7,7 +7,12 @@ import { subscribe,
          unsubscribe,
          publish,
          unpublish,
-         swapCamera } from 'react-native-red5pro'
+         swapCamera,
+         updateScaleMode } from 'react-native-red5pro'
+
+const isValidStatusMessage = (value) => {
+  return value && typeof value !== 'undefined' && value !== 'undefined' && value !== 'null'
+}
 
 export default class App extends React.Component {
   constructor (props) {
@@ -26,6 +31,12 @@ export default class App extends React.Component {
     this.onSubscribe = this.onSubscribe.bind(this)
     this.onStop = this.onStop.bind(this)
     this.onSwapCamera = this.onSwapCamera.bind(this)
+    this.onScaleMode = this.onScaleMode.bind(this)
+
+    // UI Actions.
+    this.onHostChange = this.onHostChange.bind(this)
+    this.onLicenseChange = this.onLicenseChange.bind(this)
+    this.onStreamNameChange = this.onStreamNameChange.bind(this)
 
     // Props.
     this.state = {
@@ -36,17 +47,41 @@ export default class App extends React.Component {
       buttonProps: {
         style: styles.buttonView
       },
+      hostFieldProps: {
+        placeholder: 'Host',
+        keyboardType: 'numeric',
+        autoCorrect: false,
+        value: '50.56.81.179',
+        //        value: '52.15.97.198', // 'webrtc.red5.org'
+        style: styles.inputField
+      },
+      licenseFieldProps: {
+        placeholder: 'License Key',
+        autoCorrect: false,
+        value: 'BWAP-WF5E-JZU2-6I5G',
+        //        value: 'ACGE-4UMR-UHM4-RVJR', // PROD
+        style: styles.inputField
+      },
+      streamNameFieldProps: {
+        placeholder: 'Stream Name',
+        autoCorrect: false,
+        value: 'reactnative',
+        style: styles.inputField
+      },
+      toastProps: {
+        ref: 'toast',
+        style: styles.toast,
+        value: 'waiting...'
+      },
       videoProps: {
         ref: 'video',
         key: 'video',
         style: styles.videoView,
         collapsable: false,
         configuration: {
-          streamName: 'reactnative',
-          host: '50.56.81.179', // 'ir5rtc.red5.org',
-          // host: '52.15.97.198', // 'webrtc.red5.org',
-          // licenseKey: 'ACGE-4UMR-UHM4-RVJR', // valid license if using PROD SDK
-          licenseKey: 'BWAP-WF5E-JZU2-6I5G', // valid license if using QA SDK
+          host: undefined,
+          licenseKey: undefined,
+          streamName: undefined,
           port: 8554,
           contextName: 'live',
           bufferTime: 0.5,
@@ -66,6 +101,9 @@ export default class App extends React.Component {
         onUnpublishNotification: this.onUnpublishNotification
       }
     }
+
+    // stored for scale swapping. #see :onSwapScale
+    this.scaleMode = this.state.videoProps.scaleMode
   }
 
   componentDidMount () {
@@ -90,6 +128,7 @@ export default class App extends React.Component {
         return (
           <View style={styles.container}>
             <R5VideoView {...this.state.videoProps} />
+            <Text {...this.state.toastProps}>{this.state.toastProps.value}</Text>
             <Button
               {...this.state.buttonProps}
               onPress={this.onStop}
@@ -102,18 +141,25 @@ export default class App extends React.Component {
               title='Swap Camera'
               accessibilityLabel='Swap Camera'
               />
-            </View>
+          </View>
         )
       }
       else {
         return (
           <View style={styles.container}>
             <R5VideoView {...this.state.videoProps} />
+            <Text {...this.state.toastProps}>{this.state.toastProps.value}</Text>
             <Button
               {...this.state.buttonProps}
               onPress={this.onStop}
               title='Stop'
               accessibilityLabel='Stop'
+              />
+            <Button
+              {...this.state.buttonProps}
+              onPress={this.onScaleMode}
+              title='Swap Scale'
+              accessibilityLabel='Swap Scale'
               />
           </View>
         )
@@ -122,6 +168,24 @@ export default class App extends React.Component {
     else {
       return (
         <View style={styles.container}>
+          <View style={styles.formField}>
+            <TextInput ref="host"
+              {...this.state.hostFieldProps}
+              onChangeText={this.onHostChange}
+            />
+          </View>
+          <View style={styles.formField}>
+            <TextInput ref="license"
+              {...this.state.licenseFieldProps}
+              onChangeText={this.onLicenseChange}
+            />
+          </View>
+          <View style={styles.formField}>
+            <TextInput ref="streamName"
+              {...this.state.streamNameFieldProps}
+              onChangeText={this.onStreamNameChange}
+            />
+          </View>
           {!this.state.hasPermissions
             ? <Text style={{color: 'white', backgroundColor: 'blue'}}>Waiting on permissions...</Text>
             : <View><Button
@@ -129,14 +193,15 @@ export default class App extends React.Component {
                 onPress={this.onSubscribe}
                 title='Subscribe'
                 accessibilityLabel='Subscribe'
-                ></Button>
+                />
+              <Text style={styles.text}>OR</Text>
               <Button
                 {...this.state.buttonProps}
                 style={{marginTop: 40}}
                 onPress={this.onPublish}
                 title='Publish'
                 accessibilityLabel='Publish'
-                ></Button></View>}
+                /></View>}
         </View>
       )
     }
@@ -162,6 +227,16 @@ export default class App extends React.Component {
 
   onSubscribe (event) {
     this.setState({
+      hostFieldProps: {...this.state.hostFieldProps, value: this.refs.host.props.value},
+      licenseFieldProps: {...this.state.licenseFieldProps, value: this.refs.license.props.value},
+      streamNameFieldProps: {...this.state.streamNameFieldProps, value: this.refs.streamName.props.value},
+      videoProps: {...this.state.videoProps,
+        configuration: {...this.state.videoProps.configuration,
+          host: this.refs.host.props.value,
+          licenseKey: this.refs.license.props.value,
+          streamName: this.refs.streamName.props.value
+        }
+      },
       isPublisher: false,
       hasStarted: true
     })
@@ -169,6 +244,16 @@ export default class App extends React.Component {
 
   onPublish (event) {
     this.setState({
+      hostFieldProps: {...this.state.hostFieldProps, value: this.refs.host.props.value},
+      licenseFieldProps: {...this.state.licenseFieldProps, value: this.refs.license.props.value},
+      streamNameFieldProps: {...this.state.streamNameFieldProps, value: this.refs.streamName.props.value},
+      videoProps: {...this.state.videoProps,
+        configuration: {...this.state.videoProps.configuration,
+          host: this.refs.host.props.value,
+          licenseKey: this.refs.license.props.value,
+          streamName: this.refs.streamName.props.value
+        }
+      },
       isPublisher: true,
       hasStarted: true
     })
@@ -191,6 +276,43 @@ export default class App extends React.Component {
     }
   }
 
+  onScaleMode (event) {
+    console.log('onScaleMode()')
+    let scale = this.scaleMode + 1
+    if (scale > 2) {
+      scale = 0
+    }
+    this.scaleMode = scale
+    updateScaleMode(findNodeHandle(this.refs.video), scale)
+  }
+
+  onHostChange (text) {
+    this.setState({
+      hostFieldProps: {...this.state.hostFieldProps, value: text},
+      videoProps: {...this.state.videoProps,
+        configuration: {...this.state.videoProps.configuration, host: text}
+      }
+    })
+  }
+
+  onLicenseChange (text) {
+    this.setState({
+      licenseFieldProps: {...this.state.licenseFieldProps, value: text},
+      videoProps: {...this.state.videoProps,
+        configuration: {...this.state.videoProps.configuration, licenseKey: text}
+      }
+    })
+  }
+
+  onStreamNameChange (text) {
+    this.setState({
+      streamNameFieldProps: {...this.state.streamNameFieldProps, value: text},
+      videoProps: {...this.state.videoProps,
+        configuration: {...this.state.videoProps.configuration, streamName: text}
+      }
+    })
+  }
+
   onMetaData (event) {
     console.log(`onMetadata :: ${event.nativeEvent.metadata}`)
   }
@@ -210,10 +332,20 @@ export default class App extends React.Component {
 
   onPublisherStreamStatus (event) {
     console.log(`onPublisherStreamStatus :: ${JSON.stringify(event.nativeEvent.status, null, 2)}`)
+    const status = event.nativeEvent.status
+    let message = isValidStatusMessage(status.message) ? status.message : status.name
+    this.setState({
+      toastProps: {...this.state.toastProps, value: message}
+    })
   }
 
   onSubscriberStreamStatus (event) {
     console.log(`onSubscriberStreamStatus :: ${JSON.stringify(event.nativeEvent.status, null, 2)}`)
+    const status = event.nativeEvent.status
+    let message = isValidStatusMessage(status.message) ? status.message : status.name
+    this.setState({
+      toastProps: {...this.state.toastProps, value: message}
+    })
   }
 
   onUnsubscribeNotification (event) {
@@ -238,6 +370,21 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     justifyContent: 'center'
   },
+  formField: {
+    padding: 10
+  },
+  inputField: {
+    paddingLeft: 10,
+    height: 36,
+    borderBottomColor: 'gray',
+    borderBottomWidth: 1
+  },
+  text: {
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+    padding: 20
+  },
   videoView: {
     flex: 1,
     flexDirection: 'row',
@@ -252,6 +399,15 @@ const styles = StyleSheet.create({
     height: 40,
     backgroundColor: 'blue',
     color: 'white'
+  },
+  toast: {
+    color: 'white',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    padding: 10,
+    textAlign: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 1.0)'
   }
 })
 

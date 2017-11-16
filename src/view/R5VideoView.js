@@ -40,6 +40,7 @@ class R5VideoView extends React.Component {
 
   _onConfigured = (event) => {
     console.log('R5VideoView:: _onConfigured')
+    console.log(this.state.configuration)
     if (!this.props.onConfigured) {
       return
     }

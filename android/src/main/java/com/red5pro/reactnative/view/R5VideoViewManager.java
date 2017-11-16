@@ -42,6 +42,7 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     private static final int COMMAND_UNSUBSCRIBE = 3;
     private static final int COMMAND_UNPUBLISH = 4;
     private static final int COMMAND_SWAP_CAMERA = 5;
+    private static final int COMMAND_UPDATE_SCALE_MODE = 6;
 
     private int logLevel = R5Stream.LOG_LEVEL_ERROR;
     private boolean showDebug = false;
@@ -114,6 +115,12 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
             case COMMAND_SWAP_CAMERA:
 
                 mView.swapCamera();
+
+                break;
+            case COMMAND_UPDATE_SCALE_MODE:
+
+                final int mode = args.getInt(0);
+                mView.updateScaleMode(mode);
 
                 break;
             default:

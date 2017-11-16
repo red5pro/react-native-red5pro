@@ -97,7 +97,8 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
         PUBLISH("publish", 2),
         UNSUBSCRIBE("unsubscribe", 3),
         UNPUBLISH("unpublish", 4),
-        SWAP_CAMERA("swapCamera", 5);
+        SWAP_CAMERA("swapCamera", 5),
+        UPDATE_SCALE_MODE("updateScaleMode", 6);
 
         private final String mName;
         private final int mValue;
