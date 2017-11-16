@@ -27,6 +27,9 @@ import com.red5pro.streaming.source.R5Camera;
 import com.red5pro.streaming.source.R5Microphone;
 import com.red5pro.streaming.view.R5VideoView;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by kylekellogg on 9/11/17.
  */
@@ -285,6 +288,7 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
 
             updatedCamera.startPreview();
             mUseBackfacingCamera = !mUseBackfacingCamera;
+            mStream.updateStreamMeta();
         }
 
     }
@@ -319,12 +323,14 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
     protected void reorient() {
 
         if (mCamera != null) {
-            int rotate = mUseBackfacingCamera ? 0 : 180;
+            int rotate = 180;// mUseBackfacingCamera ? 0 : 180;
             int displayOrientation = (mDisplayOrientation + rotate) % 360;
             mCamera.setOrientation(mCameraOrientation);
             mCamera.getCamera().setDisplayOrientation(displayOrientation);
+            mStream.updateStreamMeta();
         }
         mOrientationDirty = false;
+
     }
 
     protected void updateDeviceOrientationOnLayoutChange() {
