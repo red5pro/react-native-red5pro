@@ -25,3 +25,7 @@ export const swapCamera = (handle) => {
   UIManager.dispatchViewManagerCommand(handle, Commands.swapCamera, [])
 }
 
+export const updateScaleMode = (handle, mode) => {
+  UIManager.dispatchViewManagerCommand(handle, Commands.updateScaleMode, [mode])
+}
+
