@@ -86,23 +86,38 @@ export default class App extends React.Component {
 
   render () {
     if (this.state.hasPermissions && this.state.hasStarted) {
-      return (
-        <View style={styles.container}>
-          <R5VideoView {...this.state.videoProps} />
-          <Button
-            {...this.state.buttonProps}
-            onPress={this.onStop}
-            title='Stop'
-            accessibilityLabel='Stop'
-            />
-          <Button
-            {...this.state.buttonProps}
-            onPress={this.onSwapCamera}
-            title='Swap Camera'
-            accessibilityLabel='Swap Camera'
-            />
+      if (this.state.isPublisher) {
+        return (
+          <View style={styles.container}>
+            <R5VideoView {...this.state.videoProps} />
+            <Button
+              {...this.state.buttonProps}
+              onPress={this.onStop}
+              title='Stop'
+              accessibilityLabel='Stop'
+              />
+            <Button
+              {...this.state.buttonProps}
+              onPress={this.onSwapCamera}
+              title='Swap Camera'
+              accessibilityLabel='Swap Camera'
+              />
+            </View>
+        )
+      }
+      else {
+        return (
+          <View style={styles.container}>
+            <R5VideoView {...this.state.videoProps} />
+            <Button
+              {...this.state.buttonProps}
+              onPress={this.onStop}
+              title='Stop'
+              accessibilityLabel='Stop'
+              />
           </View>
-      )
+        )
+      }
     }
     else {
       return (
