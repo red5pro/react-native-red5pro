@@ -3,38 +3,38 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 48;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		48B917981FBB8BAE002CA6D9 /* R5VideoView.m in Sources */ = {isa = PBXBuildFile; fileRef = 48B917961FBB8BAE002CA6D9 /* R5VideoView.m */; };
-		48B917991FBB8BAE002CA6D9 /* R5VideoViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 48B917971FBB8BAE002CA6D9 /* R5VideoViewManager.m */; };
-		48B9179B1FBB8BE2002CA6D9 /* R5VideoView.h in Headers */ = {isa = PBXBuildFile; fileRef = 48B917951FBB8BAE002CA6D9 /* R5VideoView.h */; };
-		48B9179D1FBB8C55002CA6D9 /* R5VideoViewManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 48B9179C1FBB8BFD002CA6D9 /* R5VideoViewManager.h */; };
+		4885C7B01FBDFA7400E77415 /* R5VideoView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4885C7AF1FBDFA7400E77415 /* R5VideoView.m */; };
+		4885C7B11FBDFA7400E77415 /* R5VideoView.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4885C7AE1FBDFA7400E77415 /* R5VideoView.h */; };
+		4885C7B91FBDFABD00E77415 /* R5VideoViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4885C7B71FBDFABD00E77415 /* R5VideoViewManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		48B917871FBB8B86002CA6D9 /* CopyFiles */ = {
+		4885C7A91FBDFA7400E77415 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 0;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
 			files = (
+				4885C7B11FBDFA7400E77415 /* R5VideoView.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		48B917891FBB8B86002CA6D9 /* libRNR5VideoView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNR5VideoView.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		48B917951FBB8BAE002CA6D9 /* R5VideoView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = R5VideoView.h; sourceTree = "<group>"; };
-		48B917961FBB8BAE002CA6D9 /* R5VideoView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = R5VideoView.m; sourceTree = "<group>"; };
-		48B917971FBB8BAE002CA6D9 /* R5VideoViewManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = R5VideoViewManager.m; sourceTree = "<group>"; };
-		48B9179C1FBB8BFD002CA6D9 /* R5VideoViewManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = R5VideoViewManager.h; sourceTree = "<group>"; };
+		4885C7AB1FBDFA7400E77415 /* libR5VideoView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libR5VideoView.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		4885C7AE1FBDFA7400E77415 /* R5VideoView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = R5VideoView.h; sourceTree = "<group>"; };
+		4885C7AF1FBDFA7400E77415 /* R5VideoView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = R5VideoView.m; sourceTree = "<group>"; };
+		4885C7B71FBDFABD00E77415 /* R5VideoViewManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = R5VideoViewManager.m; sourceTree = "<group>"; };
+		4885C7B81FBDFABD00E77415 /* R5VideoViewManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = R5VideoViewManager.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		48B917861FBB8B86002CA6D9 /* Frameworks */ = {
+		4885C7A81FBDFA7400E77415 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -44,121 +44,99 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		48302EC31FBB985B00CF4938 /* Frameworks */ = {
+		4885C7A21FBDFA7400E77415 = {
 			isa = PBXGroup;
 			children = (
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		48B917801FBB8B86002CA6D9 = {
-			isa = PBXGroup;
-			children = (
-				48B9178B1FBB8B86002CA6D9 /* RNR5VideoView */,
-				48B9178A1FBB8B86002CA6D9 /* Products */,
-				48302EC31FBB985B00CF4938 /* Frameworks */,
+				4885C7AD1FBDFA7400E77415 /* R5VideoView */,
+				4885C7AC1FBDFA7400E77415 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		48B9178A1FBB8B86002CA6D9 /* Products */ = {
+		4885C7AC1FBDFA7400E77415 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				48B917891FBB8B86002CA6D9 /* libRNR5VideoView.a */,
+				4885C7AB1FBDFA7400E77415 /* libR5VideoView.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		48B9178B1FBB8B86002CA6D9 /* RNR5VideoView */ = {
+		4885C7AD1FBDFA7400E77415 /* R5VideoView */ = {
 			isa = PBXGroup;
 			children = (
-				48B917951FBB8BAE002CA6D9 /* R5VideoView.h */,
-				48B917961FBB8BAE002CA6D9 /* R5VideoView.m */,
-				48B917971FBB8BAE002CA6D9 /* R5VideoViewManager.m */,
-				48B9179C1FBB8BFD002CA6D9 /* R5VideoViewManager.h */,
+				4885C7B81FBDFABD00E77415 /* R5VideoViewManager.h */,
+				4885C7B71FBDFABD00E77415 /* R5VideoViewManager.m */,
+				4885C7AE1FBDFA7400E77415 /* R5VideoView.h */,
+				4885C7AF1FBDFA7400E77415 /* R5VideoView.m */,
 			);
-			path = RNR5VideoView;
+			path = R5VideoView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
-/* Begin PBXHeadersBuildPhase section */
-		48B9179A1FBB8BDC002CA6D9 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				48B9179D1FBB8C55002CA6D9 /* R5VideoViewManager.h in Headers */,
-				48B9179B1FBB8BE2002CA6D9 /* R5VideoView.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXHeadersBuildPhase section */
-
 /* Begin PBXNativeTarget section */
-		48B917881FBB8B86002CA6D9 /* RNR5VideoView */ = {
+		4885C7AA1FBDFA7400E77415 /* R5VideoView */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 48B917921FBB8B86002CA6D9 /* Build configuration list for PBXNativeTarget "RNR5VideoView" */;
+			buildConfigurationList = 4885C7B41FBDFA7400E77415 /* Build configuration list for PBXNativeTarget "R5VideoView" */;
 			buildPhases = (
-				48B917851FBB8B86002CA6D9 /* Sources */,
-				48B917861FBB8B86002CA6D9 /* Frameworks */,
-				48B917871FBB8B86002CA6D9 /* CopyFiles */,
-				48B9179A1FBB8BDC002CA6D9 /* Headers */,
+				4885C7A71FBDFA7400E77415 /* Sources */,
+				4885C7A81FBDFA7400E77415 /* Frameworks */,
+				4885C7A91FBDFA7400E77415 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = RNR5VideoView;
-			productName = RNR5VideoView;
-			productReference = 48B917891FBB8B86002CA6D9 /* libRNR5VideoView.a */;
+			name = R5VideoView;
+			productName = R5VideoView;
+			productReference = 4885C7AB1FBDFA7400E77415 /* libR5VideoView.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		48B917811FBB8B86002CA6D9 /* Project object */ = {
+		4885C7A31FBDFA7400E77415 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0910;
 				ORGANIZATIONNAME = Red5Pro;
 				TargetAttributes = {
-					48B917881FBB8B86002CA6D9 = {
+					4885C7AA1FBDFA7400E77415 = {
 						CreatedOnToolsVersion = 9.1;
-						DevelopmentTeam = E964K44BWW;
 						ProvisioningStyle = Automatic;
 					};
 				};
 			};
-			buildConfigurationList = 48B917841FBB8B86002CA6D9 /* Build configuration list for PBXProject "RNR5VideoView" */;
-			compatibilityVersion = "Xcode 3.2";
+			buildConfigurationList = 4885C7A61FBDFA7400E77415 /* Build configuration list for PBXProject "R5VideoView" */;
+			compatibilityVersion = "Xcode 8.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = 48B917801FBB8B86002CA6D9;
-			productRefGroup = 48B9178A1FBB8B86002CA6D9 /* Products */;
+			mainGroup = 4885C7A21FBDFA7400E77415;
+			productRefGroup = 4885C7AC1FBDFA7400E77415 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				48B917881FBB8B86002CA6D9 /* RNR5VideoView */,
+				4885C7AA1FBDFA7400E77415 /* R5VideoView */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		48B917851FBB8B86002CA6D9 /* Sources */ = {
+		4885C7A71FBDFA7400E77415 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48B917981FBB8BAE002CA6D9 /* R5VideoView.m in Sources */,
-				48B917991FBB8BAE002CA6D9 /* R5VideoViewManager.m in Sources */,
+				4885C7B01FBDFA7400E77415 /* R5VideoView.m in Sources */,
+				4885C7B91FBDFABD00E77415 /* R5VideoViewManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		48B917901FBB8B86002CA6D9 /* Debug */ = {
+		4885C7B21FBDFA7400E77415 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -206,7 +184,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -214,7 +191,7 @@
 			};
 			name = Debug;
 		};
-		48B917911FBB8B86002CA6D9 /* Release */ = {
+		4885C7B31FBDFA7400E77415 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -256,7 +233,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
@@ -264,7 +240,7 @@
 			};
 			name = Release;
 		};
-		48B917931FBB8B86002CA6D9 /* Debug */ = {
+		4885C7B51FBDFA7400E77415 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -273,9 +249,6 @@
 					"$(inherited)",
 					"$(SRCROOT)/../../example/ios/Frameworks",
 				);
-				HEADER_SEARCH_PATHS = "";
-				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
-				MACH_O_TYPE = staticlib;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -283,7 +256,7 @@
 			};
 			name = Debug;
 		};
-		48B917941FBB8B86002CA6D9 /* Release */ = {
+		4885C7B61FBDFA7400E77415 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -292,9 +265,6 @@
 					"$(inherited)",
 					"$(SRCROOT)/../../example/ios/Frameworks",
 				);
-				HEADER_SEARCH_PATHS = "";
-				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
-				MACH_O_TYPE = staticlib;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -305,25 +275,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		48B917841FBB8B86002CA6D9 /* Build configuration list for PBXProject "RNR5VideoView" */ = {
+		4885C7A61FBDFA7400E77415 /* Build configuration list for PBXProject "R5VideoView" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				48B917901FBB8B86002CA6D9 /* Debug */,
-				48B917911FBB8B86002CA6D9 /* Release */,
+				4885C7B21FBDFA7400E77415 /* Debug */,
+				4885C7B31FBDFA7400E77415 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		48B917921FBB8B86002CA6D9 /* Build configuration list for PBXNativeTarget "RNR5VideoView" */ = {
+		4885C7B41FBDFA7400E77415 /* Build configuration list for PBXNativeTarget "R5VideoView" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				48B917931FBB8B86002CA6D9 /* Debug */,
-				48B917941FBB8B86002CA6D9 /* Release */,
+				4885C7B51FBDFA7400E77415 /* Debug */,
+				4885C7B61FBDFA7400E77415 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 48B917811FBB8B86002CA6D9 /* Project object */;
+	rootObject = 4885C7A31FBDFA7400E77415 /* Project object */;
 }

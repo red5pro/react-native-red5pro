@@ -1,6 +1,6 @@
 //
 //  R5VideoViewManager.m
-//  Red5ProDemo
+//  React Native Red5Pro
 //
 //  Created by Todd Anderson on 10/27/17.
 //  Copyright © 2017 Infrared5, Inc. All rights reserved.
