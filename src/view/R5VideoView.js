@@ -110,7 +110,7 @@ R5VideoView.propTypes = {
     framerate: PropTypes.number,                    // publisher only, fps
     useAdaptiveBitrateController: PropTypes.bool,   // publisher only
     useBackfacingCamera: PropTypes.bool,            // publisher only
-    audioBitrate: PropTypes.bool,                   // publisher only, kb/s
+    audioBitrate: PropTypes.number,                 // publisher only, kb/s
     audioSampleRate: PropTypes.number,              // publisher only, hz, default iOS is 16000, default Android is 44100
     audioMode: PropTypes.number, // mainly subscribers, especially with 2 subscribers.
     configuration: PropTypes.shape({
