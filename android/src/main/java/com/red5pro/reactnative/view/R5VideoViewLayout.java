@@ -323,7 +323,7 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
     protected void reorient() {
 
         if (mCamera != null) {
-            int rotate = 180;// mUseBackfacingCamera ? 0 : 180;
+            int rotate = mUseBackfacingCamera ? 0 : 180;
             int displayOrientation = (mDisplayOrientation + rotate) % 360;
             mCamera.setOrientation(mCameraOrientation);
             mCamera.getCamera().setDisplayOrientation(displayOrientation);
@@ -347,6 +347,9 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
 
         mDisplayOrientation = (mOrigCamOrientation + degrees) % 360;
         mCameraOrientation = rotation % 2 != 0 ? mDisplayOrientation - 180 : mDisplayOrientation;
+        if (mUseBackfacingCamera && (rotation % 2 != 0)) {
+            mCameraOrientation += 180;
+        }
         mOrientationDirty = true;
 
     }
