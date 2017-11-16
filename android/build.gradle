@@ -18,4 +18,5 @@ android {
 
 dependencies {
     provided "com.facebook.react:react-native:${_reactNativeVersion}"
+    compile files("../example/android/app/libs/red5streaming.jar")
 }
