@@ -100,8 +100,8 @@ class R5VideoView extends React.Component {
 
 R5VideoView.propTypes = {
     showDebugView: PropTypes.bool,
-    scaleMode: PropTypes.number,
     logLevel: PropTypes.oneOf([R5LogLevel.ERROR, R5LogLevel.WARN, R5LogLevel.INFO, R5LogLevel.DEBUG]),
+    scaleMode: PropTypes.number,
     streamType: PropTypes.oneOf([R5PublishType.LIVE, R5PublishType.RECORD, R5PublishType.APPEND]), // publisher only
     publishVideo: PropTypes.bool,                   // publisher only
     publishAudio: PropTypes.bool,                   // publisher only
@@ -117,13 +117,13 @@ R5VideoView.propTypes = {
     configuration: PropTypes.shape({
       host: PropTypes.string.isRequired,
       port: PropTypes.number.isRequired,
-      streamName: PropTypes.string,
-      bufferTime: PropTypes.number,
+      streamName: PropTypes.string.isRequired,
       contextName: PropTypes.string.isRequired,
       licenseKey: PropTypes.string.isRequired,
       bundleID: PropTypes.string.isRequired,
+      bufferTime: PropTypes.number,
       streamBufferTime: PropTypes.number,
-      parameters: PropTypes.object,
+      parameters: PropTypes.string,
       key: PropTypes.string.isRequired
     }).isRequired,
     onConfigured: PropTypes.func,
@@ -136,9 +136,9 @@ R5VideoView.propTypes = {
 }
 R5VideoView.defaultProps = {
     showDebugView: false,
-    streamType: R5PublishType.LIVE,
-    scaleMode: R5ScaleMode.SCALE_TO_FILL,
     logLevel: R5LogLevel.ERROR,
+    scaleMode: R5ScaleMode.SCALE_TO_FILL,
+    streamType: R5PublishType.LIVE,
     publishVideo: true,
     publishAudio: true,
     cameraWidth: 640,

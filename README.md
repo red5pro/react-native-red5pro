@@ -20,7 +20,8 @@ React Native Red5 Pro Publisher & Subscriber.
   * [Event Callbacks](#callbacks)
 * [Red5 Pro Quickstart](#red5-pro)
 
-> You will need a Red5 Pro SDK License and a Red5 Pro Server in order to use this component. [Sign up for a free trial!](https://account.red5pro.com/register)
+> You will need a Red5 Pro SDK License and a Red5 Pro Server in order to use this component.  
+[Sign up for a free trial!](https://account.red5pro.com/register)
 
 # Install
 
@@ -195,7 +196,6 @@ Now that the *Red5 Pro Android SDK* is a dependency for the `react-native-red5pr
 
 1. Locate the `build.gradle` for your Android **app** and open it in the editor.
 2. Define the `red5sreaming.jar` as an exclusion for the **libs** dependencies.
-3. Add the `react-native-red5pro` library as a project dependency.
 
 The `dependencies` definition in the `build.gradle` of the **app** should look similar to the following:
 
@@ -243,7 +243,96 @@ The following describe the API available for the `react-native-red5pro` componen
 
 ## Properties
 
+| Key | Type | Default | Description | Publisher | Subscriber |
+| :-- | :-- | :-- | :-- | :--: | :--: |
+| showDebugView | boolean | false | Displays the debug information for a broadcast and playback stream. | x | x |
+| logLevel | int | 3 | Enumerated value of [R5LogLevel](src/enum/R5VideoView.loglevel.js). | x | x |
+| scaleMode | int | 0 | Enumerated value of [R5ScaleMode](src/enum/R5VideoView.scalemode.js). | x | x |
+| streamType | int | 0 | Enumerated value of [R5PublishType](src/enum/R5VideoView.publishtype.js). | x | |
+| publishVideo | boolean | true | Flag to include video in broadcast. | x | |
+| publishAudio | boolean | true | Flag to include audio in broadcast. | x | |
+| cameraWidth | int | 640 | Width dimension of Camera to use in broadcast. | x | |
+| cameraHeight | int | 360 | Height dimension of Camera to use in broadcast. | x | |
+| bitrate | int | 750 | The video bitrate to broadcast at. | x | |
+| framerate | int | 15 | The video framerate to broadcast at. | x | |
+| audioBitrate | int | 32 | The audio bitrate to broadcast at (kb/s). | x | |
+| audioSampleRate | int | iOS: `16000`, Android: `44100` | The audio sample rate to broadcast at (hz).  | x | |
+| useAdaptiveBitrateController | boolean | false | Use of adaptive bitrate streaming for broadcasting.  | x | |
+| useBackfacingCamera | boolean | false | Use the backfacing camera of the device to start broadcasting. | x | |
+| audioMode | int | 0 | Enumerated value of [R5AudioMode](src/enum/R5VideoView.audiomode.js). | | x |
+| configuration | shape | `REQUIRED` | [Refer to Configuration Properties](#configuration-properties). | x | x |
+
+## Configuration Properties
+
+The following are the `configuration` properties of the Properties of the `react-native-red5pro` library. This is required to properly setup a broadcasting or playback session of a stream on the *Red5 Pro Server*.
+
+These properties are required for **both** Publishers and Subscribers.
+
+| Key | Type | Default | Description |
+| :-- | :-- | :-- | :-- |
+| host | string | `REQUIRED` | The IP or Fully Qualified Domain Name of where the *Red5 Pro Server* is deployed. |
+| port | int | `REQUIRED` | The port number that is exposed on the *Red5 Pro Server* to access RTSP connections. |
+| streamName | string | `REQUIRED` | The unique name of the stream to broadcast on or subscribe to. |
+| contextName | string | `REQUIRED` | The target *webapp* to stream to or access streams from. _Typically, `live`._ |
+| licenseKey | string | `REQUIRED` | The SDK license key provided with your registered *Red5 Pro* account. |
+| bundleID | string | `REQUIRED` | A unique (typically inversed domain name) descriptor for you app. _Required for some stores._ |
+| bufferTime | number | 0.5 | Default buffer. |
+| streamBufferTime | number | 4 | Default buffer for subscribers to allow on the server in sending packets. |
+| parameters | string | none | Optional connection parameters. Often used for authentication. ***[See Note Below](#parameters-configuration-property)** |
+| key | string | `REQUIRED` | Unique key to be used internally to access the configuration object. |
+
+### Parameters Configuration Property
+
+The `parameters` configuration provides the ability to pass in additional properties to be used by the target application accepting the RTSP connection from a publisher or subscriber.
+
+Typically, this is used for authentication purposes and requires custom modifications on the server.
+
+The structure is key/value pairs delimited by a `;`. For example:
+
+```js
+let auth = 'username=foo;password=bar;'
+```
+
+> See [iOS Example](https://github.com/red5pro/streaming-ios/blob/master/R5ProTestbed/Tests/PublishAuth/PublishAuthTest.swift) and [Android Example](https://github.com/red5pro/streaming-android/blob/master/app/src/main/java/red5pro/org/testandroidproject/tests/PublishAuthTest/PublishAuthTest.java).
+
+
 ## Methods
 
+The following methods are available:
+
+| Name | Arguments | Description | Publisher | Subscriber |
+| :-- | :-- | :-- | :--: | :--: |
+| subscribe | `streamName` | Request to start subscribing to stream. | | x |
+| unsubscribe | none | Request to stop playback of stream. | | x |
+| publish | `streamName`, `streamType` | Request to start broadcasting stream with unique name and type (0: `live`, 1: `record`, `2`: append). | x | |
+| unpublish | none | Request to stop broadcast. | x | |
+| swapCamera | none | Request to swap camera on device, from front-facing to back-facing and vice-versa. | x | |
+| updateScaleMode | `mode` | Request to change playback scalemode (0: `fill with aspect ratio`, 1: `fit, with letterboxing`, 2: `fill to view`). | | x |
+
 ## Event Callbacks
+
+The following callbacks are available:
+
+| Name | Event Object | Description | Publisher | Subscriber |
+| :-- | :-- | :-- | :--: | :--: |
+| onConfigured | {`key`: `<configuration.key provided>`} | Notification of configuration being completed. | x | x |
+| onMetaData | {`metadata`: `<server provided info about stream>`} | Notification of stream metadata. | | x |
+| onPublisherStreamStatus | {`status`: [refer to status section](#status-callback-objects)} | Notification of stream status for a Publisher. | x | |
+| onSubscriberStreamStatus | {`status`: [refer to status section](#status-callback-objects)} | Notification of stream status for a Subscriber. | | x |
+| onUnsubscribeNotification | none | Notification of stop of playback. | | x |
+| onUnpublishNotification | none | Notification of stop of broadcast. | x | |
+
+### Status Callback Objects
+
+The Publishers and Subscribers receive status events during the lifecycle of broadcasting and consuming a stream, respectively. The following properties are available in the status object:
+
+| Key | Description |
+| :-- | :-- |
+| code | The enumerated code of the event. |
+| name | The associated name of the event. |
+| message | The human readable, optional, message associated with the event. |
+| streamName | The associated stream. |
+
+* The enumerated list of statuses on iOS [https://www.red5pro.com/docs/static/ios-streaming/protocol_r5_stream_delegate-p.html](https://www.red5pro.com/docs/static/ios-streaming/protocol_r5_stream_delegate-p.html)
+* The enumerated list of statuses on Android [https://www.red5pro.com/docs/static/android-streaming/enumcom_1_1red5pro_1_1streaming_1_1event_1_1_r5_connection_event.html](https://www.red5pro.com/docs/static/android-streaming/enumcom_1_1red5pro_1_1streaming_1_1event_1_1_r5_connection_event.html)
 
