@@ -51,21 +51,22 @@ export default class App extends React.Component {
         placeholder: 'Host',
         keyboardType: 'numeric',
         autoCorrect: false,
-        value: '50.56.81.179',
-        //        value: '52.15.97.198', // 'webrtc.red5.org'
+        underlineColorAndroid: '#00000000',
+        clearTextOnFocus: true,
         style: styles.inputField
       },
       licenseFieldProps: {
         placeholder: 'License Key',
         autoCorrect: false,
-        value: 'BWAP-WF5E-JZU2-6I5G',
-        //        value: 'ACGE-4UMR-UHM4-RVJR', // PROD
+        underlineColorAndroid: '#00000000',
+        clearTextOnFocus: true,
         style: styles.inputField
       },
       streamNameFieldProps: {
         placeholder: 'Stream Name',
         autoCorrect: false,
-        value: 'reactnative',
+        underlineColorAndroid: '#00000000',
+        clearTextOnFocus: true,
         style: styles.inputField
       },
       toastProps: {
