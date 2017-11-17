@@ -23,9 +23,7 @@ class R5VideoView extends React.Component {
   }
 
   shouldComponentUpdate (nextProps, nextState) {
-    console.log(`R5VideoView: update ${JSON.stringify(nextState, null, 2)}`)
     if (this.state.configured !== nextState.configured) {
-      console.log('needs update.')
       return true
     }
     return false
@@ -39,8 +37,6 @@ class R5VideoView extends React.Component {
   }
 
   _onConfigured = (event) => {
-    console.log('R5VideoView:: _onConfigured')
-    console.log(this.state.configuration)
     if (!this.props.onConfigured) {
       return
     }
@@ -62,7 +58,6 @@ class R5VideoView extends React.Component {
   }
 
   _onUnsubscribeNotification = (event) => {
-    console.log('R5VideoView:: _onUnsubscribe')
     if (!this.props.onUnsubscribeNotification) {
       return
     }
@@ -70,7 +65,6 @@ class R5VideoView extends React.Component {
   }
 
   _onUnpublishNotification = (event) => {
-    console.log('R5VideoView:: _onUnpublish')
     if (!this.props.onUnpublishNotification) {
       return
     }
