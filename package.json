@@ -15,11 +15,15 @@
     "react-native-component",
     "react-component",
     "react-native",
+    "reactnative",
     "ios",
     "android",
+    "video",
+    "audio",
     "streaming",
     "live-streaming",
-    "video"
+    "video-streaming",
+    "audio-streaming"
   ],
   "author": "Red5Pro",
   "contributors": [
