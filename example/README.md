@@ -17,7 +17,9 @@ Examples in using the `react-native-red5pro` React Native component library.
 
 The following examples are deployed to an iPhone using the [suggested running operations](#running).
 
-Additionally, a [Red5 Pro Server](https://red5pro.com) has been deployed locally and is accessible at the IP address of `10.0.0.10`.
+Additionally, a [Red5 Pro Server](https://red5pro.com) has been deployed locally and is accessible at the IP address of `10.0.0.10` and the Red5 Pro Mobile SDK license is `YOU-RLIC-ENSE-1234`. You will ned to change both of these to where you Red5 Pro Server is deployed and your personal Red5 Pro Mobile SDK License, respectively.
+
+> Note: Because of React Native's debugger defaulting to `8081` and the default unsecure websocket port of Red5 Pro being `8081`, you may need to re-define one or the other ports if developing locally.
 
 ### As a Publisher
 ![http://g.recordit.co/D22pc3XGzc.gif](http://g.recordit.co/D22pc3XGzc.gif)
