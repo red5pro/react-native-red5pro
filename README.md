@@ -17,7 +17,9 @@ React Native Red5 Pro Publisher & Subscriber.
 * [Usage](#usage)
   * [Properties](#properties)
   * [Methods](#methods)
-  * [Event Callbacks](#callbacks)
+  * [Event Callbacks](#event-callbacks)
+  * [Publisher Example](#publisher-example)
+  * [Subscriber Example](#subscriber-example)
 * [Red5 Pro Quickstart](#red5-pro)
 
 > You will need a Red5 Pro SDK License and a Red5 Pro Server in order to use this component.  
@@ -28,7 +30,7 @@ React Native Red5 Pro Publisher & Subscriber.
 Install the `react-native-red5pro` component:
 
 ```sh
-$ npm i --save react-native-red5pro
+$ npm i --save @red5pro/react-native-red5pro
 ```
 
 If you intend to use the live broadcasting capabilities of the [Red5 Pro SDK](https://www.red5pro.com/docs/streaming/), install the `react-native-permissions` module that will present to the user the permissions dialogs for Camera and Microphone:
@@ -300,14 +302,23 @@ let auth = 'username=foo;password=bar;'
 
 The following methods are available:
 
+```js
+import { subscribe,
+         unsubscribe,
+         publish,
+         unpublish,
+         swapCamera,
+         updateScaleMode } from 'react-native-red5pro'
+```
+
 | Name | Arguments | Description | Publisher | Subscriber |
 | :-- | :-- | :-- | :--: | :--: |
-| subscribe | `streamName` | Request to start subscribing to stream. | | x |
-| unsubscribe | none | Request to stop playback of stream. | | x |
-| publish | `streamName`, `streamType` | Request to start broadcasting stream with unique name and type (0: `live`, 1: `record`, `2`: append). | x | |
-| unpublish | none | Request to stop broadcast. | x | |
-| swapCamera | none | Request to swap camera on device, from front-facing to back-facing and vice-versa. | x | |
-| updateScaleMode | `mode` | Request to change playback scalemode (0: `fill with aspect ratio`, 1: `fit, with letterboxing`, 2: `fill to view`). | | x |
+| subscribe | `<ref>`, `streamName` | Request to start subscribing to stream. | | x |
+| unsubscribe | `<ref>` | Request to stop playback of stream. | | x |
+| publish | `<ref>`, `streamName`, `streamType` | Request to start broadcasting stream with unique name and type (0: `live`, 1: `record`, `2`: append). | x | |
+| unpublish | `<ref>` | Request to stop broadcast. | x | |
+| swapCamera | `<ref>` | Request to swap camera on device, from front-facing to back-facing and vice-versa. | x | |
+| updateScaleMode | `<ref>`, `mode` | Request to change playback scalemode (0: `fill with aspect ratio`, 1: `fit, with letterboxing`, 2: `fill to view`). | | x |
 
 ## Event Callbacks
 
@@ -335,4 +346,240 @@ The Publishers and Subscribers receive status events during the lifecycle of bro
 
 * The enumerated list of statuses on iOS [https://www.red5pro.com/docs/static/ios-streaming/protocol_r5_stream_delegate-p.html](https://www.red5pro.com/docs/static/ios-streaming/protocol_r5_stream_delegate-p.html)
 * The enumerated list of statuses on Android [https://www.red5pro.com/docs/static/android-streaming/enumcom_1_1red5pro_1_1streaming_1_1event_1_1_r5_connection_event.html](https://www.red5pro.com/docs/static/android-streaming/enumcom_1_1red5pro_1_1streaming_1_1event_1_1_r5_connection_event.html)
+
+## Publisher Example
+
+You will need to have a Red5 Pro SDK license and access to a reployed Red5 Pro Server in order to use the following example.
+
+> [Sign up for a free trial of Red5 Pro!](https://account.red5pro.com/register)
+
+```js
+import React from 'react'
+import { findNodeHandle, View, Button, StyleSheet } from 'react-native'
+
+import { R5VideoView } from 'react-native-red5pro'
+import { R5LogLevel } from 'react-native-red5pro'
+import { publish,
+         unpublish,
+         swapCamera } from 'react-native-red5pro'
+
+export default class App extends React.Component {
+
+  constructor (props) {
+    super(props)
+
+    this.state = {
+      publisher: {
+        ref: 'video',
+        configuration: {
+          host: 'your.red5pro.deploy', // IP or Fully Qualified Domain Name
+          port: 8554,
+          contextName: 'live',
+          bufferTime: 0.5,
+          streamBufferTime: 2,
+          key: Math.floor(Math.random() * 0x10000).toString(16),
+          bundleID: 'com.red5pro.example',
+          licenseKey: 'YOUR-LICENSE-KEY',
+          streamName: 'mystream'
+        },
+        showDebugView: true,
+        logLevel: R5LogLevel.DEBUG,
+        onConfigured: this.onConfigured.bind(this)
+      }
+    }
+
+    this.onStop = this.onStop.bind(this)
+    this.onSwapCamera = this.onSwapCamera.bind(this)
+
+  }
+
+  render () {
+
+    return (
+      <View style={styles.container}>
+        <R5VideoView {...this.state.publisher} style={styles.video} />
+        <Button
+          style={styles.button}
+          onPress={this.onStop}
+          title='Stop'
+          accessibilityLabel='Stop'
+          />
+        <Button
+          style={styles.button}
+          onPress={this.onSwapCamera}
+          title='Swap Camera'
+          accessibilityLabel='Swap Camera'
+          />
+      </View>
+    )
+
+  }
+
+  onConfigured () {
+    // By providing the `configuration` state prop to the view,
+    // the component starts the configuration process.
+
+    const streamName = this.state.publisher.configuration.streamName
+    publish(findNodeHandle(this.refs.video), streamName)
+
+  }
+
+  onStop () {
+
+    unpublish(findNodeHandle(this.refs.video))
+
+  }
+
+  onSwapCamera () {
+
+    swapCamera(findNodeHandle(this.refs.video))
+
+  }
+
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+    justifyContent: 'center'
+  },
+  video: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: 'black'
+  },
+  button: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 40,
+    backgroundColor: 'blue',
+    color: 'white'
+  }
+})
+```
+
+## Subscriber Example
+
+You will need to have a Red5 Pro SDK license and access to a reployed Red5 Pro Server in order to use the following example.
+
+> [Sign up for a free trial of Red5 Pro!](https://account.red5pro.com/register)
+
+```js
+import React from 'react'
+import { findNodeHandle, View, Button, StyleSheet } from 'react-native'
+
+import { R5VideoView } from 'react-native-red5pro'
+import { R5LogLevel, R5ScaleMode } from 'react-native-red5pro'
+import { subscribe,
+         unsubscribe,
+         updateScaleMode } from 'react-native-red5pro'
+
+export default class App extends React.Component {
+
+  constructor (props) {
+    super(props)
+
+    this.state = {
+      subscriber: {
+        ref: 'video',
+        configuration: {
+          host: 'your.red5pro.deploy', // IP or Fully Qualified Domain Name
+          port: 8554,
+          contextName: 'live',
+          bufferTime: 0.5,
+          streamBufferTime: 2,
+          key: Math.floor(Math.random() * 0x10000).toString(16),
+          bundleID: 'com.red5pro.example',
+          licenseKey: 'YOUR-LICENSE-KEY',
+          streamName: 'mystream'
+        },
+        showDebugView: true,
+        logLevel: R5LogLevel.DEBUG,
+        scaleMode: R5ScaleMode.SCALE_TO_FILL,
+        onConfigured: this.onConfigured.bind(this)
+      }
+    }
+
+    this.scaleMode = this.state.subscriber.scaleMode
+    this.onScaleMode = this.onScaleMode.bind(this)
+
+    this.onStop = this.onStop.bind(this)
+
+  }
+
+  render () {
+
+    return (
+      <View style={styles.container}>
+        <R5VideoView {...this.state.subscriber} style={styles.video} />
+        <Button
+          style={styles.button}
+          onPress={this.onStop}
+          title='Stop'
+          accessibilityLabel='Stop'
+          />
+        <Button
+          style={styles.button}
+          onPress={this.onScaleMode}
+          title='Swap Scale Mode'
+          accessibilityLabel='Swap Scale Mode'
+          />
+      </View>
+    )
+
+  }
+
+  onConfigured () {
+    // By providing the `configuration` state prop to the view,
+    // the component starts the configuration process.
+
+    const streamName =  this.state.subscriber.configuration.streamName
+    subscribe(findNodeHandle(this.refs.video), streamName)
+
+  }
+
+  onStop () {
+
+    unsubscribe(findNodeHandle(this.refs.video))
+
+  }
+
+  onScaleMode () {
+
+    let scale = this.scaleMode + 1
+    if (scale > 2) {
+      scale = 0
+    }
+    this.scaleMode = scale
+    updateScaleMode(findNodeHandle(this.refs.video), scale)
+
+  }
+
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+    justifyContent: 'center'
+  },
+  video: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: 'black'
+  },
+  button: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 40,
+    backgroundColor: 'blue',
+    color: 'white'
+  }
+})
+```
 
