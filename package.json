@@ -1,0 +1,45 @@
+{
+  "name": "react-native-red5pro",
+  "version": "1.0.0",
+  "description": "React Native Red5 Pro Publisher/Subscriber",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/infrared5/react-native-red5pro.git"
+  },
+  "keywords": [
+    "red5pro",
+    "react-native-component",
+    "react-component",
+    "react-native",
+    "reactnative",
+    "ios",
+    "android",
+    "video",
+    "audio",
+    "streaming",
+    "live-streaming",
+    "video-streaming",
+    "audio-streaming"
+  ],
+  "author": "Red5Pro",
+  "contributors": [
+    {
+      "name": "Todd Anderson",
+      "email": "todd@infrared5.com"
+    },
+    {
+      "name": "Kyle Kellogg",
+      "email": "kkellogg@infrared5.com"
+    }
+  ],
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/infrared5/react-native-red5pro/issues"
+  },
+  "homepage": "https://github.com/infrared5/react-native-red5pro#readme",
+  "devDependencies": {}
+}

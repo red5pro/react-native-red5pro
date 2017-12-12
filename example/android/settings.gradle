@@ -1,0 +1,6 @@
+rootProject.name = 'Red5ProVideoViewExample'
+
+include ':app',
+        ':react-native-red5pro'
+
+project(':react-native-red5pro').projectDir = new File(rootProject.projectDir, '../../android')

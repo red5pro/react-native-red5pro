@@ -1,0 +1,22 @@
+apply plugin: 'com.android.library'
+
+def _ext = rootProject.ext;
+def _reactNativeVersion = _ext.has('reactNative') ? _ext.reactNative : '+';
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "25.0.2"
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+
+    }
+}
+
+dependencies {
+    provided "com.facebook.react:react-native:${_reactNativeVersion}"
+    compile files("../example/android/app/libs/red5streaming.jar")
+}
