@@ -210,6 +210,33 @@ dependencies {
 }
 ```
 
+### Add `R5Package` to your App
+
+1. Open you main `ReactApplication` implementation file.
+2. Within the `getPackages()` override, add a new instance of `R5Package` to the list, e.g.,:
+
+```java
+private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
+  @Override
+  public boolean getUseDeveloperSupport() {
+    return BuildConfig.DEBUG;
+  }
+
+  @Override
+  protected List<ReactPackage> getPackages() {
+    return Arrays.<ReactPackage>asList(
+        new MainReactPackage(),
+        new R5Package()
+    );
+  }
+
+  @Override
+  protected String getJSMainModuleName() {
+    return "index.android";
+  }
+};
+```
+
 ### Define Permissions
 
 If you intend to use the `react-native-red5pro` to broadcast live streams, you will need to add Privacy permissions for Camera and Microphone access on the device. To do so:
