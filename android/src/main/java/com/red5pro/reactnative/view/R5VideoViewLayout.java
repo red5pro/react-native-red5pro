@@ -205,33 +205,42 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
 
             @Override
             public void reject(String code, String message) {
-
+                R5ConnectionEvent event = R5ConnectionEvent.getEventFromCode(2);
+                event.message = message;
+                onConnectionEvent(event);
             }
 
             @Override
             public void reject(String code, Throwable e) {
-
+                R5ConnectionEvent event = R5ConnectionEvent.getEventFromCode(2);
+                event.message = e.getMessage();
+                onConnectionEvent(event);
             }
 
             @Override
             public void reject(String code, String message, Throwable e) {
-
+                R5ConnectionEvent event = R5ConnectionEvent.getEventFromCode(2);
+                event.message = message;
+                onConnectionEvent(event);
             }
 
             @Override
             public void reject(String message) {
-
+                R5ConnectionEvent event = R5ConnectionEvent.getEventFromCode(2);
+                event.message = message;
+                onConnectionEvent(event);
             }
 
             @Override
             public void reject(Throwable reason) {
-
+                R5ConnectionEvent event = R5ConnectionEvent.getEventFromCode(2);
+                event.message = reason.getMessage();
+                onConnectionEvent(event);
             }
         };
 
         permissionsCheck(activity, promise,
                 Arrays.asList(Manifest.permission.CAMERA,
-                        Manifest.permission.CAPTURE_AUDIO_OUTPUT,
                         Manifest.permission.RECORD_AUDIO), new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -551,6 +560,8 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
     }
 
     protected void onConfigured(String key) {
+
+        System.out.println("[R5VideoViewLayout]:: onConfigured()");
         WritableMap map = new WritableNativeMap();
         map.putString("key", key);
         mEventEmitter.receiveEvent(this.getId(), "onConfigured", map);
