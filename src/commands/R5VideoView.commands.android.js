@@ -13,6 +13,10 @@ export const unsubscribe = (handle) => {
   UIManager.dispatchViewManagerCommand(handle, Commands.unsubscribe, [])
 }
 
+export const preview = (handle) => {
+  UIManager.dispatchViewManagerCommand(handle, Commands.preview, [])
+}
+
 export const publish = (handle, streamName, streamType = R5PublishType.LIVE) => {
   UIManager.dispatchViewManagerCommand(handle, Commands.publish, [streamName, streamType])
 }

@@ -137,27 +137,31 @@
   
 }
 
+- (void)preview {
+    
+    if (_useVideo) {
+        AVCaptureDevice *video = [self getCameraDevice:_useBackfacingCamera];
+        R5Camera *camera = [[R5Camera alloc] initWithDevice:video andBitRate:_bitrate];
+        [camera setWidth:_cameraWidth];
+        [camera setHeight:_cameraHeight];
+        [camera setOrientation:90];
+        [camera setFps:_framerate];
+        [self.stream attachVideo:camera];
+    }
+    if (_useAudio) {
+        AVCaptureDevice *audio = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio];
+        R5Microphone *microphone = [[R5Microphone alloc] initWithDevice:audio];
+        microphone.bitrate = _audioBitrate;
+        microphone.sampleRate = _audioSampleRate;
+        [self.stream attachAudio:microphone];
+    }
+
+}
+
 - (void)publish:(NSString *)streamName withMode:(int)publishMode {
   
   _isPublisher = YES;
   _streamName = streamName;
-  
-  if (_useVideo) {
-    AVCaptureDevice *video = [self getCameraDevice:_useBackfacingCamera];
-    R5Camera *camera = [[R5Camera alloc] initWithDevice:video andBitRate:_bitrate];
-    [camera setWidth:_cameraWidth];
-    [camera setHeight:_cameraHeight];
-    [camera setOrientation:90];
-    [camera setFps:_framerate];
-    [self.stream attachVideo:camera];
-  }
-  if (_useAudio) {
-    AVCaptureDevice *audio = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio];
-    R5Microphone *microphone = [[R5Microphone alloc] initWithDevice:audio];
-    microphone.bitrate = _audioBitrate;
-    microphone.sampleRate = _audioSampleRate;
-    [self.stream attachAudio:microphone];
-  }
   
   if (_useAdaptiveBitrateController) {
     R5AdaptiveBitrateController *abrController = [[R5AdaptiveBitrateController alloc] init];

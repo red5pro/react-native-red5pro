@@ -4,6 +4,7 @@ const { R5VideoViewManager } = NativeModules
 
 export const subscribe = (handle, streamName) => R5VideoViewManager.subscribe(streamName)
 export const unsubscribe = (handle) => R5VideoViewManager.unsubscribe()
+export const preview = (handle) => R5VideoViewManager.preview()
 export const publish = (handle, streamName, streamType = R5PublishType.LIVE) => R5VideoViewManager.publish(streamName, streamType)
 export const unpublish = (handle) => R5VideoViewManager.unpublish()
 export const swapCamera = (handle) => R5VideoViewManager.swapCamera()

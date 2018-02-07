@@ -39,6 +39,10 @@ RCT_EXPORT_METHOD(unsubscribe) {
   [r5View unsubscribe];
 }
 
+RCT_EXPORT_METHOD(unpublish) {
+    [r5View preview];
+}
+
 RCT_EXPORT_METHOD(publish:(nonnull NSString *)streamName withMode:(int)publishMode) {
   [r5View publish:streamName withMode:publishMode];
 }

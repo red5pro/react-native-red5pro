@@ -34,6 +34,7 @@
 
 # pragma RN Methods
 - (void)subscribe:(NSString *)streamName;
+- (void)preview;
 - (void)publish:(NSString *)streamName withMode:(int)publishMode;
 - (void)unsubscribe;
 - (void)unpublish;

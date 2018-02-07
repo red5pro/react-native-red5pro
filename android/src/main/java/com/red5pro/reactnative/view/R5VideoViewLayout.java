@@ -110,7 +110,8 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
         UNSUBSCRIBE("unsubscribe", 3),
         UNPUBLISH("unpublish", 4),
         SWAP_CAMERA("swapCamera", 5),
-        UPDATE_SCALE_MODE("updateScaleMode", 6);
+        UPDATE_SCALE_MODE("updateScaleMode", 6),
+        PREVIEW("preview", 7);
 
         private final String mName;
         private final int mValue;
@@ -293,9 +294,8 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
 
     }
 
-    public void publish (String streamName, R5Stream.RecordType streamType) {
-
-        mStreamName = streamName;
+    public void setupPublisher () {
+;
         mIsPublisher = true;
         if (mLayoutListener == null) {
             mLayoutListener = setUpOrientationListener();
@@ -324,6 +324,11 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
             camera.setFramerate(mFramerate);
 
             mCamera = camera;
+            mVideoView.attachStream(mStream);
+            if (mCamera != null && mUseVideo) {
+                mCamera.getCamera().startPreview();
+                mStream.attachCamera(mCamera);
+            }
 
         }
 
@@ -344,19 +349,16 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
 //          mStream.audioController.sampleRate = 8000;
 
         }
+    }
 
-        mVideoView.attachStream(mStream);
+    public void publish (String streamName, R5Stream.RecordType streamType) {
 
-        if (mCamera != null && mUseVideo) {
-            mStream.attachCamera(camera);
-        }
+        setupPublisher();
+        mStreamName = streamName;
+        mIsPublisher = true;
 
         mVideoView.showDebugView(showDebug);
         mStream.publish(streamName, streamType);
-
-        if (mCamera != null && mUseVideo) {
-            mCamera.getCamera().startPreview();
-        }
 
     }
 

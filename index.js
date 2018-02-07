@@ -6,6 +6,7 @@ import R5ScaleMode from './src/enum/R5VideoView.scalemode'
 
 import { subscribe,
   unsubscribe,
+  preview,
   publish,
   unpublish,
   swapCamera,
@@ -13,6 +14,6 @@ import { subscribe,
 
 module.exports = {
   R5VideoView,
-  subscribe, unsubscribe, publish, unpublish, swapCamera, updateScaleMode,
+  subscribe, unsubscribe, preview, publish, unpublish, swapCamera, updateScaleMode,
   R5AudioMode, R5LogLevel, R5PublishType, R5ScaleMode
 }
