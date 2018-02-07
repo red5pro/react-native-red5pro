@@ -1,8 +1,11 @@
 package com.red5pro.reactnative.view;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.Camera;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceView;
@@ -11,8 +14,11 @@ import android.view.ViewGroup;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.modules.core.PermissionAwareActivity;
+import com.facebook.react.modules.core.PermissionListener;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 
@@ -27,8 +33,14 @@ import com.red5pro.streaming.source.R5Camera;
 import com.red5pro.streaming.source.R5Microphone;
 import com.red5pro.streaming.view.R5VideoView;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+
+import javax.annotation.Nullable;
 
 /**
  * Created by kylekellogg on 9/11/17.
@@ -131,7 +143,106 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
 
     }
 
-    public void loadConfiguration(R5Configuration configuration, String forKey) {
+    private static final String E_CALLBACK_ERROR = "E_CALLBACK_ERROR";
+    private static final String E_PERMISSIONS_MISSING = "E_PERMISSION_MISSING";
+
+    private void permissionsCheck(final Activity activity, final Promise promise, final List<String> requiredPermissions, final Callable<Void> callback) {
+
+        List<String> missingPermissions = new ArrayList<>();
+
+        for (String permission : requiredPermissions) {
+            int status = ActivityCompat.checkSelfPermission(activity, permission);
+            if (status != PackageManager.PERMISSION_GRANTED) {
+                missingPermissions.add(permission);
+            }
+        }
+
+        if (!missingPermissions.isEmpty()) {
+
+            ((PermissionAwareActivity) activity).requestPermissions(missingPermissions.toArray(new String[missingPermissions.size()]), 1, new PermissionListener() {
+
+                @Override
+                public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+                    if (requestCode == 1) {
+
+                        for (int grantResult : grantResults) {
+                            if (grantResult == PackageManager.PERMISSION_DENIED) {
+                                promise.reject(E_PERMISSIONS_MISSING, "Required permission missing");
+                                return true;
+                            }
+                        }
+
+                        try {
+                            callback.call();
+                        } catch (Exception e) {
+                            promise.reject(E_CALLBACK_ERROR, "Unknown error", e);
+                        }
+                    }
+
+                    return true;
+                }
+            });
+
+            return;
+        }
+
+        // all permissions granted
+        try {
+            callback.call();
+        } catch (Exception e) {
+            promise.reject(E_CALLBACK_ERROR, "Unknown error", e);
+        }
+    }
+
+    public void loadConfiguration(final R5Configuration configuration, final String forKey) {
+
+        final Activity activity = mContext.getCurrentActivity();
+        Promise promise = new Promise() {
+            @Override
+            public void resolve(@Nullable Object value) {
+
+            }
+
+            @Override
+            public void reject(String code, String message) {
+
+            }
+
+            @Override
+            public void reject(String code, Throwable e) {
+
+            }
+
+            @Override
+            public void reject(String code, String message, Throwable e) {
+
+            }
+
+            @Override
+            public void reject(String message) {
+
+            }
+
+            @Override
+            public void reject(Throwable reason) {
+
+            }
+        };
+
+        permissionsCheck(activity, promise,
+                Arrays.asList(Manifest.permission.CAMERA,
+                        Manifest.permission.CAPTURE_AUDIO_OUTPUT,
+                        Manifest.permission.RECORD_AUDIO), new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                initiate(configuration, forKey);
+                return null;
+            }
+        });
+
+    }
+
+    public void initiate(R5Configuration configuration, String forKey) {
 
         R5AudioController.mode = mAudioMode == 1
                 ? R5AudioController.PlaybackMode.STANDARD
@@ -624,3 +735,4 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
      */
 
 }
+
