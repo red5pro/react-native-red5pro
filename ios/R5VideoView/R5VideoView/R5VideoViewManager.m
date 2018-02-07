@@ -39,7 +39,7 @@ RCT_EXPORT_METHOD(unsubscribe) {
   [r5View unsubscribe];
 }
 
-RCT_EXPORT_METHOD(unpublish) {
+RCT_EXPORT_METHOD(preview) {
     [r5View preview];
 }
 
