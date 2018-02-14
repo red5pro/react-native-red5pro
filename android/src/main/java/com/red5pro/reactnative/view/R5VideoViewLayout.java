@@ -288,7 +288,7 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
         }
         else {
             WritableMap map = Arguments.createMap();
-            mEventEmitter.receiveEvent(this.getId(), Events.UNPUBLISH_NOTIFICATION.toString(), map);
+            mEventEmitter.receiveEvent(this.getId(), Events.UNSUBSCRIBE_NOTIFICATION.toString(), map);
             cleanup();
         }
 
