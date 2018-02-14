@@ -364,12 +364,13 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
 
     public void unpublish () {
 
+        if (mCamera != null) {
+          Camera c = mCamera.getCamera();
+          c.stopPreview();
+          c.release();
+          mCamera = null;
+        }
         if (mStream != null && mIsStreaming) {
-            if(mStream.getVideoSource() != null) {
-                Camera c = mCamera.getCamera();
-                c.stopPreview();
-                c.release();
-            }
             mStream.stop();
         }
         else {
