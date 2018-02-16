@@ -19,10 +19,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
 
-/**
- * Created by kylekellogg on 9/11/17.
- */
-
 public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
 
     private static final String REACT_CLASS = "R5VideoView";
@@ -44,6 +40,7 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     private static final int COMMAND_SWAP_CAMERA = 5;
     private static final int COMMAND_UPDATE_SCALE_MODE = 6;
     private static final int COMMAND_PREVIEW = 7;
+    private static final int COMMAND_UPDATE_SCALE_SIZE = 8;
 
     private int logLevel = R5Stream.LOG_LEVEL_ERROR;
     private boolean showDebug = false;
@@ -80,6 +77,13 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
         }
 
         switch (commandId) {
+            case COMMAND_UPDATE_SCALE_SIZE:
+                int updateWidth = args.getInt(0);
+                int updateHeight = args.getInt(1);
+                int screenWidth = args.getInt(2);
+                int screenHeight = args.getInt(3);
+                mView.updateScaleSize(updateWidth, updateHeight, screenWidth, screenHeight);
+                break;
             case COMMAND_PREVIEW:
                 mView.setupPublisher();
                 break;
@@ -93,6 +97,11 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
 
                 break;
             case COMMAND_PUBLISH:
+
+                int width = mView.getWidth();
+                int height = mView.getHeight();
+                Log.d("R5VideoViewManager", "dims: (" + width + ", " + height + ")");
+
 
                 final int type = args.getInt(1);
                 final String name = args.getString(0);
@@ -291,4 +300,5 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     }
 
 }
+
 

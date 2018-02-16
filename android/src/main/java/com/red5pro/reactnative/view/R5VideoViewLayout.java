@@ -11,6 +11,9 @@ import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.view.ViewGroup;
+import android.util.DisplayMetrics;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -42,11 +45,7 @@ import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 
-/**
- * Created by kylekellogg on 9/11/17.
- */
-
-public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListener, LifecycleEventListener {
+public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListener, LifecycleEventListener {
 
     public int logLevel;
     public int scaleMode;
@@ -111,7 +110,8 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
         UNPUBLISH("unpublish", 4),
         SWAP_CAMERA("swapCamera", 5),
         UPDATE_SCALE_MODE("updateScaleMode", 6),
-        PREVIEW("preview", 7);
+        PREVIEW("preview", 7),
+        UPDATE_SCALE_SIZE("updateScaleSize", 8);
 
         private final String mName;
         private final int mValue;
@@ -140,115 +140,18 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
         mEventEmitter = mContext.getJSModule(RCTEventEmitter.class);
         setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mContext.addLifecycleEventListener(this);
-        mVideoView = this;
+        mVideoView = new R5VideoView(mContext);
+        mVideoView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        addView(mVideoView);
 
     }
 
     private static final String E_CALLBACK_ERROR = "E_CALLBACK_ERROR";
     private static final String E_PERMISSIONS_MISSING = "E_PERMISSION_MISSING";
 
-    private void permissionsCheck(final Activity activity, final Promise promise, final List<String> requiredPermissions, final Callable<Void> callback) {
-
-        List<String> missingPermissions = new ArrayList<>();
-
-        for (String permission : requiredPermissions) {
-            int status = ActivityCompat.checkSelfPermission(activity, permission);
-            if (status != PackageManager.PERMISSION_GRANTED) {
-                missingPermissions.add(permission);
-            }
-        }
-
-        if (!missingPermissions.isEmpty()) {
-
-            ((PermissionAwareActivity) activity).requestPermissions(missingPermissions.toArray(new String[missingPermissions.size()]), 1, new PermissionListener() {
-
-                @Override
-                public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-                    if (requestCode == 1) {
-
-                        for (int grantResult : grantResults) {
-                            if (grantResult == PackageManager.PERMISSION_DENIED) {
-                                promise.reject(E_PERMISSIONS_MISSING, "Required permission missing");
-                                return true;
-                            }
-                        }
-
-                        try {
-                            callback.call();
-                        } catch (Exception e) {
-                            promise.reject(E_CALLBACK_ERROR, "Unknown error", e);
-                        }
-                    }
-
-                    return true;
-                }
-            });
-
-            return;
-        }
-
-        // all permissions granted
-        try {
-            callback.call();
-        } catch (Exception e) {
-            promise.reject(E_CALLBACK_ERROR, "Unknown error", e);
-        }
-    }
-
     public void loadConfiguration(final R5Configuration configuration, final String forKey) {
 
-        final Activity activity = mContext.getCurrentActivity();
-        Promise promise = new Promise() {
-            @Override
-            public void resolve(@Nullable Object value) {
-
-            }
-
-            @Override
-            public void reject(String code, String message) {
-                R5ConnectionEvent event = R5ConnectionEvent.getEventFromCode(2);
-                event.message = message;
-                onConnectionEvent(event);
-            }
-
-            @Override
-            public void reject(String code, Throwable e) {
-                R5ConnectionEvent event = R5ConnectionEvent.getEventFromCode(2);
-                event.message = e.getMessage();
-                onConnectionEvent(event);
-            }
-
-            @Override
-            public void reject(String code, String message, Throwable e) {
-                R5ConnectionEvent event = R5ConnectionEvent.getEventFromCode(2);
-                event.message = message;
-                onConnectionEvent(event);
-            }
-
-            @Override
-            public void reject(String message) {
-                R5ConnectionEvent event = R5ConnectionEvent.getEventFromCode(2);
-                event.message = message;
-                onConnectionEvent(event);
-            }
-
-            @Override
-            public void reject(Throwable reason) {
-                R5ConnectionEvent event = R5ConnectionEvent.getEventFromCode(2);
-                event.message = reason.getMessage();
-                onConnectionEvent(event);
-            }
-        };
-
-        permissionsCheck(activity, promise,
-                Arrays.asList(Manifest.permission.CAMERA,
-                        Manifest.permission.RECORD_AUDIO), new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                initiate(configuration, forKey);
-                return null;
-            }
-        });
+        initiate(configuration, forKey);
 
     }
 
@@ -312,11 +215,6 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
             updateDeviceOrientationOnLayoutChange();
             int rotate = mUseBackfacingCamera ? 0 : 180;
             device.setDisplayOrientation((mCameraOrientation + rotate) % 360);
-
-            SurfaceView v = new SurfaceView(mContext);
-            v.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            mStream.setView(v);
-            addView(v);
 
             camera = new R5Camera(device, mCameraWidth, mCameraHeight);
             camera.setBitrate(mBitrate);
@@ -413,6 +311,36 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
             updatedCamera.startPreview();
             mUseBackfacingCamera = !mUseBackfacingCamera;
             mStream.updateStreamMeta();
+        }
+
+    }
+
+    public void updateScaleSize(final int width, final int height, final int screenWidth, final int screenHeight) {
+
+        if (this.getVideoView() != null) {
+
+            final float xscale = (float)width / (float)screenWidth;
+            final float yscale = (float)height / (float)screenHeight;
+
+            final FrameLayout layout = mVideoView;
+            final DisplayMetrics displayMetrics = new DisplayMetrics();
+            mContext.getCurrentActivity().getWindowManager()
+                    .getDefaultDisplay()
+                    .getMetrics(displayMetrics);
+
+            final int dwidth = displayMetrics.widthPixels;
+            final int dheight = displayMetrics.heightPixels;
+
+            layout.post(new Runnable() {
+                @Override
+                public void run() {
+                    ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) layout.getLayoutParams();
+                    params.width = Math.round((displayMetrics.widthPixels * 1.0f) * xscale);
+                    params.height = Math.round((displayMetrics.heightPixels * 1.0f) * yscale);
+                    layout.setLayoutParams(params);
+                }
+            });
+
         }
 
     }
@@ -749,4 +677,5 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
      */
 
 }
+
 
