@@ -164,7 +164,7 @@ Your app should now be available for broadcasting and subscribing to live stream
 
 ### Additional Notes
 
-* You may bew required to set the `Enable Bitcode` Build Setting to a value of `No` in order to use the SDK.
+* You may be required to set the `Enable Bitcode` Build Setting to a value of `No` in order to use the SDK.
 
 ## Android Project Setup
 
