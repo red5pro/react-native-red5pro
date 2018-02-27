@@ -16,6 +16,7 @@ class R5VideoView extends React.Component {
     this._onSubscriberStreamStatus = this._onSubscriberStreamStatus.bind(this)
     this._onUnpublishNotification = this._onUnpublishNotification.bind(this)
     this._onUnsubscribeNotification = this._onUnsubscribeNotification.bind(this)
+    this._refHandle = this._refHandle.bind(this)
 
     this.state = {
       configured: false
@@ -71,14 +72,19 @@ class R5VideoView extends React.Component {
     this.props.onUnpublishNotification(event)
   }
 
+  _refHandle = (video) => {
+    this.red5provideo = video
+  }
+
   _onLayout = (event) => {
     // const layout = event.nativeEvent.layout
     // console.log(`R5Video:onLayout: ${event.nativeEvent.layout.x}, ${event.nativeEvent.layout.y}, ${event.nativeEvent.layout.width}x${event.nativeEvent.layout.height}`);
   }
 
   render() {
+    let elementRef = this.props.videoRef ? this.props.videoRef : this._refHandle
     return <R5Video
-            ref={(video) => { this.red5provideo = video }}
+            ref={elementRef}
             {...this.props}
             onLayout={this._onLayout}
             onMetaDataEvent={this._onMetaData}

@@ -55,6 +55,7 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
     protected boolean mIsPublisher;
     protected boolean mIsStreaming;
     protected R5VideoView mVideoView;
+    protected boolean mIsPublisherSetup;
 
     protected ThemedReactContext mContext;
     protected RCTEventEmitter mEventEmitter;
@@ -247,11 +248,14 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 //          mStream.audioController.sampleRate = 8000;
 
         }
+        mIsPublisherSetup = true;
     }
 
     public void publish (String streamName, R5Stream.RecordType streamType) {
 
-        setupPublisher();
+        if (!mIsPublisherSetup) {
+            setupPublisher();
+        }
         mStreamName = streamName;
         mIsPublisher = true;
 
