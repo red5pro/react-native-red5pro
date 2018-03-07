@@ -71,7 +71,7 @@ RCT_EXPORT_VIEW_PROPERTY(useBackfacingCamera, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(useAdaptiveBitrateController, BOOL);
 
 RCT_CUSTOM_VIEW_PROPERTY(showDebugView, BOOL, R5VideoView) {
-  [view setShowDebugInfo:json];
+  [view setShowDebugInfo:[json boolValue]];
 }
 
 RCT_CUSTOM_VIEW_PROPERTY(configuration, R5Configuration, R5VideoView) {
