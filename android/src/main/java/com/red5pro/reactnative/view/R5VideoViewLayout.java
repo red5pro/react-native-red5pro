@@ -65,6 +65,7 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
     protected boolean mUseVideo = true;
     protected boolean mUseAudio = true;
+    protected boolean mPlaybackVideo = true;
     protected int mCameraWidth = 640;
     protected int mCameraHeight = 360;
     protected int mBitrate = 750;
@@ -141,14 +142,19 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         mEventEmitter = mContext.getJSModule(RCTEventEmitter.class);
         setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mContext.addLifecycleEventListener(this);
-        mVideoView = new R5VideoView(mContext);
-        mVideoView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        addView(mVideoView);
 
     }
 
     private static final String E_CALLBACK_ERROR = "E_CALLBACK_ERROR";
     private static final String E_PERMISSIONS_MISSING = "E_PERMISSION_MISSING";
+
+    protected void createVideoView () {
+
+        mVideoView = new R5VideoView(mContext);
+        mVideoView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        addView(mVideoView);
+
+    }
 
     public void loadConfiguration(final R5Configuration configuration, final String forKey) {
 
@@ -179,8 +185,11 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
         mStreamName = streamName;
 
-        mVideoView.attachStream(mStream);
-        mVideoView.showDebugView(showDebug);
+        if (mPlaybackVideo && this.getVideoView() == null) {
+            createVideoView();
+            mVideoView.attachStream(mStream);
+            mVideoView.showDebugView(showDebug);
+        }
         mStream.play(streamName);
 
     }
@@ -209,6 +218,10 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         // Establish Camera if requested.
         if (mUseVideo) {
 
+            if (this.getVideoView() == null) {
+                createVideoView();
+            }
+
             Camera device = mUseBackfacingCamera
                     ? openBackFacingCameraGingerbread()
                     : openFrontFacingCameraGingerbread();
@@ -224,7 +237,7 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
             mCamera = camera;
             mVideoView.attachStream(mStream);
-            if (mCamera != null && mUseVideo) {
+            if (mCamera != null) {
                 mCamera.getCamera().startPreview();
                 mStream.attachCamera(mCamera);
             }
@@ -259,7 +272,9 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         mStreamName = streamName;
         mIsPublisher = true;
 
-        mVideoView.showDebugView(showDebug);
+        if (this.getVideoView() != null) {
+            mVideoView.showDebugView(showDebug);
+        }
         mStream.publish(streamName, streamType);
 
     }
@@ -307,7 +322,6 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         }
 
         if(updatedCamera != null) {
-
             updatedCamera.setDisplayOrientation((mCameraOrientation + rotate) % 360);
             mCamera.setCamera(updatedCamera);
             mCamera.setOrientation(mCameraOrientation);
@@ -505,7 +519,9 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
     protected void updateOrientation(int value) {
         // subscriber only.
         value += 90;
-        this.getVideoView().setStreamRotation(value);
+        if (this.getVideoView() != null) {
+            this.getVideoView().setStreamRotation(value);
+        }
     }
 
     public void onMetaData(String metadata) {
@@ -611,6 +627,10 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
     public void updatePublishAudio(boolean useAudio) {
         this.mUseAudio = useAudio;
+    }
+
+    public void updateSubscribeVideo(boolean playbackVideo) {
+        this.mPlaybackVideo = playbackVideo;
     }
 
     public void updateCameraWidth(int value) {

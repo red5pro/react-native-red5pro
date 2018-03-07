@@ -225,6 +225,11 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
         view.updatePublishAudio(useAudio);
     }
 
+    @ReactProp(name = "subscribeVideo", defaultBoolean = true)
+    public  void setSubscribeVideo(R5VideoViewLayout view, boolean playbackVideo) {
+        view.updateSubscribeVideo(playbackVideo);
+    }
+
     @ReactProp(name = "cameraWidth", defaultInt = 640)
     public void setCameraWidth(R5VideoViewLayout view, int value) {
         view.updateCameraWidth(value);

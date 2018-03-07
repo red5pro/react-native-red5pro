@@ -113,6 +113,7 @@ R5VideoView.propTypes = {
     useBackfacingCamera: PropTypes.bool,            // publisher only
     audioBitrate: PropTypes.number,                 // publisher only, kb/s
     audioSampleRate: PropTypes.number,              // publisher only, hz, default iOS is 16000, default Android is 44100
+    subscribeVideo: PropTypes.bool,                 // subscriber only
     audioMode: PropTypes.number, // mainly subscribers, especially with 2 subscribers.
     configuration: PropTypes.shape({
       host: PropTypes.string.isRequired,
@@ -141,6 +142,7 @@ R5VideoView.defaultProps = {
     streamType: R5PublishType.LIVE,
     publishVideo: true,
     publishAudio: true,
+    subscribeVideo: true,
     cameraWidth: 640,
     cameraHeight: 360,
     bitrate: 750,

@@ -50,6 +50,7 @@
     _showDebugInfo = NO;
     _useVideo = YES;
     _useAudio = YES;
+    _playbackVideo = YES;
     _bitrate = 750;
     _framerate = 15;
     _audioBitrate = 32;
@@ -74,12 +75,15 @@
   
   self.stream = stream;
   self.connection = connection;
-  [self.controller showPreview:YES];
-  [self.controller showDebugInfo:_showDebugInfo];
-  [self.controller attachStream:self.stream];
+
+  if (_playbackVideo) {
+    [self.controller showPreview:YES];
+    [self.controller showDebugInfo:_showDebugInfo];
+    [self.controller attachStream:self.stream];
   
-  UIViewController *rootVc = [UIApplication sharedApplication].delegate.window.rootViewController;
-  [self.controller setFrame:rootVc.view.frame];
+    UIViewController *rootVc = [UIApplication sharedApplication].delegate.window.rootViewController;
+    [self.controller setFrame:rootVc.view.frame];
+  }
   
   // Needed to dispatch event on main thread as this request on configuration was made through RN. (?)
   dispatch_async(dispatch_get_main_queue(), ^{
@@ -115,8 +119,11 @@
   
   _isPublisher = NO;
   _streamName = streamName;
-  
-  [self.controller setScaleMode:_scaleMode];
+ 
+  if (_playbackVideo) {
+    [self.controller setScaleMode:_scaleMode];
+  }
+
   [self.stream setAudioController:[[R5AudioController alloc] initWithMode:_audioMode]];
   
   [self.stream play:streamName];
@@ -206,6 +213,18 @@
     
 }
 
+- (void)updateScaleSize:(int)width withHeight:(int)height withScreenWidth:(int)screenWidth withScreenHeight:(int)screenHeight {
+    
+    if (_playbackVideo) {
+      float xscale = width / screenWidth;
+      float yscale = height / screenHeight;
+    
+      CGRect b = self.frame;
+      [self.controller setFrame:CGRectMake(0.0, 0.0, b.size.width * xscale, b.size.height * yscale)];
+    }
+    
+}
+
 - (void)tearDown {
   
   if (self.stream != nil) {
@@ -266,8 +285,10 @@
 - (void)layoutSubviews {
   
   [super layoutSubviews];
-  CGRect b = self.frame;
-  [self.controller setFrame:CGRectMake(0.0, 0.0, b.size.width, b.size.height)];
+  if (_playbackVideo) {
+    CGRect b = self.frame;
+    [self.controller setFrame:CGRectMake(0.0, 0.0, b.size.width, b.size.height)];
+  }
   
 }
 
@@ -344,7 +365,9 @@
 }
 - (void)setScaleMode:(int)mode {
   _scaleMode = mode;
-  [self.controller setScaleMode:_scaleMode];
+  if (_playbackVideo) {
+    [self.controller setScaleMode:_scaleMode];
+  }
 }
 
 - (BOOL)getShowDebugInfo {
@@ -377,6 +400,13 @@
 }
 - (void)setPublishAudio:(BOOL)value {
   _useAudio = value;
+}
+
+- (BOOL)getSubscribeVideo {
+  return _playbackVideo;
+}
+- (void)setSubscribeVideo:(BOOL)value {
+  _playbackVideo = value;
 }
 
 - (int)getCameraWidth {

@@ -59,11 +59,16 @@ RCT_EXPORT_METHOD(updateScaleMode:(int)mode) {
     [r5View updateScaleMode:mode];
 }
 
+RCT_EXPORT_METHOD(updateScaleSize:(int)width withHeight:(int)height withScreenWidth:(int)screenWidth withScreenHeight:(int)screenHeight) {
+    [r5View updateScaleSize:width withHeight:height withScreenWidth:screenWidth withScreenHeight:screenHeight];
+}
+
 # pragma RN Properties
 RCT_EXPORT_VIEW_PROPERTY(logLevel, int);
 RCT_EXPORT_VIEW_PROPERTY(scaleMode, int);
 RCT_EXPORT_VIEW_PROPERTY(publishVideo, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(publishAudio, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(subscribeAudio, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(cameraWidth, int);
 RCT_EXPORT_VIEW_PROPERTY(cameraHeight, int);
 RCT_EXPORT_VIEW_PROPERTY(bitrate, int);

@@ -40,6 +40,7 @@
 - (void)unpublish;
 - (void)swapCamera;
 - (void)updateScaleMode:(int)mode;
+- (void)updateScaleSize:(int)width withHeight:(int)height withScreenWidth:(int)screenWidth withScreenHeight:(int)screenHeight;
 
 # pragma RN Properties
 - (BOOL)getShowDebugInfo;
@@ -60,6 +61,10 @@
 - (BOOL)getPublishAudio;
 - (void)setPublishAudio:(BOOL)value;
 @property (nonatomic, setter=setPublishAudio:, getter=getPublishAudio) BOOL publishAudio;
+
+- (BOOL)getSubscribeVideo;
+- (void)setSubscribeVideo:(BOOL)value;
+@property (nonatomic, setter=setSubscribeVideo:, getter=getSubscribeVideo) BOOL subscribeVideo;
 
 @end
 
