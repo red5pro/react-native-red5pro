@@ -4,7 +4,7 @@
 
 ---
 
-# react-native-red5pro
+# react-native-red5pro BETA
 
 React Native Red5 Pro Publisher & Subscriber.
 
