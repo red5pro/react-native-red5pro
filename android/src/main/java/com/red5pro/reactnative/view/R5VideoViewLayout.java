@@ -196,6 +196,10 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
     public void unsubscribe () {
 
+        if (mVideoView != null) {
+            mVideoView.attachStream(null);
+        }
+
         if (mStream != null && mIsStreaming) {
             mStream.stop();
         }
@@ -208,7 +212,7 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
     }
 
     public void setupPublisher () {
-;
+
         mIsPublisher = true;
         if (mLayoutListener == null) {
             mLayoutListener = setUpOrientationListener();
@@ -281,11 +285,15 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
     public void unpublish () {
 
+        if (mVideoView != null) {
+            mVideoView.attachStream(null);
+        }
+
         if (mCamera != null) {
-          Camera c = mCamera.getCamera();
-          c.stopPreview();
-          c.release();
-          mCamera = null;
+            Camera c = mCamera.getCamera();
+            c.stopPreview();
+            c.release();
+            mCamera = null;
         }
         if (mStream != null && mIsStreaming) {
             mStream.stop();
@@ -365,7 +373,9 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
     protected void cleanup() {
 
+        Log.d("R5VideoViewLayout", ":cleanup (" + mStreamName + ")!");
         if (mStream != null) {
+            mStream.client = null;
             mStream.setListener(null);
             mStream = null;
         }
@@ -373,6 +383,11 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         if (mConnection != null) {
             mConnection.removeListener();
             mConnection = null;
+        }
+        if (mVideoView != null) {
+            mVideoView.attachStream(null);
+            removeView(mVideoView);
+            mVideoView = null;
         }
         mIsStreaming = false;
 
@@ -701,5 +716,3 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
      */
 
 }
-
-

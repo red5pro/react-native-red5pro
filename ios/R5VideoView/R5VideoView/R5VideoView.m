@@ -20,6 +20,7 @@
   BOOL _isPublisher;      // determined.
   BOOL _useVideo;
   BOOL _useAudio;
+  BOOL _playbackVideo;
   int _cameraWidth;
   int _cameraHeight;
   int _bitrate;
