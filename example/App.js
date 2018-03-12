@@ -80,9 +80,9 @@ export default class App extends React.Component {
         style: styles.videoView,
         collapsable: false,
         configuration: {
-          host: 'ipv6west.red5.org',
-          licenseKey: 'ACGE-4UMR-UHM4-RVJR',
-          streamName: 'todd',
+          host: undefined,
+          licenseKey: undefined,
+          streamName: undefined,
           port: 8554,
           contextName: 'live',
           bufferTime: 0.5,
@@ -171,21 +171,18 @@ export default class App extends React.Component {
         <View style={styles.container}>
           <View style={styles.formField}>
             <TextInput ref="host"
-              value='ipv6west.red5.org'
               {...this.state.hostFieldProps}
               onChangeText={this.onHostChange}
             />
           </View>
           <View style={styles.formField}>
             <TextInput ref="license"
-              value='ACGE-4UMR-UHM4-RVJR'
               {...this.state.licenseFieldProps}
               onChangeText={this.onLicenseChange}
             />
           </View>
           <View style={styles.formField}>
             <TextInput ref="streamName"
-              value='todd'
               {...this.state.streamNameFieldProps}
               onChangeText={this.onStreamNameChange}
             />
