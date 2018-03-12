@@ -5,6 +5,7 @@ import { R5VideoView } from 'react-native-red5pro'
 import { R5ScaleMode, R5LogLevel } from 'react-native-red5pro'
 import { subscribe,
          unsubscribe,
+         preview,
          publish,
          unpublish,
          swapCamera,
@@ -79,9 +80,9 @@ export default class App extends React.Component {
         style: styles.videoView,
         collapsable: false,
         configuration: {
-          host: undefined,
-          licenseKey: undefined,
-          streamName: undefined,
+          host: 'ipv6west.red5.org',
+          licenseKey: 'ACGE-4UMR-UHM4-RVJR',
+          streamName: 'todd',
           port: 8554,
           contextName: 'live',
           bufferTime: 0.5,
@@ -170,18 +171,21 @@ export default class App extends React.Component {
         <View style={styles.container}>
           <View style={styles.formField}>
             <TextInput ref="host"
+              value='ipv6west.red5.org'
               {...this.state.hostFieldProps}
               onChangeText={this.onHostChange}
             />
           </View>
           <View style={styles.formField}>
             <TextInput ref="license"
+              value='ACGE-4UMR-UHM4-RVJR'
               {...this.state.licenseFieldProps}
               onChangeText={this.onLicenseChange}
             />
           </View>
           <View style={styles.formField}>
             <TextInput ref="streamName"
+              value='todd'
               {...this.state.streamNameFieldProps}
               onChangeText={this.onStreamNameChange}
             />
@@ -323,6 +327,7 @@ export default class App extends React.Component {
       configured: true
     })
     if (this.state.isPublisher) {
+      preview(findNodeHandle(this.refs.video))
       publish(findNodeHandle(this.refs.video), this.state.videoProps.configuration.streamName)
     }
     else {
