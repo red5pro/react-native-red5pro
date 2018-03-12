@@ -386,7 +386,7 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         }
         if (mVideoView != null) {
             mVideoView.attachStream(null);
-            removeView(mVideoView);
+//            removeView(mVideoView);
             mVideoView = null;
         }
         mIsStreaming = false;
