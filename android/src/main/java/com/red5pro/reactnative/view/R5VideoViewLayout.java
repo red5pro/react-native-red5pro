@@ -2,6 +2,7 @@ package com.red5pro.reactnative.view;
 
 import android.app.Activity;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.hardware.Camera;
 import android.util.Log;
 import android.view.Surface;
@@ -58,6 +59,13 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
     protected int mAudioSampleRate = 44100;
     protected boolean mUseAdaptiveBitrateController = false;
     protected boolean mUseBackfacingCamera = false;
+
+
+    protected int mClientWidth;
+    protected int mClientHeight;
+    protected int mClientScreenWidth;
+    protected int mClientScreenHeight;
+    protected boolean mRequiresScaleSizeUpdate = false;
 
     protected int mCameraOrientation;
     protected int mDisplayOrientation;
@@ -132,6 +140,7 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
         mVideoView = new R5VideoView(mContext);
         mVideoView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mVideoView.setBackgroundColor(Color.BLACK);
         addView(mVideoView);
 
     }
@@ -205,6 +214,9 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
             if (this.getVideoView() == null) {
                 createVideoView();
+                if (mRequiresScaleSizeUpdate) {
+                    this.updateScaleSize(mClientWidth, mClientHeight, mClientScreenWidth, mClientScreenHeight);
+                }
             }
 
             Camera device = mUseBackfacingCamera
@@ -250,9 +262,9 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         }
         if (mCamera != null && mUseVideo) {
             mStream.attachCamera(mCamera);
-        }
-        if (mCamera != null && mCamera.getCamera() != null && mUseVideo && withPreview) {
-            mCamera.getCamera().startPreview();
+            if (mCamera.getCamera() != null && withPreview) {
+              mCamera.getCamera().startPreview();
+            }
         }
 
         mIsPublisherSetup = true;
@@ -272,13 +284,18 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
             mVideoView.showDebugView(showDebug);
         }
 
-        if (mCamera.getCamera() != null && mUseVideo && hasPreview) {
+        Boolean shouldPublishVideo = (mCamera != null && mCamera.getCamera() != null && mUseVideo);
+
+        if (shouldPublishVideo && hasPreview) {
             mCamera.getCamera().stopPreview();
         }
 
         mStream.publish(streamName, streamType);
 
-        if (mCamera != null && mCamera.getCamera() != null && mUseVideo) {
+        if (shouldPublishVideo) {
+            if (mRequiresScaleSizeUpdate) {
+                this.updateScaleSize(mClientWidth, mClientHeight, mClientScreenWidth, mClientScreenHeight);
+            }
             mCamera.getCamera().startPreview();
         }
 
@@ -296,6 +313,7 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
             c.release();
             mCamera = null;
         }
+
         if (mStream != null && mIsStreaming) {
             mStream.stop();
         }
@@ -345,7 +363,15 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
     public void updateScaleSize(final int width, final int height, final int screenWidth, final int screenHeight) {
 
+        mClientWidth = width;
+        mClientHeight = height;
+        mClientScreenWidth = screenWidth;
+        mClientScreenHeight = screenHeight;
+        mRequiresScaleSizeUpdate = true;
+
         if (this.getVideoView() != null) {
+
+            Log.d("R5VideoViewLayout", "rescaling...");
 
             final float xscale = (float)width / (float)screenWidth;
             final float yscale = (float)height / (float)screenHeight;
