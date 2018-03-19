@@ -78,7 +78,7 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
                 root.updateScaleSize(updateWidth, updateHeight, screenWidth, screenHeight);
                 break;
             case COMMAND_PREVIEW:
-                root.setupPublisher();
+                root.setupPublisher(true);
                 break;
             case COMMAND_SUBSCRIBE:
 
@@ -297,5 +297,3 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     }
 
 }
-
-

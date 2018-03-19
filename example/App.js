@@ -5,7 +5,6 @@ import { R5VideoView } from 'react-native-red5pro'
 import { R5ScaleMode, R5LogLevel } from 'react-native-red5pro'
 import { subscribe,
          unsubscribe,
-         preview,
          publish,
          unpublish,
          swapCamera,
@@ -324,7 +323,6 @@ export default class App extends React.Component {
       configured: true
     })
     if (this.state.isPublisher) {
-      preview(findNodeHandle(this.refs.video))
       publish(findNodeHandle(this.refs.video), this.state.videoProps.configuration.streamName)
     }
     else {

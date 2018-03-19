@@ -1,27 +1,19 @@
 package com.red5pro.reactnative.view;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.Camera;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.Surface;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.view.ViewGroup;
 import android.util.DisplayMetrics;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
-import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
-import com.facebook.react.modules.core.PermissionAwareActivity;
-import com.facebook.react.modules.core.PermissionListener;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 
@@ -35,15 +27,6 @@ import com.red5pro.streaming.source.R5AdaptiveBitrateController;
 import com.red5pro.streaming.source.R5Camera;
 import com.red5pro.streaming.source.R5Microphone;
 import com.red5pro.streaming.view.R5VideoView;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-
-import javax.annotation.Nullable;
 
 public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListener, LifecycleEventListener {
 
@@ -145,9 +128,6 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
     }
 
-    private static final String E_CALLBACK_ERROR = "E_CALLBACK_ERROR";
-    private static final String E_PERMISSIONS_MISSING = "E_PERMISSION_MISSING";
-
     protected void createVideoView () {
 
         mVideoView = new R5VideoView(mContext);
@@ -206,12 +186,13 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         else {
             WritableMap map = Arguments.createMap();
             mEventEmitter.receiveEvent(this.getId(), Events.UNSUBSCRIBE_NOTIFICATION.toString(), map);
+            Log.d("R5VideoViewLayout", "UNSUBSCRIBE");
             cleanup();
         }
 
     }
 
-    public void setupPublisher () {
+    public void setupPublisher (Boolean withPreview) {
 
         mIsPublisher = true;
         if (mLayoutListener == null) {
@@ -240,11 +221,9 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
             camera.setFramerate(mFramerate);
 
             mCamera = camera;
-            mVideoView.attachStream(mStream);
-            if (mCamera != null) {
-                mCamera.getCamera().startPreview();
-                mStream.attachCamera(mCamera);
-            }
+            Camera.Parameters params = mCamera.getCamera().getParameters();
+            params.setRecordingHint(true);
+            mCamera.getCamera().setParameters(params);
 
         }
 
@@ -265,13 +244,26 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 //          mStream.audioController.sampleRate = 8000;
 
         }
+
+        if (mVideoView != null && mUseVideo) {
+            mVideoView.attachStream(mStream);
+        }
+        if (mCamera != null && mUseVideo) {
+            mStream.attachCamera(mCamera);
+        }
+        if (mCamera.getCamera() != null && mUseVideo && withPreview) {
+            mCamera.getCamera().startPreview();
+        }
+
         mIsPublisherSetup = true;
     }
 
     public void publish (String streamName, R5Stream.RecordType streamType) {
 
+        Log.d("R5VideoViewLayout", "publish");
+        Boolean hasPreview = mIsPublisherSetup;
         if (!mIsPublisherSetup) {
-            setupPublisher();
+            setupPublisher(false);
         }
         mStreamName = streamName;
         mIsPublisher = true;
@@ -279,7 +271,16 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         if (this.getVideoView() != null) {
             mVideoView.showDebugView(showDebug);
         }
+
+        if (mCamera.getCamera() != null && mUseVideo && hasPreview) {
+            mCamera.getCamera().stopPreview();
+        }
+
         mStream.publish(streamName, streamType);
+
+        if (mCamera.getCamera() != null && mUseVideo) {
+            mCamera.getCamera().startPreview();
+        }
 
     }
 
@@ -301,6 +302,7 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         else {
             WritableMap map = Arguments.createMap();
             mEventEmitter.receiveEvent(this.getId(), Events.UNPUBLISH_NOTIFICATION.toString(), map);
+            Log.d("R5VideoViewLayout", "UNPUBLISH");
             cleanup();
         }
 
@@ -583,6 +585,7 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
             else {
                 mEventEmitter.receiveEvent(this.getId(), Events.UNSUBSCRIBE_NOTIFICATION.toString(), evt);
             }
+            Log.d("R5VideoViewLayout", "DISCONNECT");
             cleanup();
             mIsStreaming = false;
         }
