@@ -251,7 +251,7 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         if (mCamera != null && mUseVideo) {
             mStream.attachCamera(mCamera);
         }
-        if (mCamera.getCamera() != null && mUseVideo && withPreview) {
+        if (mCamera != null && mCamera.getCamera() != null && mUseVideo && withPreview) {
             mCamera.getCamera().startPreview();
         }
 
