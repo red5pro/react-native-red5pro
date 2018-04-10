@@ -19,10 +19,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
 
-/**
- * Created by kylekellogg on 9/11/17.
- */
-
 public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
 
     private static final String REACT_CLASS = "R5VideoView";
@@ -43,15 +39,9 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     private static final int COMMAND_UNPUBLISH = 4;
     private static final int COMMAND_SWAP_CAMERA = 5;
     private static final int COMMAND_UPDATE_SCALE_MODE = 6;
-
-    private int logLevel = R5Stream.LOG_LEVEL_ERROR;
-    private boolean showDebug = false;
-
-    private AtomicBoolean isConfigured = new AtomicBoolean(false);
-    private AtomicBoolean isAttached = new AtomicBoolean(false);
+    private static final int COMMAND_UPDATE_SCALE_SIZE = 7;
 
     private R5VideoViewLayout mView;
-
     private ThemedReactContext mContext;
 
     public R5VideoViewManager() {
@@ -79,16 +69,28 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
         }
 
         switch (commandId) {
+            case COMMAND_UPDATE_SCALE_SIZE:
+                int updateWidth = args.getInt(0);
+                int updateHeight = args.getInt(1);
+                int screenWidth = args.getInt(2);
+                int screenHeight = args.getInt(3);
+                root.updateScaleSize(updateWidth, updateHeight, screenWidth, screenHeight);
+                break;
             case COMMAND_SUBSCRIBE:
 
-                int w = mView.getWidth();
-                int h = mView.getHeight();
+                int w = root.getWidth();
+                int h = root.getHeight();
 
                 final String streamName = args.getString(0);
-                mView.subscribe(streamName);
+                root.subscribe(streamName);
 
                 break;
             case COMMAND_PUBLISH:
+
+                int width = root.getWidth();
+                int height = root.getHeight();
+                Log.d("R5VideoViewManager", "dims: (" + width + ", " + height + ")");
+
 
                 final int type = args.getInt(1);
                 final String name = args.getString(0);
@@ -99,28 +101,28 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
                 else if (type == 2) {
                     recordType = R5Stream.RecordType.Append;
                 }
-                mView.publish(name, recordType);
+                root.publish(name, recordType);
 
                 break;
             case COMMAND_UNSUBSCRIBE:
 
-                mView.unsubscribe();
+                root.unsubscribe();
 
                 break;
             case COMMAND_UNPUBLISH:
 
-                mView.unpublish();
+                root.unpublish();
 
                 break;
             case COMMAND_SWAP_CAMERA:
 
-                mView.swapCamera();
+                root.swapCamera();
 
                 break;
             case COMMAND_UPDATE_SCALE_MODE:
 
                 final int mode = args.getInt(0);
-                mView.updateScaleMode(mode);
+                root.updateScaleMode(mode);
 
                 break;
             default:
@@ -192,7 +194,6 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     @ReactProp(name = "configuration")
     public void setConfiguration(R5VideoViewLayout view, ReadableMap configuration) {
         view.loadConfiguration(createConfigurationFromMap(configuration), configuration.getString("key"));
-        isConfigured.set(true);
     }
 
     @ReactProp(name = "showDebugView", defaultBoolean = false)
@@ -218,6 +219,11 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     @ReactProp(name = "publishAudio", defaultBoolean = true)
     public  void setPublishAudio(R5VideoViewLayout view, boolean useAudio) {
         view.updatePublishAudio(useAudio);
+    }
+
+    @ReactProp(name = "subscribeVideo", defaultBoolean = true)
+    public  void setSubscribeVideo(R5VideoViewLayout view, boolean playbackVideo) {
+        view.updateSubscribeVideo(playbackVideo);
     }
 
     @ReactProp(name = "cameraWidth", defaultInt = 640)

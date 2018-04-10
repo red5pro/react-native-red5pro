@@ -20,6 +20,7 @@
   BOOL _isPublisher;      // determined.
   BOOL _useVideo;
   BOOL _useAudio;
+  BOOL _playbackVideo;
   int _cameraWidth;
   int _cameraHeight;
   int _bitrate;
@@ -40,16 +41,12 @@
   
   if (self = [super init]) {
     
-    R5VideoViewController *ctrl = [[R5VideoViewController alloc] init];
-    [ctrl setView:self];
-    
-    self.controller = ctrl;
-    
     _scaleMode = 0;
     _logLevel = 3;
     _showDebugInfo = NO;
     _useVideo = YES;
     _useAudio = YES;
+    _playbackVideo = YES;
     _bitrate = 750;
     _framerate = 15;
     _audioBitrate = 32;
@@ -59,6 +56,7 @@
     _useAdaptiveBitrateController = NO;
     _audioMode = R5AudioControllerModeStandardIO;
     _useBackfacingCamera = NO;
+    r5_set_log_level(_logLevel);
     
   }
   return self;
@@ -67,26 +65,19 @@
 
 - (void)loadConfiguration:(R5Configuration *)configuration forKey:(NSString *)key {
   
-  R5Connection *connection = [[R5Connection alloc] initWithConfig:configuration];
-  R5Stream *stream = [[R5Stream alloc] initWithConnection:connection];
-  [stream setDelegate:self];
-  [stream setClient:self];
-  
-  self.stream = stream;
-  self.connection = connection;
-  [self.controller showPreview:YES];
-  [self.controller showDebugInfo:_showDebugInfo];
-  [self.controller attachStream:self.stream];
-  
-  UIViewController *rootVc = [UIApplication sharedApplication].delegate.window.rootViewController;
-  [self.controller setFrame:rootVc.view.frame];
-  
-  // Needed to dispatch event on main thread as this request on configuration was made through RN. (?)
-  dispatch_async(dispatch_get_main_queue(), ^{
-    if (self.onConfigured) {
-      self.onConfigured(@{@"key": key});
-    }
-  });
+    dispatch_async(dispatch_get_main_queue(), ^{
+        R5Connection *connection = [[R5Connection alloc] initWithConfig:configuration];
+        R5Stream *stream = [[R5Stream alloc] initWithConnection:connection];
+        [stream setDelegate:self];
+        [stream setClient:self];
+        
+        self.stream = stream;
+        self.connection = connection;
+        
+        if (self.onConfigured) {
+            self.onConfigured(@{@"key": key});
+        }
+    });
   
 }
 
@@ -113,13 +104,31 @@
 
 - (void)subscribe:(NSString *)streamName {
   
-  _isPublisher = NO;
-  _streamName = streamName;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        _isPublisher = NO;
+        _streamName = streamName;
+ 
+        if (_playbackVideo) {
+            
+            R5VideoViewController *ctrl = [[R5VideoViewController alloc] init];
+            [ctrl setView:self];
+            
+            self.controller = ctrl;
+            
+            [self.controller showPreview:YES];
+            [self.controller attachStream:self.stream];
+                
+            UIViewController *rootVc = [UIApplication sharedApplication].delegate.window.rootViewController;
+            [self.controller setFrame:rootVc.view.frame];
+            [self.controller showDebugInfo:_showDebugInfo];
+            [self.controller setScaleMode:_scaleMode];
+            
+        }
+
+        [self.stream setAudioController:[[R5AudioController alloc] initWithMode:_audioMode]];
   
-  [self.controller setScaleMode:_scaleMode];
-  [self.stream setAudioController:[[R5AudioController alloc] initWithMode:_audioMode]];
-  
-  [self.stream play:streamName];
+        [self.stream play:streamName];
+    });
   
 }
 
@@ -137,37 +146,59 @@
   
 }
 
-- (void)publish:(NSString *)streamName withMode:(int)publishMode {
-  
-  _isPublisher = YES;
-  _streamName = streamName;
-  
-  if (_useVideo) {
+- (R5Camera *)setUpCamera {
     AVCaptureDevice *video = [self getCameraDevice:_useBackfacingCamera];
     R5Camera *camera = [[R5Camera alloc] initWithDevice:video andBitRate:_bitrate];
     [camera setWidth:_cameraWidth];
     [camera setHeight:_cameraHeight];
     [camera setOrientation:90];
     [camera setFps:_framerate];
-    [self.stream attachVideo:camera];
-  }
-  if (_useAudio) {
+    return camera;
+}
+
+- (R5Microphone *)setUpMicrophone {
     AVCaptureDevice *audio = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio];
     R5Microphone *microphone = [[R5Microphone alloc] initWithDevice:audio];
     microphone.bitrate = _audioBitrate;
     microphone.sampleRate = _audioSampleRate;
-    [self.stream attachAudio:microphone];
-  }
+    return microphone;
+}
+
+- (void)publish:(NSString *)streamName withMode:(int)publishMode {
   
-  if (_useAdaptiveBitrateController) {
-    R5AdaptiveBitrateController *abrController = [[R5AdaptiveBitrateController alloc] init];
-    [abrController attachToStream:self.stream];
-    [abrController setRequiresVideo:_useVideo];
-  }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        _isPublisher = YES;
+        _streamName = streamName;
+        
+        if (_useAdaptiveBitrateController) {
+            R5AdaptiveBitrateController *abrController = [[R5AdaptiveBitrateController alloc] init];
+            [abrController attachToStream:self.stream];
+            [abrController setRequiresVideo:_useVideo];
+        }
+        
+        if (_useAudio) {
+            R5Microphone *microphone = [self setUpMicrophone];
+            [self.stream attachAudio:microphone];
+        }
   
-  [self onDeviceOrientation:NULL];
-  [self.stream publish:streamName type:publishMode];
-  [self.stream updateStreamMeta];
+        if (_useVideo) {
+            R5Camera *camera = [self setUpCamera];
+            
+            self.controller = [[R5VideoViewController alloc] init];
+            [self.controller setView:self];
+            [self.controller setFrame:self.frame];
+            
+            [self.controller showPreview:YES];
+            [self.controller showDebugInfo:_showDebugInfo];
+            
+            [self.controller attachStream:self.stream];
+            [self.stream attachVideo:camera];
+        }
+  
+        [self.stream publish:streamName type:publishMode];
+        [self.stream updateStreamMeta];
+        
+    });
   
 }
 
@@ -187,12 +218,14 @@
 
 - (void)swapCamera {
   
-  if (_isPublisher) {
-    _useBackfacingCamera = !_useBackfacingCamera;
-    AVCaptureDevice *device = [self getCameraDevice:_useBackfacingCamera];
-    R5Camera *camera = (R5Camera *)[self.stream getVideoSource];
-    [camera setDevice:device];
-  }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_isPublisher) {
+            _useBackfacingCamera = !_useBackfacingCamera;
+            AVCaptureDevice *device = [self getCameraDevice:_useBackfacingCamera];
+            R5Camera *camera = (R5Camera *)[self.stream getVideoSource];
+            [camera setDevice:device];
+        }
+    });
   
 }
 
@@ -202,68 +235,91 @@
     
 }
 
+- (void)updateScaleSize:(int)width withHeight:(int)height withScreenWidth:(int)screenWidth withScreenHeight:(int)screenHeight {
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_playbackVideo) {
+            float xscale = (width*1.0f) / (screenWidth*1.0f);
+            float yscale = (height*1.0f) / (screenHeight*1.0f);
+            int dwidth = [[UIScreen mainScreen] bounds].size.width;
+            int dheight = [[UIScreen mainScreen] bounds].size.height;
+            
+            [self.controller setFrame:CGRectMake(0.0, 0.0, dwidth * xscale, dheight * yscale)];
+        }
+    });
+    
+}
+
 - (void)tearDown {
   
-  if (self.stream != nil) {
-    [self.stream setDelegate:nil];
-    [self.stream setClient:nil];
-  }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (self.stream != nil) {
+            [self.stream setDelegate:nil];
+            [self.stream setClient:nil];
+    }
   
-  _streamName = nil;
-  _isStreaming = NO;
+        _streamName = nil;
+        _isStreaming = NO;
+    });
 
 }
 
 - (void)updateOrientation:(int)value {
   
-  if (_currentRotation == value) {
-    return;
-  }
-  _currentRotation = value;
-  [self.controller.view.layer setTransform:CATransform3DMakeRotation(value, 0.0, 0.0, 0.0)];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_currentRotation == value) {
+            return;
+        }
+        _currentRotation = value;
+        [self.controller.view.layer setTransform:CATransform3DMakeRotation(value, 0.0, 0.0, 0.0)];
+    });
   
 }
 
 - (void)onDeviceOrientation:(NSNotification *)notification {
   
-  if (_isPublisher) {
-    R5Camera *camera = (R5Camera *)[self.stream getVideoSource];
-    UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_isPublisher) {
+            R5Camera *camera = (R5Camera *)[self.stream getVideoSource];
+            UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
   
-    if (orientation == UIDeviceOrientationPortraitUpsideDown) {
-      [camera setOrientation: 270];
-    }
-    else if (orientation == UIDeviceOrientationLandscapeLeft) {
-      if (_useBackfacingCamera) {
-        [camera setOrientation: 0];
-      }
-      else {
-        [camera setOrientation: 180];
-      }
-    }
-    else if (orientation == UIDeviceOrientationLandscapeRight) {
-      if (_useBackfacingCamera) {
-        [camera setOrientation: 180];
-      }
-      else {
-        [camera setOrientation: 0];
-      }
-    }
-    else {
-      [camera setOrientation: 90];
-    }
-    [self.controller showPreview:YES];
-    [self.stream updateStreamMeta];
+            if (orientation == UIDeviceOrientationPortraitUpsideDown) {
+                [camera setOrientation: 270];
+            }
+            else if (orientation == UIDeviceOrientationLandscapeLeft) {
+                if (_useBackfacingCamera) {
+                    [camera setOrientation: 0];
+                }
+                else {
+                    [camera setOrientation: 180];
+                }
+            }
+            else if (orientation == UIDeviceOrientationLandscapeRight) {
+                if (_useBackfacingCamera) {
+                    [camera setOrientation: 180];
+                }
+                else {
+                    [camera setOrientation: 0];
+                }
+            }
+            else {
+                [camera setOrientation: 90];
+            }
+            [self.controller showPreview:YES];
+            [self.stream updateStreamMeta];
     
-  }
+        }
+    });
 
 }
 
 - (void)layoutSubviews {
   
   [super layoutSubviews];
-  CGRect b = self.frame;
-  [self.controller setFrame:CGRectMake(0.0, 0.0, b.size.width, b.size.height)];
+  if (_playbackVideo) {
+    CGRect b = self.frame;
+    [self.controller setFrame:CGRectMake(0.0, 0.0, b.size.width, b.size.height)];
+  }
   
 }
 
@@ -340,7 +396,9 @@
 }
 - (void)setScaleMode:(int)mode {
   _scaleMode = mode;
-  [self.controller setScaleMode:_scaleMode];
+  if (_playbackVideo) {
+    [self.controller setScaleMode:_scaleMode];
+  }
 }
 
 - (BOOL)getShowDebugInfo {
@@ -373,6 +431,13 @@
 }
 - (void)setPublishAudio:(BOOL)value {
   _useAudio = value;
+}
+
+- (BOOL)getSubscribeVideo {
+  return _playbackVideo;
+}
+- (void)setSubscribeVideo:(BOOL)value {
+  _playbackVideo = value;
 }
 
 - (int)getCameraWidth {

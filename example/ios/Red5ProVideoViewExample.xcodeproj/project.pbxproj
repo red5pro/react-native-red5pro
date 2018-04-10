@@ -238,16 +238,16 @@
 			remoteGlobalIDString = 3D383D621EBD27B9005632C8;
 			remoteInfo = "double-conversion-tvOS";
 		};
-		4885C7861FBCDA8C00E77415 /* PBXContainerItemProxy */ = {
+		48B89E8220755A6A007B8E0B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 064144544B8240068B1F5786 /* ReactNativePermissions.xcodeproj */;
+			containerPortal = 27B45A7934E94BF684633433 /* ReactNativePermissions.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 9D23B34F1C767B80008B4819;
 			remoteInfo = ReactNativePermissions;
 		};
-		4885C81C1FBDFBDE00E77415 /* PBXContainerItemProxy */ = {
+		48FC2681207D0BDC004DD40C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 99A2D948606344179E43B87F /* R5VideoView.xcodeproj */;
+			containerPortal = 4D56EA92F45F4CC3AFD7AEBD /* R5VideoView.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 4885C7AB1FBDFA7400E77415;
 			remoteInfo = R5VideoView;
@@ -299,7 +299,6 @@
 		00E356EE1AD99517003FC87E /* Red5ProVideoViewExampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Red5ProVideoViewExampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* Red5ProVideoViewExampleTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Red5ProVideoViewExampleTests.m; sourceTree = "<group>"; };
-		064144544B8240068B1F5786 /* ReactNativePermissions.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = ReactNativePermissions.xcodeproj; path = "../node_modules/react-native-permissions/ReactNativePermissions.xcodeproj"; sourceTree = "<group>"; };
 		139105B61AF99BAD00B5F7CC /* RCTSettings.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTSettings.xcodeproj; path = "../node_modules/react-native/Libraries/Settings/RCTSettings.xcodeproj"; sourceTree = "<group>"; };
 		139FDEE61B06529A00C62182 /* RCTWebSocket.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTWebSocket.xcodeproj; path = "../node_modules/react-native/Libraries/WebSocket/RCTWebSocket.xcodeproj"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* Red5ProVideoViewExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Red5ProVideoViewExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -310,6 +309,7 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Red5ProVideoViewExample/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Red5ProVideoViewExample/main.m; sourceTree = "<group>"; };
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
+		27B45A7934E94BF684633433 /* ReactNativePermissions.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = ReactNativePermissions.xcodeproj; path = "../node_modules/react-native-permissions/ios/ReactNativePermissions.xcodeproj"; sourceTree = "<group>"; };
 		3DDCBA3C025240A8A3E51BB9 /* libReactNativePermissions.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libReactNativePermissions.a; sourceTree = "<group>"; };
 		4885C7061FBCD3EB00E77415 /* R5Streaming.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = R5Streaming.framework; sourceTree = "<group>"; };
 		4885C7471FBCD99200E77415 /* libstdc++.6.0.9.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libstdc++.6.0.9.tbd"; path = "usr/lib/libstdc++.6.0.9.tbd"; sourceTree = SDKROOT; };
@@ -322,10 +322,10 @@
 		4885C7521FBCD9C400E77415 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		4885C7531FBCD9CB00E77415 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		49FCB1AB163541A9AAB78157 /* libR5VideoView.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libR5VideoView.a; sourceTree = "<group>"; };
+		4D56EA92F45F4CC3AFD7AEBD /* R5VideoView.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = R5VideoView.xcodeproj; path = "../node_modules/react-native-red5pro/ios/R5VideoView/R5VideoView.xcodeproj"; sourceTree = "<group>"; };
 		5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAnimation.xcodeproj; path = "../node_modules/react-native/Libraries/NativeAnimation/RCTAnimation.xcodeproj"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
-		99A2D948606344179E43B87F /* R5VideoView.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = R5VideoView.xcodeproj; path = "../node_modules/react-native-red5pro/ios/R5VideoView/R5VideoView.xcodeproj"; sourceTree = "<group>"; };
 		ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -506,18 +506,18 @@
 			path = Frameworks;
 			sourceTree = "<group>";
 		};
-		4885C7831FBCDA8C00E77415 /* Products */ = {
+		48B89E5D20755A6A007B8E0B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4885C7871FBCDA8C00E77415 /* libReactNativePermissions.a */,
+				48B89E8320755A6A007B8E0B /* libReactNativePermissions.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		4885C8191FBDFBDE00E77415 /* Products */ = {
+		48FC267E207D0BDC004DD40C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4885C81D1FBDFBDE00E77415 /* libR5VideoView.a */,
+				48FC2682207D0BDC004DD40C /* libR5VideoView.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -555,8 +555,8 @@
 				832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */,
 				00C302DF1ABCB9EE00DB3ED1 /* RCTVibration.xcodeproj */,
 				139FDEE61B06529A00C62182 /* RCTWebSocket.xcodeproj */,
-				064144544B8240068B1F5786 /* ReactNativePermissions.xcodeproj */,
-				99A2D948606344179E43B87F /* R5VideoView.xcodeproj */,
+				27B45A7934E94BF684633433 /* ReactNativePermissions.xcodeproj */,
+				4D56EA92F45F4CC3AFD7AEBD /* R5VideoView.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -674,8 +674,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 4885C8191FBDFBDE00E77415 /* Products */;
-					ProjectRef = 99A2D948606344179E43B87F /* R5VideoView.xcodeproj */;
+					ProductGroup = 48FC267E207D0BDC004DD40C /* Products */;
+					ProjectRef = 4D56EA92F45F4CC3AFD7AEBD /* R5VideoView.xcodeproj */;
 				},
 				{
 					ProductGroup = 00C302A81ABCB8CE00DB3ED1 /* Products */;
@@ -726,8 +726,8 @@
 					ProjectRef = 146833FF1AC3E56700842450 /* React.xcodeproj */;
 				},
 				{
-					ProductGroup = 4885C7831FBCDA8C00E77415 /* Products */;
-					ProjectRef = 064144544B8240068B1F5786 /* ReactNativePermissions.xcodeproj */;
+					ProductGroup = 48B89E5D20755A6A007B8E0B /* Products */;
+					ProjectRef = 27B45A7934E94BF684633433 /* ReactNativePermissions.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -935,18 +935,18 @@
 			remoteRef = 4885C6D11FBCD34200E77415 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4885C7871FBCDA8C00E77415 /* libReactNativePermissions.a */ = {
+		48B89E8320755A6A007B8E0B /* libReactNativePermissions.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libReactNativePermissions.a;
-			remoteRef = 4885C7861FBCDA8C00E77415 /* PBXContainerItemProxy */;
+			remoteRef = 48B89E8220755A6A007B8E0B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4885C81D1FBDFBDE00E77415 /* libR5VideoView.a */ = {
+		48FC2682207D0BDC004DD40C /* libR5VideoView.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libR5VideoView.a;
-			remoteRef = 4885C81C1FBDFBDE00E77415 /* PBXContainerItemProxy */;
+			remoteRef = 48FC2681207D0BDC004DD40C /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */ = {
@@ -1079,6 +1079,8 @@
 					"$(SRCROOT)/../node_modules/react-native-red5pro/ios/RNR5VideoView/RNR5VideoView",
 					"$(SRCROOT)/../node_modules/react-native-permissions/**",
 					"$(SRCROOT)/../node_modules/react-native-red5pro/ios/R5VideoView/**",
+					"$(SRCROOT)/../node_modules/react-native-permissions/ios/**",
+					"$(SRCROOT)/../node_modules/react-native-red5pro/ios/R5VideoView/**",
 				);
 				INFOPLIST_FILE = Red5ProVideoViewExampleTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -1110,6 +1112,8 @@
 					"$(SRCROOT)/../node_modules/react-native-red5pro/example/node_modules/**",
 					"$(SRCROOT)/../node_modules/react-native-red5pro/ios/RNR5VideoView/RNR5VideoView",
 					"$(SRCROOT)/../node_modules/react-native-permissions/**",
+					"$(SRCROOT)/../node_modules/react-native-red5pro/ios/R5VideoView/**",
+					"$(SRCROOT)/../node_modules/react-native-permissions/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-red5pro/ios/R5VideoView/**",
 				);
 				INFOPLIST_FILE = Red5ProVideoViewExampleTests/Info.plist;
@@ -1148,6 +1152,8 @@
 					"$(SRCROOT)/../node_modules/react-native-red5pro/ios/RNR5VideoView/RNR5VideoView",
 					"$(SRCROOT)/../node_modules/react-native-permissions/**",
 					"$(SRCROOT)/../node_modules/react-native-red5pro/ios/R5VideoView/**",
+					"$(SRCROOT)/../node_modules/react-native-permissions/ios/**",
+					"$(SRCROOT)/../node_modules/react-native-red5pro/ios/R5VideoView/**",
 				);
 				INFOPLIST_FILE = Red5ProVideoViewExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -1177,6 +1183,8 @@
 					"$(SRCROOT)/../node_modules/react-native/React",
 					"$(SRCROOT)/../node_modules/react-native-red5pro/ios/RNR5VideoView/RNR5VideoView",
 					"$(SRCROOT)/../node_modules/react-native-permissions/**",
+					"$(SRCROOT)/../node_modules/react-native-red5pro/ios/R5VideoView/**",
+					"$(SRCROOT)/../node_modules/react-native-permissions/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-red5pro/ios/R5VideoView/**",
 				);
 				INFOPLIST_FILE = Red5ProVideoViewExample/Info.plist;

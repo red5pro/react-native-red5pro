@@ -29,3 +29,6 @@ export const updateScaleMode = (handle, mode) => {
   UIManager.dispatchViewManagerCommand(handle, Commands.updateScaleMode, [mode])
 }
 
+export const updateScaleSize = (handle, width, height, screenWidth, screenHeight) => {
+  UIManager.dispatchViewManagerCommand(handle, Commands.updateScaleSize, [width, height, screenWidth, screenHeight])
+}

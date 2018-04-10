@@ -79,9 +79,9 @@ export default class App extends React.Component {
         style: styles.videoView,
         collapsable: false,
         configuration: {
-          host: undefined,
-          licenseKey: undefined,
-          streamName: undefined,
+          host: "",
+          licenseKey: "",
+          streamName: "",
           port: 8554,
           contextName: 'live',
           bufferTime: 0.5,
@@ -123,11 +123,14 @@ export default class App extends React.Component {
   }
 
   render () {
+    const assignVideoRef = (video) => { this.red5pro_video = video }
     if (this.state.hasPermissions && this.state.hasStarted) {
       if (this.state.isPublisher) {
         return (
           <View style={styles.container}>
-            <R5VideoView {...this.state.videoProps} />
+            <R5VideoView {...this.state.videoProps}
+              ref={assignVideoRef.bind(this)}
+            />
             <Text {...this.state.toastProps}>{this.state.toastProps.value}</Text>
             <Button
               {...this.state.buttonProps}
@@ -147,7 +150,9 @@ export default class App extends React.Component {
       else {
         return (
           <View style={styles.container}>
-            <R5VideoView {...this.state.videoProps} />
+            <R5VideoView {...this.state.videoProps}
+              ref={assignVideoRef.bind(this)}
+            />
             <Text {...this.state.toastProps}>{this.state.toastProps.value}</Text>
             <Button
               {...this.state.buttonProps}
@@ -172,18 +177,21 @@ export default class App extends React.Component {
             <TextInput ref="host"
               {...this.state.hostFieldProps}
               onChangeText={this.onHostChange}
+              value=""
             />
           </View>
           <View style={styles.formField}>
             <TextInput ref="license"
               {...this.state.licenseFieldProps}
               onChangeText={this.onLicenseChange}
+              value=""
             />
           </View>
           <View style={styles.formField}>
             <TextInput ref="streamName"
               {...this.state.streamNameFieldProps}
               onChangeText={this.onStreamNameChange}
+              value=""
             />
           </View>
           {!this.state.hasPermissions
@@ -262,17 +270,17 @@ export default class App extends React.Component {
   onStop (event) {
     console.log('onStop()')
     if (this.state.isPublisher) {
-      unpublish(findNodeHandle(this.refs.video))
+      unpublish(findNodeHandle(this.red5pro_video))
     }
     else {
-      unsubscribe(findNodeHandle(this.refs.video))
+      unsubscribe(findNodeHandle(this.red5pro_video))
     }
   }
 
   onSwapCamera (event) {
     console.log('onSwapCamera()')
     if (this.state.isPublisher) {
-      swapCamera(findNodeHandle(this.refs.video))
+      swapCamera(findNodeHandle(this.red5pro_video))
     }
   }
 
@@ -283,7 +291,7 @@ export default class App extends React.Component {
       scale = 0
     }
     this.scaleMode = scale
-    updateScaleMode(findNodeHandle(this.refs.video), scale)
+    updateScaleMode(findNodeHandle(this.red5pro_video), scale)
   }
 
   onHostChange (text) {
@@ -319,14 +327,14 @@ export default class App extends React.Component {
 
   onConfigured (event) {
     console.log(`onConfigured :: ${event.nativeEvent.key}`)
-    this.refs.video.setState({
+    this.red5pro_video.setState({
       configured: true
     })
     if (this.state.isPublisher) {
-      publish(findNodeHandle(this.refs.video), this.state.videoProps.configuration.streamName)
+      publish(findNodeHandle(this.red5pro_video), this.state.videoProps.configuration.streamName)
     }
     else {
-      subscribe(findNodeHandle(this.refs.video), this.state.videoProps.configuration.streamName)
+      subscribe(findNodeHandle(this.red5pro_video), this.state.videoProps.configuration.streamName)
     }
   }
 
