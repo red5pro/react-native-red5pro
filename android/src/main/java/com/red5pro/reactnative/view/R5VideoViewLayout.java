@@ -103,8 +103,7 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         UNPUBLISH("unpublish", 4),
         SWAP_CAMERA("swapCamera", 5),
         UPDATE_SCALE_MODE("updateScaleMode", 6),
-        PREVIEW("preview", 7),
-        UPDATE_SCALE_SIZE("updateScaleSize", 8);
+        UPDATE_SCALE_SIZE("updateScaleSize", 7);
 
         private final String mName;
         private final int mValue;

@@ -39,8 +39,7 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     private static final int COMMAND_UNPUBLISH = 4;
     private static final int COMMAND_SWAP_CAMERA = 5;
     private static final int COMMAND_UPDATE_SCALE_MODE = 6;
-    private static final int COMMAND_PREVIEW = 7;
-    private static final int COMMAND_UPDATE_SCALE_SIZE = 8;
+    private static final int COMMAND_UPDATE_SCALE_SIZE = 7;
 
     private R5VideoViewLayout mView;
     private ThemedReactContext mContext;
@@ -76,9 +75,6 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
                 int screenWidth = args.getInt(2);
                 int screenHeight = args.getInt(3);
                 root.updateScaleSize(updateWidth, updateHeight, screenWidth, screenHeight);
-                break;
-            case COMMAND_PREVIEW:
-                root.setupPublisher(true);
                 break;
             case COMMAND_SUBSCRIBE:
 
