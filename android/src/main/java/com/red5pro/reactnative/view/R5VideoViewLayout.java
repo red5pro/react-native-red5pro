@@ -2,12 +2,14 @@ package com.red5pro.reactnative.view;
 
 import android.app.Activity;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.hardware.Camera;
 import android.util.Log;
 import android.view.Surface;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.util.DisplayMetrics;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -27,14 +29,7 @@ import com.red5pro.streaming.source.R5Camera;
 import com.red5pro.streaming.source.R5Microphone;
 import com.red5pro.streaming.view.R5VideoView;
 
-import java.util.HashMap;
-import java.util.Map;
-
-/**
- * Created by kylekellogg on 9/11/17.
- */
-
-public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListener, LifecycleEventListener {
+public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListener, LifecycleEventListener {
 
     public int logLevel;
     public int scaleMode;
@@ -44,6 +39,7 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
     protected boolean mIsPublisher;
     protected boolean mIsStreaming;
     protected R5VideoView mVideoView;
+    protected boolean mIsPublisherSetup;
 
     protected ThemedReactContext mContext;
     protected RCTEventEmitter mEventEmitter;
@@ -53,6 +49,7 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
 
     protected boolean mUseVideo = true;
     protected boolean mUseAudio = true;
+    protected boolean mPlaybackVideo = true;
     protected int mCameraWidth = 640;
     protected int mCameraHeight = 360;
     protected int mBitrate = 750;
@@ -62,6 +59,13 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
     protected int mAudioSampleRate = 44100;
     protected boolean mUseAdaptiveBitrateController = false;
     protected boolean mUseBackfacingCamera = false;
+
+
+    protected int mClientWidth;
+    protected int mClientHeight;
+    protected int mClientScreenWidth;
+    protected int mClientScreenHeight;
+    protected boolean mRequiresScaleSizeUpdate = false;
 
     protected int mCameraOrientation;
     protected int mDisplayOrientation;
@@ -98,7 +102,8 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
         UNSUBSCRIBE("unsubscribe", 3),
         UNPUBLISH("unpublish", 4),
         SWAP_CAMERA("swapCamera", 5),
-        UPDATE_SCALE_MODE("updateScaleMode", 6);
+        UPDATE_SCALE_MODE("updateScaleMode", 6),
+        UPDATE_SCALE_SIZE("updateScaleSize", 7);
 
         private final String mName;
         private final int mValue;
@@ -127,11 +132,25 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
         mEventEmitter = mContext.getJSModule(RCTEventEmitter.class);
         setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mContext.addLifecycleEventListener(this);
-        mVideoView = this;
 
     }
 
-    public void loadConfiguration(R5Configuration configuration, String forKey) {
+    protected void createVideoView () {
+
+        mVideoView = new R5VideoView(mContext);
+        mVideoView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mVideoView.setBackgroundColor(Color.BLACK);
+        addView(mVideoView);
+
+    }
+
+    public void loadConfiguration(final R5Configuration configuration, final String forKey) {
+
+        initiate(configuration, forKey);
+
+    }
+
+    public void initiate(R5Configuration configuration, String forKey) {
 
         R5AudioController.mode = mAudioMode == 1
                 ? R5AudioController.PlaybackMode.STANDARD
@@ -154,28 +173,35 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
 
         mStreamName = streamName;
 
-        mVideoView.attachStream(mStream);
-        mVideoView.showDebugView(showDebug);
+        if (mPlaybackVideo && this.getVideoView() == null) {
+            createVideoView();
+            mVideoView.attachStream(mStream);
+            mVideoView.showDebugView(showDebug);
+        }
         mStream.play(streamName);
 
     }
 
     public void unsubscribe () {
 
+        if (mVideoView != null) {
+            mVideoView.attachStream(null);
+        }
+
         if (mStream != null && mIsStreaming) {
             mStream.stop();
         }
         else {
             WritableMap map = Arguments.createMap();
-            mEventEmitter.receiveEvent(this.getId(), Events.UNPUBLISH_NOTIFICATION.toString(), map);
+            mEventEmitter.receiveEvent(this.getId(), Events.UNSUBSCRIBE_NOTIFICATION.toString(), map);
+            Log.d("R5VideoViewLayout", "UNSUBSCRIBE");
             cleanup();
         }
 
     }
 
-    public void publish (String streamName, R5Stream.RecordType streamType) {
+    public void setupPublisher (Boolean withPreview) {
 
-        mStreamName = streamName;
         mIsPublisher = true;
         if (mLayoutListener == null) {
             mLayoutListener = setUpOrientationListener();
@@ -185,6 +211,13 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
         // Establish Camera if requested.
         if (mUseVideo) {
 
+            if (this.getVideoView() == null) {
+                createVideoView();
+                if (mRequiresScaleSizeUpdate) {
+                    this.updateScaleSize(mClientWidth, mClientHeight, mClientScreenWidth, mClientScreenHeight);
+                }
+            }
+
             Camera device = mUseBackfacingCamera
                     ? openBackFacingCameraGingerbread()
                     : openFrontFacingCameraGingerbread();
@@ -193,17 +226,15 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
             int rotate = mUseBackfacingCamera ? 0 : 180;
             device.setDisplayOrientation((mCameraOrientation + rotate) % 360);
 
-            SurfaceView v = new SurfaceView(mContext);
-            v.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            mStream.setView(v);
-            addView(v);
-
             camera = new R5Camera(device, mCameraWidth, mCameraHeight);
             camera.setBitrate(mBitrate);
             camera.setOrientation(mCameraOrientation);
             camera.setFramerate(mFramerate);
 
             mCamera = camera;
+            Camera.Parameters params = mCamera.getCamera().getParameters();
+            params.setRecordingHint(true);
+            mCamera.getCamera().setParameters(params);
 
         }
 
@@ -225,16 +256,45 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
 
         }
 
-        mVideoView.attachStream(mStream);
-
+        if (mVideoView != null && mUseVideo) {
+            mVideoView.attachStream(mStream);
+        }
         if (mCamera != null && mUseVideo) {
-            mStream.attachCamera(camera);
+            mStream.attachCamera(mCamera);
+            if (mCamera.getCamera() != null && withPreview) {
+              mCamera.getCamera().startPreview();
+            }
         }
 
-        mVideoView.showDebugView(showDebug);
+        mIsPublisherSetup = true;
+    }
+
+    public void publish (String streamName, R5Stream.RecordType streamType) {
+
+        Log.d("R5VideoViewLayout", "publish");
+        Boolean hasPreview = mIsPublisherSetup;
+        if (!mIsPublisherSetup) {
+            setupPublisher(false);
+        }
+        mStreamName = streamName;
+        mIsPublisher = true;
+
+        if (this.getVideoView() != null) {
+            mVideoView.showDebugView(showDebug);
+        }
+
+        Boolean shouldPublishVideo = (mCamera != null && mCamera.getCamera() != null && mUseVideo);
+
+        if (shouldPublishVideo && hasPreview) {
+            mCamera.getCamera().stopPreview();
+        }
+
         mStream.publish(streamName, streamType);
 
-        if (mCamera != null && mUseVideo) {
+        if (shouldPublishVideo) {
+            if (mRequiresScaleSizeUpdate) {
+                this.updateScaleSize(mClientWidth, mClientHeight, mClientScreenWidth, mClientScreenHeight);
+            }
             mCamera.getCamera().startPreview();
         }
 
@@ -242,17 +302,24 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
 
     public void unpublish () {
 
+        if (mVideoView != null) {
+            mVideoView.attachStream(null);
+        }
+
+        if (mCamera != null) {
+            Camera c = mCamera.getCamera();
+            c.stopPreview();
+            c.release();
+            mCamera = null;
+        }
+
         if (mStream != null && mIsStreaming) {
-            if(mStream.getVideoSource() != null) {
-                Camera c = mCamera.getCamera();
-                c.stopPreview();
-                c.release();
-            }
             mStream.stop();
         }
         else {
             WritableMap map = Arguments.createMap();
             mEventEmitter.receiveEvent(this.getId(), Events.UNPUBLISH_NOTIFICATION.toString(), map);
+            Log.d("R5VideoViewLayout", "UNPUBLISH");
             cleanup();
         }
 
@@ -282,7 +349,6 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
         }
 
         if(updatedCamera != null) {
-
             updatedCamera.setDisplayOrientation((mCameraOrientation + rotate) % 360);
             mCamera.setCamera(updatedCamera);
             mCamera.setOrientation(mCameraOrientation);
@@ -294,9 +360,49 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
 
     }
 
+    public void updateScaleSize(final int width, final int height, final int screenWidth, final int screenHeight) {
+
+        mClientWidth = width;
+        mClientHeight = height;
+        mClientScreenWidth = screenWidth;
+        mClientScreenHeight = screenHeight;
+        mRequiresScaleSizeUpdate = true;
+
+        if (this.getVideoView() != null) {
+
+            Log.d("R5VideoViewLayout", "rescaling...");
+
+            final float xscale = (float)width / (float)screenWidth;
+            final float yscale = (float)height / (float)screenHeight;
+
+            final FrameLayout layout = mVideoView;
+            final DisplayMetrics displayMetrics = new DisplayMetrics();
+            mContext.getCurrentActivity().getWindowManager()
+                    .getDefaultDisplay()
+                    .getMetrics(displayMetrics);
+
+            final int dwidth = displayMetrics.widthPixels;
+            final int dheight = displayMetrics.heightPixels;
+
+            layout.post(new Runnable() {
+                @Override
+                public void run() {
+                    ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) layout.getLayoutParams();
+                    params.width = Math.round((displayMetrics.widthPixels * 1.0f) * xscale);
+                    params.height = Math.round((displayMetrics.heightPixels * 1.0f) * yscale);
+                    layout.setLayoutParams(params);
+                }
+            });
+
+        }
+
+    }
+
     protected void cleanup() {
 
+        Log.d("R5VideoViewLayout", ":cleanup (" + mStreamName + ")!");
         if (mStream != null) {
+            mStream.client = null;
             mStream.setListener(null);
             mStream = null;
         }
@@ -304,6 +410,11 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
         if (mConnection != null) {
             mConnection.removeListener();
             mConnection = null;
+        }
+        if (mVideoView != null) {
+            mVideoView.attachStream(null);
+//            removeView(mVideoView);
+            mVideoView = null;
         }
         mIsStreaming = false;
 
@@ -440,6 +551,8 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
     }
 
     protected void onConfigured(String key) {
+
+        System.out.println("[R5VideoViewLayout]:: onConfigured()");
         WritableMap map = new WritableNativeMap();
         map.putString("key", key);
         mEventEmitter.receiveEvent(this.getId(), "onConfigured", map);
@@ -448,7 +561,9 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
     protected void updateOrientation(int value) {
         // subscriber only.
         value += 90;
-        this.getVideoView().setStreamRotation(value);
+        if (this.getVideoView() != null) {
+            this.getVideoView().setStreamRotation(value);
+        }
     }
 
     public void onMetaData(String metadata) {
@@ -495,6 +610,7 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
             else {
                 mEventEmitter.receiveEvent(this.getId(), Events.UNSUBSCRIBE_NOTIFICATION.toString(), evt);
             }
+            Log.d("R5VideoViewLayout", "DISCONNECT");
             cleanup();
             mIsStreaming = false;
         }
@@ -554,6 +670,10 @@ public class R5VideoViewLayout extends R5VideoView implements R5ConnectionListen
 
     public void updatePublishAudio(boolean useAudio) {
         this.mUseAudio = useAudio;
+    }
+
+    public void updateSubscribeVideo(boolean playbackVideo) {
+        this.mPlaybackVideo = playbackVideo;
     }
 
     public void updateCameraWidth(int value) {

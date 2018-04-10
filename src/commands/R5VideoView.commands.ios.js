@@ -8,4 +8,5 @@ export const publish = (handle, streamName, streamType = R5PublishType.LIVE) => 
 export const unpublish = (handle) => R5VideoViewManager.unpublish()
 export const swapCamera = (handle) => R5VideoViewManager.swapCamera()
 export const updateScaleMode = (handle, scale) => R5VideoViewManager.updateScaleMode(scale)
+export const updateScaleSize = (handle, width, height, screenWidth, screenHeight) => R5VideoViewManager.updateScaleSize(width, height, screenWidth, screenHeight)
 
