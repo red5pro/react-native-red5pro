@@ -177,21 +177,18 @@ export default class App extends React.Component {
             <TextInput ref="host"
               {...this.state.hostFieldProps}
               onChangeText={this.onHostChange}
-              value=""
             />
           </View>
           <View style={styles.formField}>
             <TextInput ref="license"
               {...this.state.licenseFieldProps}
               onChangeText={this.onLicenseChange}
-              value=""
             />
           </View>
           <View style={styles.formField}>
             <TextInput ref="streamName"
               {...this.state.streamNameFieldProps}
               onChangeText={this.onStreamNameChange}
-              value=""
             />
           </View>
           {!this.state.hasPermissions
