@@ -111,7 +111,9 @@
         if (_playbackVideo) {
             
             R5VideoViewController *ctrl = [[R5VideoViewController alloc] init];
-            [ctrl setView:self];
+            UIView *view = [[UIView alloc] initWithFrame:self.frame];
+            [ctrl setView:view];
+            [self addSubview:view];
             
             self.controller = ctrl;
             
@@ -185,8 +187,9 @@
             R5Camera *camera = [self setUpCamera];
             
             self.controller = [[R5VideoViewController alloc] init];
-            [self.controller setView:self];
-            [self.controller setFrame:self.frame];
+            UIView *view = [[UIView alloc] initWithFrame:self.frame];
+            [self.controller setView:view];
+            [self addSubview:view];
             
             [self.controller showPreview:YES];
             [self.controller showDebugInfo:_showDebugInfo];
