@@ -141,7 +141,7 @@
       [self.stream stop];
     }
     else {
-      self.onUnpublishNotification(@{});
+      self.onUnsubscribeNotification(@{});
       [self tearDown];
     }
   });
@@ -199,6 +199,7 @@
         }
   
         [self.stream publish:streamName type:publishMode];
+        [self onDeviceOrientation:NULL];
         [self.stream updateStreamMeta];
         
     });

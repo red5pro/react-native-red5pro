@@ -289,6 +289,7 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
             mCamera.getCamera().stopPreview();
         }
 
+        reorient();
         mStream.publish(streamName, streamType);
 
         if (shouldPublishVideo) {
@@ -480,7 +481,7 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
         mCameraOrientation += degrees;
         mCameraOrientation = mCameraOrientation % 360;
-        mOrigCamOrientation = mCameraOrientation;
+        mOrigCamOrientation = 270;
 
     }
 
@@ -498,7 +499,7 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
         mCameraOrientation += degrees;
         mCameraOrientation = mCameraOrientation % 360;
-        mOrigCamOrientation = mCameraOrientation;
+        mOrigCamOrientation = 90;
 
     }
 
@@ -552,7 +553,7 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
     protected void onConfigured(String key) {
 
-        System.out.println("[R5VideoViewLayout]:: onConfigured()");
+        Log.d("R5VideoViewLayout", "onConfigured()");
         WritableMap map = new WritableNativeMap();
         map.putString("key", key);
         mEventEmitter.receiveEvent(this.getId(), "onConfigured", map);
