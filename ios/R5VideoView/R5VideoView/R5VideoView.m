@@ -141,7 +141,7 @@
       [self.stream stop];
     }
     else {
-      self.onUnpublishNotification(@{});
+      self.onUnsubscribeNotification(@{});
       [self tearDown];
     }
   });
