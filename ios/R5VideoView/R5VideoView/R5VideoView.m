@@ -199,6 +199,7 @@
         }
   
         [self.stream publish:streamName type:publishMode];
+        [self onDeviceOrientation:NULL];
         [self.stream updateStreamMeta];
         
     });
