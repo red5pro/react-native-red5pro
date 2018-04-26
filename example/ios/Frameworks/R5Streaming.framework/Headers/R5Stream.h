@@ -102,6 +102,11 @@ enum R5StreamMode{
 -(void) stop;
 
 /**
+ * Request to empty any queued packets for broadcast.
+ */
+-(void) emptyPublishQueue;
+
+/**
  *  Get the video preview layer for publising
  *
  *  @return the video preview layer if it exists
@@ -175,10 +180,17 @@ enum R5StreamMode{
 -(void)updateStreamMeta;
 
 -(void)setFrameListener:(void (^)(uint8_t *, int, int))listenerBlock;
+-(void)setPlaybackAudioHandler:(void (^)(uint8_t *, int, double))handlerBlock;
 
 -(void)recordWithName:(NSString*)fileName;
 
 -(void)endLocalRecord;
+
+/**
+ *  Pauses processing of video frames
+ */
+-(void)deactivate_display;
+-(void)activate_display;
 
 
 @end
@@ -217,6 +229,7 @@ enum R5StreamMode{
  *  LICENSE_VALID   |   null
  *  BUFFER_FLUSH_START  |   null
  *  BUFFER_FLUSH_EMPTY  |   null
+ *  VIDEO_RENDER_START  |   null
  *
  */
 -(void)onR5StreamStatus:(R5Stream *)stream withStatus:(int) statusCode withMessage:(NSString*)msg;
