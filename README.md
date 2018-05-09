@@ -30,7 +30,7 @@ React Native Red5 Pro Publisher & Subscriber.
 Install the `react-native-red5pro` component:
 
 ```sh
-$ npm i --save https://github.com/infrared5/react-native-red5pro/tarball/develop
+$ npm i --save https://github.com/infrared5/react-native-red5pro/tarball/master
 ```
 
 If you intend to use the live broadcasting capabilities of the [Red5 Pro SDK](https://www.red5pro.com/docs/streaming/), install the `react-native-permissions` module that will present to the user the permissions dialogs for Camera and Microphone:
@@ -43,11 +43,13 @@ $ npm i --save react-native-permissions
 
 Finally, run the following to link the libraries into your projects:
 
+## iOS
+
+### using react-native link
+
 ```sh
 $ react-native link
 ```
-
-## iOS
 
 After running `react-native link`, the `react-native-red5pro` library - and optionally the `react-native-permissions` library - will be added to the *Libraries* of your iOS project:
 
@@ -67,7 +69,28 @@ _Follow similar instructions for `react-native-permissions`, if needed._
 
 > > Review the [iOS Example](example/ios) included in this repository.
 
+### using cocoaPods
+
+Add the following to your Podfile:
+
+```sh
+pod 'ReactNativePermissions', :path => '../node_modules/react-native-permissions'
+pod 'R5VideoView', :path => '../node_modules/react-native-red5pro'
+```
+
+Then issue a pod install as you would with any other project:
+
+```sh
+$ pod install
+```
+
 ## Android
+
+### using react-native link
+
+```sh
+$ react-native link
+```
 
 After running `react-native link`, the `react-native-red5pro` library will be added your Android project:
 
@@ -125,6 +148,8 @@ To integrate the *Red5 Pro iOS SDK*:
 
 The `R5Streaming.framework` should now be located within the `Frameworks` Group of your project. Select it and make note of its location (*Full Path*) in the Identities Panel of your Xcode project.
 
+#### from react-native link installation
+
 The `react-native-red5pro` library is not shipped with the *Red5 Pro SDK*. As such, we need to point the `react-native-red5pro` library point to the `R5Streaming.framework` dependency:
 
 1. Locate the `R5VideoView.xcodeproj` under the `Libraries` Group of the Project Panel of Xcode.
@@ -133,6 +158,13 @@ The `react-native-red5pro` library is not shipped with the *Red5 Pro SDK*. As su
 4. Click on the Value field and add the path to the `R5Streaming.framework` file (either relative or full path).
 
 ![iOS Framework Path](assets/ios_framework_path.png)
+
+#### from cocoaPods installation
+
+1. Locate the `Pods` project in your generated `xcworkspace` and select to open the project settings in Xcode.
+2. Click on `Build Settings`
+3. Search for "**frameworks**" (sans quotes), and navigate to the `Framework Search Paths`.
+4. Click on the Value field and add the path to the `R5Streaming.framework` file (either relative or full path).
 
 ### Required Dependencies
 
