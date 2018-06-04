@@ -4,7 +4,7 @@ const { R5VideoViewManager } = NativeModules
 const { UIManager } = NativeModules
 
 export const subscribe = (handle, streamName) => {
-  UIManager.dispatchViewManagerCommand(handle, UIManager.R5VideoView.Commands.subscribe, [sttreamName])
+  UIManager.dispatchViewManagerCommand(handle, UIManager.R5VideoView.Commands.subscribe, [streamName])
 }
 
 export const unsubscribe = (handle) => {
