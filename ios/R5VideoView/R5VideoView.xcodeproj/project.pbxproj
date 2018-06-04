@@ -31,6 +31,7 @@
 		4885C7AF1FBDFA7400E77415 /* R5VideoView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = R5VideoView.m; sourceTree = "<group>"; };
 		4885C7B71FBDFABD00E77415 /* R5VideoViewManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = R5VideoViewManager.m; sourceTree = "<group>"; };
 		4885C7B81FBDFABD00E77415 /* R5VideoViewManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = R5VideoViewManager.h; sourceTree = "<group>"; };
+		48B79AC920C5B77900AAE4E2 /* libReact.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libReact.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -49,6 +50,7 @@
 			children = (
 				4885C7AD1FBDFA7400E77415 /* R5VideoView */,
 				4885C7AC1FBDFA7400E77415 /* Products */,
+				48B79AC820C5B77900AAE4E2 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -69,6 +71,14 @@
 				4885C7AF1FBDFA7400E77415 /* R5VideoView.m */,
 			);
 			path = R5VideoView;
+			sourceTree = "<group>";
+		};
+		48B79AC820C5B77900AAE4E2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				48B79AC920C5B77900AAE4E2 /* libReact.a */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
