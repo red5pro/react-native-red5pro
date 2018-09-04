@@ -180,6 +180,8 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
         float streamBufferTime = hasStreamBufferTime ? (float) configuration.getDouble(PROP_STREAM_BUFFER_TIME) : 2.0f;
         String parameters = hasParameters ? configuration.getString(PROP_PARAMETERS) : "";
 
+        Log.d("R5VideoViewManager", "Parameters: " + parameters);
+
         R5Configuration config = new R5Configuration(protocol, host, port, contextName, bufferTime, parameters);
 
         config.setStreamBufferTime(streamBufferTime);
