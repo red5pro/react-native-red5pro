@@ -114,7 +114,8 @@ R5VideoView.propTypes = {
     audioBitrate: PropTypes.number,                 // publisher only, kb/s
     audioSampleRate: PropTypes.number,              // publisher only, hz, default iOS is 16000, default Android is 44100
     subscribeVideo: PropTypes.bool,                 // subscriber only
-    audioMode: PropTypes.number, // mainly subscribers, especially with 2 subscribers.
+    audioMode: PropTypes.number,                    // mainly subscribers, especially with 2 subscribers
+    enableBackgroundStreaming: PropTypes.bool,      // publisher and subscriber
     configuration: PropTypes.shape({
       host: PropTypes.string.isRequired,
       port: PropTypes.number.isRequired,
@@ -150,7 +151,8 @@ R5VideoView.defaultProps = {
     audioBitrate: 32, // for HQ Audio: set to 128 + audioSampleRate: 44100
     useAdaptiveBitrateController: false,
     useBackfacingCamera: false,
-    audioMode: R5AudioMode.STANDARD
+    audioMode: R5AudioMode.STANDARD,
+    enableBackgroundStreaming: false
 }
 
 let R5Video = requireNativeComponent('R5VideoView', R5VideoView)

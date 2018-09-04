@@ -283,6 +283,11 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
         view.updatePublisherUseBackfacingCamera(value);
     }
 
+    @ReactProp(name = "enableBackgroundStreaming", defaultBoolean = false)
+    public void setEnableBackgroundStreaming(R5VideoViewLayout view, boolean value) {
+        view.updatePubSubBackgroundStreaming(value);
+    }
+
     @Nullable
     @Override
     public Map<String, Object> getConstants() {

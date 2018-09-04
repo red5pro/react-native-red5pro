@@ -41,5 +41,9 @@
     "url": "https://github.com/infrared5/react-native-red5pro/issues"
   },
   "homepage": "https://github.com/infrared5/react-native-red5pro#readme",
-  "devDependencies": {}
+  "devDependencies": {
+    "babel-eslint": "^9.0.0",
+    "eslint": "^5.5.0"
+  },
+  "dependencies": {}
 }
