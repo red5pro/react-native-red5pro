@@ -44,6 +44,22 @@ const styles = StyleSheet.create({
     padding: 10,
     textAlign: 'center',
     backgroundColor: 'rgba(0, 0, 0, 1.0)'
+  },
+  muteIcon: {
+    position: 'absolute',
+    top: 10,
+    padding: 6,
+    borderRadius: 40,
+    backgroundColor: 'white'
+  },
+  muteIconRightmost: {
+    right: 10
+  },
+  muteIconRight: {
+    right: 70
+  },
+  muteIconToggled: {
+    backgroundColor: '#2089dc'
   }
 })
 
@@ -116,6 +132,11 @@ export default class Publisher extends React.Component {
 
     const setup = Object.assign({}, streamProps, videoProps)
 
+    const audioIconColor = audioMuted ? '#fff' : '#000'
+    const videoIconColor = videoMuted ? '#fff' : '#000'
+    const audioIconStyle = audioMuted ? [styles.muteIcon, styles.muteIconRight, styles.muteIconToggled] : [styles.muteIcon, styles.muteIconRight]
+    const videoIconStyle = videoMuted ? [styles.muteIcon, styles.muteIconRightmost, styles.muteIconToggled] : [styles.muteIcon, styles.muteIconRightmost]
+
     const assignVideoRef = (video) => { this.red5pro_video_publisher = video }
     const assignToastRef = (toast) => { this.toast_field = toast }
     return (
@@ -127,16 +148,20 @@ export default class Publisher extends React.Component {
         <Icon
           name={audioMuted ? 'mic-off' : 'mic'}
           type='feathericon'
-          size={42}
+          size={36}
+          color={audioIconColor}
           hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
           onPress={this.onToggleAudioMute}
+          containerStyle={audioIconStyle}
         />
         <Icon
           name={videoMuted ? 'videocam-off' : 'videocam'}
           type='feathericon'
-          size={42}
+          size={36}
+          color={videoIconColor}
           hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
           onPress={this.onToggleVideoMute}
+          containerStyle={videoIconStyle}
         />
         <Text
           ref={assignToastRef.bind(this)}
