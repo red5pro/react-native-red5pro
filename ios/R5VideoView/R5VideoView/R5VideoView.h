@@ -40,6 +40,10 @@
 - (void)swapCamera;
 - (void)updateScaleMode:(int)mode;
 - (void)updateScaleSize:(int)width withHeight:(int)height withScreenWidth:(int)screenWidth withScreenHeight:(int)screenHeight;
+- (void)muteAudio;
+- (void)unmuteAudio;
+- (void)muteVideo;
+- (void)unmuteVideo;
 
 # pragma RN Properties
 - (BOOL)getShowDebugInfo;

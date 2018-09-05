@@ -129,7 +129,11 @@ public class R5VideoViewLayout extends FrameLayout
         UNPUBLISH("unpublish", 4),
         SWAP_CAMERA("swapCamera", 5),
         UPDATE_SCALE_MODE("updateScaleMode", 6),
-        UPDATE_SCALE_SIZE("updateScaleSize", 7);
+        UPDATE_SCALE_SIZE("updateScaleSize", 7),
+        MUTE_AUDIO("muteAudio", 8),
+        UNMUTE_AUDIO("unmuteAudio", 9),
+        MUTE_VIDEO("muteVideo", 10),
+        UNMUTE_VIDEO("unmuteVideo", 11);
 
         private final String mName;
         private final int mValue;
@@ -473,6 +477,28 @@ public class R5VideoViewLayout extends FrameLayout
 
         }
 
+    }
+
+    public void muteAudio () {
+        if (mIsPublisher) {
+            mStream.restrainAudio(true);
+        }
+    }
+    public void unmuteAudio () {
+        if (mIsPublisher) {
+            mStream.restrainAudio(false);
+        }
+    }
+
+    public void muteVideo () {
+        if (mIsPublisher) {
+            mStream.restrainVideo(true);
+        }
+    }
+    public void unmuteVideo () {
+        if (mIsPublisher) {
+            mStream.restrainVideo(false);
+        }
     }
 
     protected void cleanup() {

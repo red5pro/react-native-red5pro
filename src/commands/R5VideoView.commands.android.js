@@ -32,3 +32,19 @@ export const updateScaleMode = (handle, mode) => {
 export const updateScaleSize = (handle, width, height, screenWidth, screenHeight) => {
   UIManager.dispatchViewManagerCommand(handle, Commands.updateScaleSize, [width, height, screenWidth, screenHeight])
 }
+
+export const muteAudio = (handle) => {
+  UIManager.dispatchViewManagerCommand(handle, Commands.muteAudio, [])
+}
+
+export const unmuteAudio = (handle) => {
+  UIManager.dispatchViewManagerCommand(handle, Commands.unmuteAudio, [])
+}
+
+export const muteVideo = (handle) => {
+  UIManager.dispatchViewManagerCommand(handle, Commands.muteVideo, [])
+}
+
+export const unmuteVideo = (handle) => {
+  UIManager.dispatchViewManagerCommand(handle, Commands.unmuteVideo, [])
+}

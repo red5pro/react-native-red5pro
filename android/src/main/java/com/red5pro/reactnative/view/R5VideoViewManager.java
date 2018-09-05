@@ -40,6 +40,10 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     private static final int COMMAND_SWAP_CAMERA = 5;
     private static final int COMMAND_UPDATE_SCALE_MODE = 6;
     private static final int COMMAND_UPDATE_SCALE_SIZE = 7;
+    private static final int COMMAND_MUTE_AUDIO = 8;
+    private static final int COMMAND_UNMUTE_AUDIO = 9;
+    private static final int COMMAND_MUTE_VIDEO = 10;
+    private static final int COMMAND_UNMUTE_VIDEO = 11;
 
     private R5VideoViewLayout mView;
     private ThemedReactContext mContext;
@@ -124,6 +128,18 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
                 final int mode = args.getInt(0);
                 root.updateScaleMode(mode);
 
+                break;
+            case COMMAND_MUTE_AUDIO:
+                root.muteAudio();
+                break;
+            case COMMAND_UNMUTE_AUDIO:
+                root.unmuteAudio();
+                break;
+            case COMMAND_MUTE_VIDEO:
+                root.muteVideo();
+                break;
+            case COMMAND_UNMUTE_VIDEO:
+                root.unmuteVideo();
                 break;
             default:
                 super.receiveCommand(root, commandId, args);

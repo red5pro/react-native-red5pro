@@ -11,11 +11,14 @@ import { subscribe,
   unpublish,
   swapCamera,
   updateScaleMode,
-  updateScaleSize } from './src/commands/R5VideoView.commands'
+  updateScaleSize,
+  muteAudio, unmuteAudio,
+  muteVideo, unmuteVideo } from './src/commands/R5VideoView.commands'
 
 module.exports = {
   R5VideoView,
   subscribe, unsubscribe, preview, publish, unpublish, swapCamera, updateScaleMode, updateScaleSize,
+  muteAudio, unmuteAudio, muteVideo, unmuteVideo,
   R5AudioMode, R5LogLevel, R5PublishType, R5ScaleMode
 }
 

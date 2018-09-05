@@ -254,6 +254,35 @@
     
 }
 
+- (void)muteAudio {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_isPublisher && _isStreaming) {
+            [self.stream setPauseAudio:YES];
+        }
+    });
+}
+- (void)unmuteAudio {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_isPublisher && _isStreaming) {
+            [self.stream setPauseAudio:NO];
+        }
+    });
+}
+- (void)muteVideo {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_isPublisher && _isStreaming) {
+            [self.stream setPauseVideo:YES];
+        }
+    });
+}
+- (void)unmuteVideo {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_isPublisher && _isStreaming) {
+            [self.stream setPauseVideo:NO];
+        }
+    });
+}
+
 - (void)tearDown {
   
     dispatch_async(dispatch_get_main_queue(), ^{

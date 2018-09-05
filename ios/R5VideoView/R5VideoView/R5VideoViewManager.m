@@ -115,6 +115,58 @@ RCT_EXPORT_METHOD(updateScaleSize:(nonnull NSNumber *)reactTag width:(int)width 
     
 }
 
+RCT_EXPORT_METHOD(muteAudio:(nonnull NSNumber *)reactTag) {
+    
+    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
+        R5VideoView *view = viewRegistry[reactTag];
+        if (![view isKindOfClass:[R5VideoView class]]) {
+            RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
+        } else {
+            [view muteAudio];
+        }
+    }];
+    
+}
+
+RCT_EXPORT_METHOD(unmuteAudio:(nonnull NSNumber *)reactTag) {
+    
+    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
+        R5VideoView *view = viewRegistry[reactTag];
+        if (![view isKindOfClass:[R5VideoView class]]) {
+            RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
+        } else {
+            [view unmuteAudio];
+        }
+    }];
+    
+}
+
+RCT_EXPORT_METHOD(muteVideo:(nonnull NSNumber *)reactTag) {
+    
+    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
+        R5VideoView *view = viewRegistry[reactTag];
+        if (![view isKindOfClass:[R5VideoView class]]) {
+            RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
+        } else {
+            [view muteVideo];
+        }
+    }];
+    
+}
+
+RCT_EXPORT_METHOD(unmuteVideo:(nonnull NSNumber *)reactTag) {
+    
+    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
+        R5VideoView *view = viewRegistry[reactTag];
+        if (![view isKindOfClass:[R5VideoView class]]) {
+            RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
+        } else {
+            [view unmuteVideo];
+        }
+    }];
+    
+}
+
 # pragma RN Properties
 RCT_EXPORT_VIEW_PROPERTY(logLevel, int);
 RCT_EXPORT_VIEW_PROPERTY(scaleMode, int);
