@@ -9,6 +9,7 @@ import android.hardware.Camera;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.Surface;
 import android.view.WindowManager;
 
@@ -36,11 +37,8 @@ public class PublishService extends Service {
 
 	@Override
 	public void onCreate() {
+		Log.d("R5VideoViewLayout", "PublishService:onCreate()");
 		super.onCreate();
-	}
-
-	private void startPublish() {
-		this.servicable.publishBound();
 	}
 
 //	private void attachDisplay() {
@@ -51,6 +49,7 @@ public class PublishService extends Service {
 
 	public void setServicableDelegate(PublishServicable servicable) {
 
+		Log.d("R5VideoViewLayout", "PublishService:setServicableDelegate()");
 		if (servicable == null) {
 
 			return;
@@ -63,24 +62,32 @@ public class PublishService extends Service {
 		}
 	}
 
+	private void startPublish() {
+		this.servicable.publishBound();
+	}
+
 	public void setDisplayOn(boolean setOn) {
 
+		Log.d("R5VideoViewLayout", "PublishService:setDisplayOn()");
 		if (!setOn) {
 //			publish.restrainVideo(true);
 //			cam.stopPreview();
 //			cam.release();
 //			cam = null;
 
+			Log.d("R5VideoViewLayout", "PublishService:setDisplayOn(false)");
 			if (holderNote == null) {
 				holderNote = (new Notification.Builder(getApplicationContext()))
 						.setContentTitle("Red5 Pro")
 						.setContentText("Publishing from the background")
+						.setSmallIcon(android.R.drawable.ic_media_play)
 						.build();
 				startForeground(57234111, holderNote);
 			}
 
 		} else {
 
+			Log.d("R5VideoViewLayout", "PublishService:setDisplayOn(true)");
 			if (holderNote != null) {
 				stopForeground(true);
 				holderNote = null;
@@ -99,6 +106,7 @@ public class PublishService extends Service {
 	@Override
 	public void onDestroy() {
 
+		Log.d("R5VideoViewLayout", "PublishService:onDestroy()");
 		if (holderNote != null) {
 			stopForeground(true);
 			holderNote = null;

@@ -62,11 +62,13 @@ public class R5VideoViewLayout extends FrameLayout
     private ServiceConnection mPublishServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d("R5VideoViewLayout", "connection:onServiceConnected()");
             mBackgroundService = ((PublishService.PublishServiceBinder)service).getService();
             mBackgroundService.setServicableDelegate(R5VideoViewLayout.this);
         }
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            Log.d("R5VideoViewLayout", "connection:onServiceDisconnected()");
             mBackgroundService = null;
         }
     };
@@ -294,21 +296,25 @@ public class R5VideoViewLayout extends FrameLayout
     }
 
     private void detectToStartService () {
+        Log.d("R5VideoViewLayout", "detectStartService()");
         boolean found = false;
-        ActivityManager actManager = (ActivityManager) mContext.getCurrentActivity().getSystemService(Context.ACTIVITY_SERVICE);
+        Activity activity = mContext.getCurrentActivity();
+        ActivityManager actManager = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
         try {
             for (ActivityManager.RunningServiceInfo serviceInfo : actManager.getRunningServices(Integer.MAX_VALUE)) {
                 if (serviceInfo.service.getClassName().equals(PublishService.class.getName())) {
                     found = true;
                 }
             }
-        }catch (NullPointerException e){}
+        } catch (NullPointerException e){}
 
         if(!found){
+            Log.d("R5VideoViewLayout", "detectStartService:start()");
             mContext.getCurrentActivity().startService(mPubishIntent);
         }
 
-        mContext.getCurrentActivity().bindService(mPubishIntent, mPublishServiceConnection, Context.BIND_IMPORTANT);
+        Log.d("R5VideoViewLayout", "detectStartService:bind()");
+        activity.bindService(mPubishIntent, mPublishServiceConnection, Context.BIND_IMPORTANT);
     }
 
     private void doPublish (String streamName, R5Stream.RecordType streamType) {
@@ -345,16 +351,20 @@ public class R5VideoViewLayout extends FrameLayout
 
     public void publishBound () {
 
+        Log.d("R5VideoViewLayout", "doPublishBound()");
         doPublish(mStreamName, mStreamType);
 
     }
 
     public void publish (String streamName, R5Stream.RecordType streamType) {
 
+        Log.d("R5VideoViewLayout", "publish()");
+
         mStreamName = streamName;
         mStreamType = streamType;
 
         if (mEnableBackgroundStreaming) {
+            Log.d("R5VideoViewLayout", "setting up bound publisher for background streaming.");
             // Set up service and offload setup.
             mPubishIntent = new Intent(mContext.getCurrentActivity(), PublishService.class);
             detectToStartService();
@@ -366,6 +376,8 @@ public class R5VideoViewLayout extends FrameLayout
     }
 
     public void unpublish () {
+
+        Log.d("R5VideoViewLayout", "unpublish()");
 
         if (mVideoView != null) {
             mVideoView.attachStream(null);
@@ -499,13 +511,20 @@ public class R5VideoViewLayout extends FrameLayout
 
     protected void setPublisherDisplayOn (Boolean setOn) {
 
+        Log.d("R5VideoViewLayout", "setPublisherDisplayOn(" + setOn + ")");
         if (!setOn) {
-			mStream.restrainVideo(true);
+            if (mStream != null) {
+                Log.d("R5VideoViewLayout", "Stream:restraingVideo()");
+                mStream.restrainVideo(true);
+            }
 			if (mCamera != null && mCamera.getCamera() != null) {
+                Log.d("R5VideoViewLayout", "Camera:stop()");
                 mCamera.getCamera().stopPreview();
                 mCamera.getCamera().release();
+//                mCamera.setCamera(null);
             }
-        } else {
+        } else if (mCamera != null && mStream != null) {
+            Log.d("R5VideoViewLayout", "setPublisherDisplayOn:reset()");
             int rotate = mUseBackfacingCamera ? 0 : 180;
             int displayOrientation = (mDisplayOrientation + rotate) % 360;
             Camera device = mUseBackfacingCamera
@@ -517,10 +536,13 @@ public class R5VideoViewLayout extends FrameLayout
 			mCamera.setOrientation(mCameraOrientation);
 
 			mStream.restrainVideo(false);
-            mStream.updateStreamMeta();
+//            mStream.updateStreamMeta();
             device.startPreview();
         }
-        mBackgroundService.setDisplayOn(setOn);
+
+        if (mBackgroundService != null) {
+            mBackgroundService.setDisplayOn(setOn);
+        }
 
     }
 
@@ -717,7 +739,8 @@ public class R5VideoViewLayout extends FrameLayout
         }
         this.addOnLayoutChangeListener(mLayoutListener);
 
-        if (mEnableBackgroundStreaming) {
+        Log.d("R5VideoViewLayout", "onHostResume()");
+        if (mIsPublisher && mEnableBackgroundStreaming) {
             this.setPublisherDisplayOn(true);
         }
     }
@@ -727,16 +750,17 @@ public class R5VideoViewLayout extends FrameLayout
         if (mLayoutListener != null) {
             this.removeOnLayoutChangeListener(mLayoutListener);
         }
-        if (mEnableBackgroundStreaming) {
+        Log.d("R5VideoViewLayout", "onHostPause()");
+        if (mIsPublisher && mEnableBackgroundStreaming) {
             this.setPublisherDisplayOn(false);
         }
     }
 
     @Override
     public void onHostDestroy() {
-        //Log.d("R5VideoViewLayout", "onHostDestroy");
+        Log.d("R5VideoViewLayout", "onHostDestroy()");
         Activity activity = mContext.getCurrentActivity();
-        if (mEnableBackgroundStreaming) {
+        if (mIsPublisher && mEnableBackgroundStreaming) {
             this.setPublisherDisplayOn(false);
             activity.unbindService(mPublishServiceConnection);
             activity.stopService(mPubishIntent);
