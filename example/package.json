@@ -19,7 +19,9 @@
   "dependencies": {
     "react": "16.3.1",
     "react-native": "^0.55.4",
+    "react-native-elements": "^0.19.1",
     "react-native-permissions": "^1.1.1",
-    "react-native-red5pro": "https://github.com/infrared5/react-native-red5pro/tarball/release/3.0.0"
+    "react-native-red5pro": "https://github.com/infrared5/react-native-red5pro/tarball/release/3.0.0",
+    "react-native-vector-icons": "^5.0.0"
   }
 }

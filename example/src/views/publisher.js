@@ -6,11 +6,14 @@ import {
   Text,
   View
 } from 'react-native'
+import { Icon } from 'react-native-elements'
 import {
   R5VideoView,
   publish,
   unpublish,
-  swapCamera
+  swapCamera,
+  muteAudio, unmuteAudio,
+  muteVideo, unmuteVideo
 } from 'react-native-red5pro'
 
 const styles = StyleSheet.create({
@@ -59,9 +62,13 @@ export default class Publisher extends React.Component {
     this.onUnpublishNotification = this.onUnpublishNotification.bind(this)
 
     this.onSwapCamera = this.onSwapCamera.bind(this)
+    this.onToggleAudioMute = this.onToggleAudioMute.bind(this)
+    this.onToggleVideoMute = this.onToggleVideoMute.bind(this)
 
     this.state = {
       isInErrorState: false,
+      audioMuted: false,
+      videoMuted: false,
       buttonProps: {
         style: styles.button
       },
@@ -97,7 +104,9 @@ export default class Publisher extends React.Component {
     const {
       videoProps,
       toastProps,
-      buttonProps
+      buttonProps,
+      audioMuted,
+      videoMuted
     } = this.state
 
     const {
@@ -114,6 +123,20 @@ export default class Publisher extends React.Component {
         <R5VideoView
           {...setup}
           ref={assignVideoRef.bind(this)}
+        />
+        <Icon
+          name={audioMuted ? 'mic-off' : 'mic'}
+          type='feathericon'
+          size={42}
+          hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
+          onPress={this.onToggleAudioMute}
+        />
+        <Icon
+          name={videoMuted ? 'videocam-off' : 'videocam'}
+          type='feathericon'
+          size={42}
+          hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
+          onPress={this.onToggleVideoMute}
         />
         <Text
           ref={assignToastRef.bind(this)}
@@ -174,5 +197,31 @@ export default class Publisher extends React.Component {
   onSwapCamera (event) {
     console.log('Publisher:onSwapCamera()')
     swapCamera(findNodeHandle(this.red5pro_video_publisher))
+  }
+
+  onToggleAudioMute () {
+    console.log('Publisher:onToggleAudioMute()')
+    const { audioMuted } = this.state
+    if (audioMuted) {
+      unmuteAudio(findNodeHandle(this.red5pro_video_publisher))
+    } else {
+      muteAudio(findNodeHandle(this.red5pro_video_publisher))
+    }
+    this.setState({
+      audioMuted: !audioMuted
+    })
+  }
+
+  onToggleVideoMute () {
+    console.log('Publisher:onToggleVideoMute()')
+    const { videoMuted } = this.state
+    if (videoMuted) {
+      unmuteVideo(findNodeHandle(this.red5pro_video_publisher))
+    } else {
+      muteVideo(findNodeHandle(this.red5pro_video_publisher))
+    }
+    this.setState({
+      videoMuted: !videoMuted
+    })
   }
 }
