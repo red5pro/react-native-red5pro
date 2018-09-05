@@ -82,8 +82,8 @@ export default class Publisher extends React.Component {
     this.onToggleVideoMute = this.onToggleVideoMute.bind(this)
 
     this.state = {
-      isInErrorState: false,
       audioMuted: false,
+      isInErrorState: false,
       videoMuted: false,
       buttonProps: {
         style: styles.button

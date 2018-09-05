@@ -133,7 +133,8 @@ public class R5VideoViewLayout extends FrameLayout
         MUTE_AUDIO("muteAudio", 8),
         UNMUTE_AUDIO("unmuteAudio", 9),
         MUTE_VIDEO("muteVideo", 10),
-        UNMUTE_VIDEO("unmuteVideo", 11);
+        UNMUTE_VIDEO("unmuteVideo", 11),
+        SET_PLAYBACK_VOLUME("setPlaybackVolume", 12);
 
         private final String mName;
         private final int mValue;
@@ -498,6 +499,15 @@ public class R5VideoViewLayout extends FrameLayout
     public void unmuteVideo () {
         if (mIsPublisher) {
             mStream.restrainVideo(false);
+        }
+    }
+
+    public void setPlaybackVolume (float value) {
+        Log.d("R5VideoViewLayout", "setPlaybackVolume(" + value + ")");
+        if (mIsStreaming && !mIsPublisher) {
+            if (mStream != null && mStream.audioController != null) {
+                mStream.audioController.setPlaybackGain(value);
+            }
         }
     }
 

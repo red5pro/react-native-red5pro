@@ -44,6 +44,7 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     private static final int COMMAND_UNMUTE_AUDIO = 9;
     private static final int COMMAND_MUTE_VIDEO = 10;
     private static final int COMMAND_UNMUTE_VIDEO = 11;
+    private static final int COMMAND_SET_PLAYBACK_VOLUME = 12;
 
     private R5VideoViewLayout mView;
     private ThemedReactContext mContext;
@@ -140,6 +141,12 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
                 break;
             case COMMAND_UNMUTE_VIDEO:
                 root.unmuteVideo();
+                break;
+            case COMMAND_SET_PLAYBACK_VOLUME:
+
+                final int value = args.getInt(0);
+                root.setPlaybackVolume(value/100);
+
                 break;
             default:
                 super.receiveCommand(root, commandId, args);

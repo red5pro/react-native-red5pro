@@ -46,3 +46,7 @@ export const muteVideo = (handle) => {
 export const unmuteVideo = (handle) => {
   UIManager.dispatchViewManagerCommand(handle, UIManager.R5VideoView.Commands.unmuteVideo, null)
 }
+
+export const setPlaybackVolume = (handle, value) => {
+  UIManager.dispatchViewManagerCommand(handle, UIManager.R5VideoView.Commands.setPlaybackVolume, [value])
+}

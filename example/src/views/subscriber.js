@@ -6,12 +6,14 @@ import {
   Text,
   View
 } from 'react-native'
+import { Icon } from 'react-native-elements'
 import { 
   R5VideoView,
   R5ScaleMode,
   subscribe,
   unsubscribe,
-  updateScaleMode
+  updateScaleMode,
+  setPlaybackVolume
 } from 'react-native-red5pro'
 
 const isValidStatusMessage = (value) => {
@@ -46,6 +48,19 @@ const styles = StyleSheet.create({
     padding: 10,
     textAlign: 'center',
     backgroundColor: 'rgba(0, 0, 0, 1.0)'
+  },
+  muteIcon: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    padding: 6,
+    paddingLeft: 10,
+    paddingRight: 10,
+    borderRadius: 26,
+    backgroundColor: 'white'
+  },
+  muteIconToggled: {
+    backgroundColor: '#2089dc'
   }
 })
 
@@ -60,10 +75,12 @@ export default class Subscriber extends React.Component {
     this.onUnsubscribeNotification = this.onUnsubscribeNotification.bind(this)
 
     this.onScaleMode = this.onScaleMode.bind(this)
+    this.onToggleAudioMute = this.onToggleAudioMute.bind(this)
 
     this.state = {
       scaleMode: R5ScaleMode.SCALE_TO_FILL,
-            isInErrorState: false,
+      audioMuted: false,
+      isInErrorState: false,
       buttonProps: {
         style: styles.button
       },
@@ -98,7 +115,8 @@ export default class Subscriber extends React.Component {
     const {
       videoProps,
       toastProps,
-      buttonProps
+      buttonProps,
+      audioMuted
     } = this.state
 
     const {
@@ -108,6 +126,9 @@ export default class Subscriber extends React.Component {
 
     const setup = Object.assign({}, streamProps, videoProps)
 
+    const audioIconColor = audioMuted ? '#fff' : '#000'
+    const audioIconStyle = audioMuted ? [styles.muteIcon, styles.muteIconToggled] : styles.muteIcon
+
     const assignVideoRef = (video) => { this.red5pro_video_subscriber = video }
     const assignToastRef = (toast) => { this.toast_field = toast }
 
@@ -116,6 +137,15 @@ export default class Subscriber extends React.Component {
         <R5VideoView
           {...setup}
           ref={assignVideoRef.bind(this)}
+        />
+        <Icon
+          name={audioMuted ? 'md-volume-off' : 'md-volume-high'}
+          type='ionicon'
+          size={26}
+          color={audioIconColor}
+          hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
+          onPress={this.onToggleAudioMute}
+          containerStyle={audioIconStyle}
         />
         <Text
           ref={assignToastRef.bind(this)}
@@ -151,6 +181,7 @@ export default class Subscriber extends React.Component {
 
     console.log(`Subscriber:onConfigured :: ${event.nativeEvent.key}`)
     subscribe(findNodeHandle(this.red5pro_video_subscriber), streamName)
+    setPlaybackVolume(findNodeHandle(this.red5pro_video_subscriber), 100)
   }
 
   onSubscriberStreamStatus (event) {
@@ -185,6 +216,19 @@ export default class Subscriber extends React.Component {
     updateScaleMode(findNodeHandle(this.red5pro_video_subscriber), scale)
     this.setState({
       scaleMode: scale
+    })
+  }
+
+  onToggleAudioMute () {
+    console.log('Subscriber:onToggleAudioMute()')
+    const { audioMuted } = this.state
+    if (audioMuted) {
+      setPlaybackVolume(findNodeHandle(this.red5pro_video_subscriber), 100)
+    } else {
+      setPlaybackVolume(findNodeHandle(this.red5pro_video_subscriber), 0)
+    }
+    this.setState({
+      audioMuted: !audioMuted
     })
   }
 }
