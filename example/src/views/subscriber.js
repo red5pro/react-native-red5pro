@@ -2,6 +2,7 @@ import React from 'react'
 import {
   findNodeHandle,
   Button,
+  Image,
   StyleSheet,
   Text,
   View
@@ -29,6 +30,12 @@ const styles = StyleSheet.create({
   videoView: {
     flex: 1,
     flexDirection: 'row',
+    backgroundColor: 'black'
+  },
+  imageContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
     backgroundColor: 'black'
   },
   button: {
@@ -126,6 +133,8 @@ export default class Subscriber extends React.Component {
 
     const setup = Object.assign({}, streamProps, videoProps)
 
+    const displayVideo = setup.subsribeVideo
+
     const audioIconColor = audioMuted ? '#fff' : '#000'
     const audioIconStyle = audioMuted ? [styles.muteIcon, styles.muteIconToggled] : styles.muteIcon
 
@@ -138,6 +147,12 @@ export default class Subscriber extends React.Component {
           {...setup}
           ref={assignVideoRef.bind(this)}
         />
+        { !displayVideo && <View style={styles.imageContainer}>
+            <Image 
+              style={{ width: 69, height: 68 }}
+              source={{uri: 'https://www.red5pro.com/images/red5pro_icon1.png'}} />
+          </View>
+        }
         <Icon
           name={audioMuted ? 'md-volume-off' : 'md-volume-high'}
           type='ionicon'
