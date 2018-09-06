@@ -116,6 +116,8 @@ R5VideoView.propTypes = {
     subscribeVideo: PropTypes.bool,                 // subscriber only
     audioMode: PropTypes.number,                    // mainly subscribers, especially with 2 subscribers
     enableBackgroundStreaming: PropTypes.bool,      // publisher and subscriber
+    zOrderOnTop: PropTypes.bool,                    // publisher and subscriber. Android only.
+    zOrderMediaOverlay: PropTypes.bool,             // publisher and subscriber. Android only.
     configuration: PropTypes.shape({
       host: PropTypes.string.isRequired,
       port: PropTypes.number.isRequired,
@@ -152,7 +154,9 @@ R5VideoView.defaultProps = {
     useAdaptiveBitrateController: false,
     useBackfacingCamera: false,
     audioMode: R5AudioMode.STANDARD,
-    enableBackgroundStreaming: false
+    enableBackgroundStreaming: false,
+    zOrderOnTop: false,
+    zOrderMediaOverlay: false
 }
 
 let R5Video = requireNativeComponent('R5VideoView', R5VideoView)

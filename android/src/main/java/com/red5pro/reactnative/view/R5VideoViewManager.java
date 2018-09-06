@@ -311,6 +311,16 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
         view.updatePubSubBackgroundStreaming(value);
     }
 
+    @ReactProp(name = "zOrderOnTop", defaultBoolean = true)
+    public  void setZOrderOnTop(R5VideoViewLayout view, boolean value) {
+        view.updateZOrderOnTop(value);
+    }
+
+    @ReactProp(name = "zOrderMediaOverlay", defaultBoolean = true)
+    public  void setZOrderOverlayMedia(R5VideoViewLayout view, boolean value) {
+        view.updateZOrderMediaOverlay(value);
+    }
+
     @Nullable
     @Override
     public Map<String, Object> getConstants() {

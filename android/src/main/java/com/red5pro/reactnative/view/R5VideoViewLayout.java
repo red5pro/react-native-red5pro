@@ -86,6 +86,8 @@ public class R5VideoViewLayout extends FrameLayout
     protected boolean mUseAdaptiveBitrateController = false;
     protected boolean mUseBackfacingCamera = false;
     protected boolean mEnableBackgroundStreaming = false;
+    protected boolean mZOrderOnTop = false;
+    protected boolean mZOrderMediaOverlay = false;
 
     protected int mClientWidth;
     protected int mClientHeight;
@@ -171,6 +173,8 @@ public class R5VideoViewLayout extends FrameLayout
         mVideoView = new R5VideoView(mContext);
         mVideoView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mVideoView.setBackgroundColor(Color.BLACK);
+        mVideoView.setZOrderOnTop(mZOrderOnTop);
+//        mVideoView.setZOrderMediaOverlay(mZOrderMediaOverlay);
         addView(mVideoView);
 
     }
@@ -879,6 +883,14 @@ public class R5VideoViewLayout extends FrameLayout
 
     public void updatePubSubBackgroundStreaming(boolean value) {
         this.mEnableBackgroundStreaming = value;
+    }
+
+    public void updateZOrderOnTop(boolean value) {
+        this.mZOrderOnTop = value;
+    }
+
+    public void updateZOrderMediaOverlay(boolean value) {
+        this.mZOrderMediaOverlay = value;
     }
 
     public R5VideoView getVideoView() {
