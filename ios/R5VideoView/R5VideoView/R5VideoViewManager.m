@@ -167,6 +167,19 @@ RCT_EXPORT_METHOD(unmuteVideo:(nonnull NSNumber *)reactTag) {
     
 }
 
+RCT_EXPORT_METHOD(setPlaybackVolume:(nonnull NSNumber *)reactTag value:(int)value) {
+    
+    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
+        R5VideoView *view = viewRegistry[reactTag];
+        if (![view isKindOfClass:[R5VideoView class]]) {
+            RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
+        } else {
+            [view setPlaybackVolume:value];
+        }
+    }];
+    
+}
+
 # pragma RN Properties
 RCT_EXPORT_VIEW_PROPERTY(logLevel, int);
 RCT_EXPORT_VIEW_PROPERTY(scaleMode, int);

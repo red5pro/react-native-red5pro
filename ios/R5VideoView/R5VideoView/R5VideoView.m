@@ -283,6 +283,14 @@
     });
 }
 
+- (void)setPlaybackVolume:(int)value {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_isStreaming) {
+            [[self.stream audioController] setVolume:(value/100)] ;
+        }
+    });
+}
+
 - (void)tearDown {
   
     dispatch_async(dispatch_get_main_queue(), ^{

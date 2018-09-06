@@ -44,6 +44,7 @@
 - (void)unmuteAudio;
 - (void)muteVideo;
 - (void)unmuteVideo;
+- (void)setPlaybackVolume:(int)value;
 
 # pragma RN Properties
 - (BOOL)getShowDebugInfo;
