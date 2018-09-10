@@ -45,6 +45,8 @@
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
 
       <service android:name="com.red5pro.reactnative.view.PublishService" />
+      <service android:name="com.red5pro.reactnative.view.SubscribeService" />
+
     </application>
 
 </manifest>

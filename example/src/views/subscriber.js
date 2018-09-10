@@ -133,7 +133,7 @@ export default class Subscriber extends React.Component {
 
     const setup = Object.assign({}, streamProps, videoProps)
 
-    const displayVideo = setup.subsribeVideo
+    const displayVideo = setup.subscribeVideo
 
     const audioIconColor = audioMuted ? '#fff' : '#000'
     const audioIconStyle = audioMuted ? [styles.muteIcon, styles.muteIconToggled] : styles.muteIcon

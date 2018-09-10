@@ -24,8 +24,6 @@ import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 
-import com.red5pro.reactnative.view.PublishService.PublishServicable;
-
 import com.red5pro.streaming.R5Connection;
 import com.red5pro.streaming.R5Stream;
 import com.red5pro.streaming.config.R5Configuration;
@@ -38,7 +36,8 @@ import com.red5pro.streaming.source.R5Microphone;
 import com.red5pro.streaming.view.R5VideoView;
 
 public class R5VideoViewLayout extends FrameLayout
-        implements R5ConnectionListener, LifecycleEventListener, PublishServicable {
+        implements R5ConnectionListener, LifecycleEventListener,
+        PublishService.PublishServicable, SubscribeService.SubscribeServicable {
 
     public int logLevel;
     public int scaleMode;
@@ -57,19 +56,39 @@ public class R5VideoViewLayout extends FrameLayout
     protected R5Stream mStream;
     protected R5Camera mCamera;
 
-    protected PublishService mBackgroundService;
+    protected Boolean mIsBackgroundBound;
+
+    protected PublishService mBackgroundPublishService;
     private Intent mPubishIntent;
+
     private ServiceConnection mPublishServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d("R5VideoViewLayout", "connection:onServiceConnected()");
-            mBackgroundService = ((PublishService.PublishServiceBinder)service).getService();
-            mBackgroundService.setServicableDelegate(R5VideoViewLayout.this);
+            mBackgroundPublishService = ((PublishService.PublishServiceBinder)service).getService();
+            mBackgroundPublishService.setServicableDelegate(R5VideoViewLayout.this);
         }
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.d("R5VideoViewLayout", "connection:onServiceDisconnected()");
-            mBackgroundService = null;
+            mBackgroundPublishService = null;
+        }
+    };
+
+    protected SubscribeService mBackgroundSubscribeService;
+    private Intent mSubscribeIntent;
+
+    private ServiceConnection mSubscribeServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d("R5VideoViewLayout", "connection:onServiceConnected()");
+            mBackgroundSubscribeService = ((SubscribeService.SubscribeServiceBinder)service).getService();
+            mBackgroundSubscribeService.setServicableDelegate(R5VideoViewLayout.this);
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d("R5VideoViewLayout", "connection:onServiceDisconnected()");
+            mBackgroundSubscribeService = null;
         }
     };
 
@@ -204,9 +223,7 @@ public class R5VideoViewLayout extends FrameLayout
 
     }
 
-    public void subscribe (String streamName) {
-
-        mStreamName = streamName;
+    private void doSubscribe (String streamName, Boolean showDebug) {
 
         if (mPlaybackVideo && this.getVideoView() == null) {
             createVideoView();
@@ -214,6 +231,29 @@ public class R5VideoViewLayout extends FrameLayout
             mVideoView.showDebugView(showDebug);
         }
         mStream.play(streamName);
+
+    }
+
+    public void subscribeBound () {
+
+        Log.d("R5VideoViewLayout", "doSubscribeBound()");
+        doSubscribe(mStreamName, showDebug);
+
+    }
+
+    public void subscribe (String streamName) {
+
+        mStreamName = streamName;
+
+        if (mEnableBackgroundStreaming) {
+            Log.d("R5VideoViewLayout", "setting up bound subscriber for background streaming.");
+            // Set up service and offload setup.
+            mSubscribeIntent = new Intent(mContext.getCurrentActivity(), SubscribeService.class);
+            detectToStartService(mSubscribeIntent, mSubscribeServiceConnection);
+            return;
+        }
+
+        doSubscribe(mStreamName, showDebug);
 
     }
 
@@ -304,7 +344,7 @@ public class R5VideoViewLayout extends FrameLayout
         mIsPublisherSetup = true;
     }
 
-    private void detectToStartService () {
+    private void detectToStartService (Intent intent, ServiceConnection connection) {
         Log.d("R5VideoViewLayout", "detectStartService()");
         boolean found = false;
         Activity activity = mContext.getCurrentActivity();
@@ -319,11 +359,12 @@ public class R5VideoViewLayout extends FrameLayout
 
         if(!found){
             Log.d("R5VideoViewLayout", "detectStartService:start()");
-            mContext.getCurrentActivity().startService(mPubishIntent);
+            mContext.getCurrentActivity().startService(intent);
         }
 
         Log.d("R5VideoViewLayout", "detectStartService:bind()");
-        activity.bindService(mPubishIntent, mPublishServiceConnection, Context.BIND_IMPORTANT);
+        activity.bindService(intent, connection, Context.BIND_IMPORTANT);
+        mIsBackgroundBound = true;
     }
 
     private void doPublish (String streamName, R5Stream.RecordType streamType) {
@@ -376,7 +417,7 @@ public class R5VideoViewLayout extends FrameLayout
             Log.d("R5VideoViewLayout", "setting up bound publisher for background streaming.");
             // Set up service and offload setup.
             mPubishIntent = new Intent(mContext.getCurrentActivity(), PublishService.class);
-            detectToStartService();
+            detectToStartService(mPubishIntent, mPublishServiceConnection);
             return;
         }
 
@@ -576,12 +617,12 @@ public class R5VideoViewLayout extends FrameLayout
 			mCamera.setOrientation(mCameraOrientation);
 
 			mStream.restrainVideo(false);
-//            mStream.updateStreamMeta();
+            mStream.updateStreamMeta();
             device.startPreview();
         }
 
-        if (mBackgroundService != null) {
-            mBackgroundService.setDisplayOn(setOn);
+        if (mBackgroundPublishService != null) {
+            mBackgroundPublishService.setDisplayOn(setOn);
         }
 
     }
@@ -704,6 +745,26 @@ public class R5VideoViewLayout extends FrameLayout
 
     }
 
+    protected void setSubscriberDisplayOn (Boolean setOn) {
+
+        Log.d("R5VideoViewLayout", "setSubscriberDisplayOn(" + setOn + ")");
+        if (!setOn) {
+            if (mStream != null) {
+                Log.d("R5VideoViewLayout", "Stream:deactivate_display()");
+                mStream.deactivate_display();
+            }
+        } else if (mStream != null) {
+            Log.d("R5VideoViewLayout", "Stream:activate_display()");
+            mStream.activate_display();
+
+        }
+
+        if (mBackgroundSubscribeService != null) {
+            mBackgroundSubscribeService.setDisplayOn(setOn);
+        }
+
+    }
+
     protected void onConfigured(String key) {
 
         Log.d("R5VideoViewLayout", "onConfigured()");
@@ -782,6 +843,8 @@ public class R5VideoViewLayout extends FrameLayout
         Log.d("R5VideoViewLayout", "onHostResume()");
         if (mIsPublisher && mEnableBackgroundStreaming) {
             this.setPublisherDisplayOn(true);
+        } else if (mIsStreaming && mEnableBackgroundStreaming) {
+            this.setSubscriberDisplayOn(true);
         }
     }
 
@@ -793,6 +856,8 @@ public class R5VideoViewLayout extends FrameLayout
         Log.d("R5VideoViewLayout", "onHostPause()");
         if (mIsPublisher && mEnableBackgroundStreaming) {
             this.setPublisherDisplayOn(false);
+        } else if (mIsStreaming && mEnableBackgroundStreaming) {
+            this.setSubscriberDisplayOn(false);
         }
     }
 
@@ -800,10 +865,16 @@ public class R5VideoViewLayout extends FrameLayout
     public void onHostDestroy() {
         Log.d("R5VideoViewLayout", "onHostDestroy()");
         Activity activity = mContext.getCurrentActivity();
-        if (mIsPublisher && mEnableBackgroundStreaming) {
+        if (mPubishIntent != null && mIsBackgroundBound) {
             this.setPublisherDisplayOn(false);
             activity.unbindService(mPublishServiceConnection);
             activity.stopService(mPubishIntent);
+            mIsBackgroundBound = false;
+        } else if (mSubscribeIntent != null && mIsBackgroundBound) {
+            this.setSubscriberDisplayOn(false);
+            activity.unbindService(mSubscribeServiceConnection);
+            activity.stopService(mSubscribeIntent);
+            mIsBackgroundBound = false;
         }
     }
 

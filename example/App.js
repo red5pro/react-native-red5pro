@@ -95,11 +95,11 @@ export default class App extends React.Component {
           parameters: '',
           key: Math.floor(Math.random() * 0x10000).toString(16)
         },
-        subscribeVideo: false,
+        subscribeVideo: true,
         showDebugView: true,
         logLevel: R5LogLevel.DEBUG,
         useBackfacingCamera: false,
-        enableBackgroundStreaming: false
+        enableBackgroundStreaming: true
       }
     }
 
