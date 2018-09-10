@@ -247,8 +247,8 @@ export default class App extends React.Component {
     const hostValue = this.host_field.props.value
     const licenseValue = this.license_field.props.value
     const streamNameValue = this.stream_name_field.props.value
-    const usernameValue = this.username_field.props.value
-    const passwordValue = this.password_field.props.value
+    const usernameValue = useAuthentication ? this.username_field.props.value : undefined
+    const passwordValue = useAuthentication ? this.password_field.props.value : undefined
     return {
       hostFieldProps: {...this.state.hostFieldProps, value: hostValue},
       licenseFieldProps: {...this.state.licenseFieldProps, value: licenseValue},
