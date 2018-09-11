@@ -314,6 +314,16 @@
 }
 
 - (void)sendToBackground {
+    
+    if (!_enableBackgroundStreaming) {
+        if (_isPublisher) {
+            [self unpublish];
+        } else {
+            [self unsubscribe];
+        }
+        return;
+    }
+    
     if (_isStreaming && !_isPublisher && self.controller != nil) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.controller pauseRender];
@@ -323,9 +333,15 @@
             [self.stream setPauseVideo:YES];
         });
     }
+    
 }
 
 - (void)bringToForeground {
+    
+    if (!_enableBackgroundStreaming) {
+        return;
+    }
+    
     if (_isStreaming && !_isPublisher && self.controller != nil) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.controller resumeRender];
@@ -335,6 +351,7 @@
             [self.stream setPauseVideo:_hasExplicitlyPausedVideo];
         });
     }
+    
 }
 
 - (void)tearDown {

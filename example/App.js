@@ -30,6 +30,7 @@ export default class App extends React.Component {
     this.onHostChange = this.onHostChange.bind(this)
     this.onLicenseChange = this.onLicenseChange.bind(this)
     this.onStreamNameChange = this.onStreamNameChange.bind(this)
+    this.onEnableBackgroundStreamingChange = this.onEnableBackgroundStreamingChange.bind(this)
     this.onUseAuthenticationChange = this.onUseAuthenticationChange.bind(this)
     this.onUsernameChange = this.onUsernameChange.bind(this)
     this.onPasswordChange = this.onPasswordChange.bind(this)
@@ -56,6 +57,7 @@ export default class App extends React.Component {
         clearTextOnFocus: true,
         style: styles.inputField,
         value: ''
+        //        value: ''
       },
       streamNameFieldProps: {
         placeholder: 'Stream Name',
@@ -99,7 +101,7 @@ export default class App extends React.Component {
         showDebugView: true,
         logLevel: R5LogLevel.DEBUG,
         useBackfacingCamera: false,
-        enableBackgroundStreaming: true
+        enableBackgroundStreaming: false
       }
     }
 
@@ -127,7 +129,10 @@ export default class App extends React.Component {
 
   render () {
     const {
-      useAuthentication
+      useAuthentication,
+      streamProps: {
+        enableBackgroundStreaming
+      }
     } = this.state
 
     const assignHostRef = (host) => { this.host_field = host }
@@ -181,7 +186,13 @@ export default class App extends React.Component {
             />
           </View>
           <View style={styles.formField}>
-            <CheckBox title='Use Auth'
+            <CheckBox title='Allow Background Streaming'
+              checked={enableBackgroundStreaming}
+              onPress={this.onEnableBackgroundStreamingChange}
+            />
+          </View>
+          <View style={styles.formField}>
+            <CheckBox title='Use Authentication'
               checked={useAuthentication}
               onPress={this.onUseAuthenticationChange}
             />
@@ -321,6 +332,16 @@ export default class App extends React.Component {
   onPasswordChange (text) {
     this.setState({
       passwordFieldProps: {...this.state.passwordFieldProps, value: text}
+    })
+  }
+
+  onEnableBackgroundStreamingChange () {
+    const { streamProps: { enableBackgroundStreaming } } = this.state
+    this.setState({
+      streamProps: {
+        ...this.state.streamProps,
+        enableBackgroundStreaming: !enableBackgroundStreaming
+      }
     })
   }
 
