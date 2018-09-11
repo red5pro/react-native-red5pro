@@ -180,6 +180,32 @@ RCT_EXPORT_METHOD(setPlaybackVolume:(nonnull NSNumber *)reactTag value:(int)valu
     
 }
 
+//RCT_EXPORT_METHOD(sendToBackground:(nonnull NSNumber *)reactTag) {
+//    
+//    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
+//        R5VideoView *view = viewRegistry[reactTag];
+//        if (![view isKindOfClass:[R5VideoView class]]) {
+//            RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
+//        } else {
+//            [view sendToBackground];
+//        }
+//    }];
+//    
+//}
+//
+//RCT_EXPORT_METHOD(bringToForeground:(nonnull NSNumber *)reactTag) {
+//    
+//    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
+//        R5VideoView *view = viewRegistry[reactTag];
+//        if (![view isKindOfClass:[R5VideoView class]]) {
+//            RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
+//        } else {
+//            [view bringToForeground];
+//        }
+//    }];
+//    
+//}
+
 # pragma RN Properties
 RCT_EXPORT_VIEW_PROPERTY(logLevel, int);
 RCT_EXPORT_VIEW_PROPERTY(scaleMode, int);
@@ -195,6 +221,7 @@ RCT_EXPORT_VIEW_PROPERTY(audioBitrate, int);
 RCT_EXPORT_VIEW_PROPERTY(audioSampleRate, int);
 RCT_EXPORT_VIEW_PROPERTY(useBackfacingCamera, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(useAdaptiveBitrateController, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(enableBackgroundStreaming, BOOL);
 
 RCT_CUSTOM_VIEW_PROPERTY(showDebugView, BOOL, R5VideoView) {
   [view setShowDebugInfo:[json boolValue]];
