@@ -1,5 +1,6 @@
 import React from 'react'
 import {
+  AppState,
   findNodeHandle,
   Button,
   Image,
@@ -85,6 +86,7 @@ export default class Subscriber extends React.Component {
     this.onToggleAudioMute = this.onToggleAudioMute.bind(this)
 
     this.state = {
+      appState: AppState.currentState,
       scaleMode: R5ScaleMode.SCALE_TO_FILL,
       audioMuted: false,
       isInErrorState: false,
@@ -105,7 +107,14 @@ export default class Subscriber extends React.Component {
     }
   }
 
+  componentWillMount () {
+    console.log('Subscriber:componentWillMount()')
+    AppState.addEventListener('change', this._handleAppStateChange)
+  }
+
   componentWillUnmount () {
+    console.log('Subscriber:componentWillUnmount()')
+    AppState.removeEventListener('change', this._handleAppStateChange)
     const nodeHandle = findNodeHandle(this.red5pro_video_subscriber)
     const {
       streamProps: {
@@ -118,6 +127,25 @@ export default class Subscriber extends React.Component {
       unsubscribe(nodeHandle, streamName)
     }
   }
+
+  _handleAppStateChange = (nextAppState) => {
+    console.log(`Subscriber:AppState - ${nextAppState}`)
+    const { streamProps: { enableBackgroundStreaming } } = this.props
+    const nodeHandle = findNodeHandle(this.red5pro_video_subscriber)
+    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+      console.log('Subscriber:AppState - App has come to the foreground.')
+    } else if (nextAppState === 'inactive') {
+      console.log('Subscriber:AppState - App has gone to the background.')
+      if (!enableBackgroundStreaming) {
+        console.log('Subscriber:AppState - unpublish()')
+        unsubscribe(nodeHandle)
+      }
+    }
+    this.setState({
+      appState: nextAppState
+    })
+  }
+
   render () {
     const {
       videoProps,

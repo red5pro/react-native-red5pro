@@ -46,6 +46,10 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     private static final int COMMAND_UNMUTE_VIDEO = 11;
     private static final int COMMAND_SET_PLAYBACK_VOLUME = 12;
 
+    public R5VideoViewLayout getmView() {
+        return mView;
+    }
+
     private R5VideoViewLayout mView;
     private ThemedReactContext mContext;
 

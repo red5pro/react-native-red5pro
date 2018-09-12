@@ -73,14 +73,22 @@
 - (void)onEnterForegroundActive:(NSNotification *)notification {
     [self bringToForeground];
 }
+//- (void)onDeviceOrientation:(NSNotification *)notification {
+//  if (r5View != nil) {
+//      [r5View onDeviceOrientation:notification];
+//  }
+//}
 
 - (void)addObservers {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onWillResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onEnterForegroundActive:) name:UIApplicationWillEnterForegroundNotification object:nil];}
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onEnterForegroundActive:) name:UIApplicationWillEnterForegroundNotification object:nil];
+//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onDeviceOrientation:) name:UIDeviceOrientationDidChangeNotification object:nil];
+}
 
 - (void)removeObservers {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillResignActiveNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillEnterForegroundNotification object:nil];
+//  [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
 }
 
 - (void)loadConfiguration:(R5Configuration *)configuration forKey:(NSString *)key {

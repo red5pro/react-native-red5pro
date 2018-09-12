@@ -4,7 +4,8 @@ import R5LogLevel from './src/enum/R5VideoView.loglevel'
 import R5PublishType from './src/enum/R5VideoView.publishtype'
 import R5ScaleMode from './src/enum/R5VideoView.scalemode'
 
-import { subscribe,
+import {
+  subscribe,
   unsubscribe,
   preview,
   publish,
@@ -14,7 +15,8 @@ import { subscribe,
   updateScaleSize,
   setPlaybackVolume,
   muteAudio, unmuteAudio,
-  muteVideo, unmuteVideo } from './src/commands/R5VideoView.commands'
+  muteVideo, unmuteVideo
+} from './src/commands/R5VideoView.commands'
 
 module.exports = {
   R5VideoView,

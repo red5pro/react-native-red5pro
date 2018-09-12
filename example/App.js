@@ -57,7 +57,6 @@ export default class App extends React.Component {
         clearTextOnFocus: true,
         style: styles.inputField,
         value: ''
-        //        value: ''
       },
       streamNameFieldProps: {
         placeholder: 'Stream Name',

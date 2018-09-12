@@ -45,8 +45,6 @@
 - (void)muteVideo;
 - (void)unmuteVideo;
 - (void)setPlaybackVolume:(int)value;
-//- (void)sendToBackground;
-//- (void)bringToForeground;
 
 # pragma RN Properties
 - (BOOL)getShowDebugInfo;

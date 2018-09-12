@@ -56,7 +56,8 @@ public class R5VideoViewLayout extends FrameLayout
     protected R5Stream mStream;
     protected R5Camera mCamera;
 
-    protected Boolean mIsBackgroundBound;
+    protected boolean mIsRestrainingVideo;
+    protected boolean mIsBackgroundBound;
 
     protected PublishService mBackgroundPublishService;
     private Intent mPubishIntent;
@@ -434,9 +435,13 @@ public class R5VideoViewLayout extends FrameLayout
         }
 
         if (mCamera != null) {
-            Camera c = mCamera.getCamera();
-            c.stopPreview();
-            c.release();
+            try {
+                Camera c = mCamera.getCamera();
+                c.stopPreview();
+                c.release();
+            } catch (Exception e) {
+                Log.w("R5VideoViewLayout", "unpublish:stop:error  " + e.getMessage());
+            }
             mCamera = null;
         }
 
@@ -538,11 +543,13 @@ public class R5VideoViewLayout extends FrameLayout
 
     public void muteVideo () {
         if (mIsPublisher) {
+            mIsRestrainingVideo = true;
             mStream.restrainVideo(true);
         }
     }
     public void unmuteVideo () {
         if (mIsPublisher) {
+            mIsRestrainingVideo = false;
             mStream.restrainVideo(false);
         }
     }
@@ -560,6 +567,7 @@ public class R5VideoViewLayout extends FrameLayout
 
         Log.d("R5VideoViewLayout", ":cleanup (" + mStreamName + ")!");
         if (mStream != null) {
+            mStream.attachCamera(null);
             mStream.client = null;
             mStream.setListener(null);
             mStream = null;
@@ -569,12 +577,13 @@ public class R5VideoViewLayout extends FrameLayout
             mConnection.removeListener();
             mConnection = null;
         }
+
         if (mVideoView != null) {
             mVideoView.attachStream(null);
-//            removeView(mVideoView);
             mVideoView = null;
         }
         mIsStreaming = false;
+        mIsRestrainingVideo = false;
 
     }
 
@@ -600,11 +609,16 @@ public class R5VideoViewLayout extends FrameLayout
             }
 			if (mCamera != null && mCamera.getCamera() != null) {
                 Log.d("R5VideoViewLayout", "Camera:stop()");
-                mCamera.getCamera().stopPreview();
-                mCamera.getCamera().release();
-//                mCamera.setCamera(null);
+                try {
+                    Camera c = mCamera.getCamera();
+                    c.stopPreview();
+                    c.release();
+                    mCamera.setCamera(null);
+                } catch (Exception e) {
+                    Log.w("R5VideoViewLayout", "Camera:stop:error - " + e.getMessage());
+                }
             }
-        } else if (mCamera != null && mStream != null) {
+        } else if (mCamera != null && mStream != null && !mIsRestrainingVideo) {
             Log.d("R5VideoViewLayout", "setPublisherDisplayOn:reset()");
             int rotate = mUseBackfacingCamera ? 0 : 180;
             int displayOrientation = (mDisplayOrientation + rotate) % 360;
@@ -619,6 +633,8 @@ public class R5VideoViewLayout extends FrameLayout
 			mStream.restrainVideo(false);
             mStream.updateStreamMeta();
             device.startPreview();
+        } else {
+            Log.d("R5VideoViewLayout", "setPublisherDisplayOn:bypassed");
         }
 
         if (mBackgroundPublishService != null) {
@@ -781,6 +797,42 @@ public class R5VideoViewLayout extends FrameLayout
         }
     }
 
+    public void sendToBackground () {
+
+        Log.d("R5VideoViewLayout", "sendToBackground()");
+        if (!mEnableBackgroundStreaming) {
+            Log.d("R5VideoViewLayout", "sendToBackground:shutdown");
+            if (mIsPublisher) {
+                this.unpublish();
+            } else {
+                this.unsubscribe();
+            }
+            return;
+        }
+
+        if (mIsPublisher && mEnableBackgroundStreaming) {
+            Log.d("R5VideoViewLayout", "sendToBackground:publiserPause");
+            this.setPublisherDisplayOn(false);
+        } else if (mIsStreaming && mEnableBackgroundStreaming) {
+            Log.d("R5VideoViewLayout", "sendToBackground:subscriberPause");
+            this.setSubscriberDisplayOn(false);
+        }
+
+    }
+
+    public void bringToForeground () {
+
+        Log.d("R5VideoViewLayout", "bringToForeground()");
+        if (mIsPublisher && mEnableBackgroundStreaming) {
+            Log.d("R5VideoViewLayout", "sendToBackground:publiserResume");
+            this.setPublisherDisplayOn(true);
+        } else if (mIsStreaming && mEnableBackgroundStreaming) {
+            Log.d("R5VideoViewLayout", "sendToBackground:publiserResume");
+            this.setSubscriberDisplayOn(true);
+        }
+
+    }
+
     public void onMetaData(String metadata) {
 
         String[] props = metadata.split(";");
@@ -841,11 +893,7 @@ public class R5VideoViewLayout extends FrameLayout
         this.addOnLayoutChangeListener(mLayoutListener);
 
         Log.d("R5VideoViewLayout", "onHostResume()");
-        if (mIsPublisher && mEnableBackgroundStreaming) {
-            this.setPublisherDisplayOn(true);
-        } else if (mIsStreaming && mEnableBackgroundStreaming) {
-            this.setSubscriberDisplayOn(true);
-        }
+        bringToForeground();
     }
 
     @Override
@@ -854,11 +902,7 @@ public class R5VideoViewLayout extends FrameLayout
             this.removeOnLayoutChangeListener(mLayoutListener);
         }
         Log.d("R5VideoViewLayout", "onHostPause()");
-        if (mIsPublisher && mEnableBackgroundStreaming) {
-            this.setPublisherDisplayOn(false);
-        } else if (mIsStreaming && mEnableBackgroundStreaming) {
-            this.setSubscriberDisplayOn(false);
-        }
+        sendToBackground();
     }
 
     @Override

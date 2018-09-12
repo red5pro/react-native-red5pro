@@ -1,5 +1,6 @@
 import React from 'react'
 import {
+  AppState,
   findNodeHandle,
   Button,
   StyleSheet,
@@ -82,6 +83,7 @@ export default class Publisher extends React.Component {
     this.onToggleVideoMute = this.onToggleVideoMute.bind(this)
 
     this.state = {
+      appState: AppState.currentState,
       audioMuted: false,
       isInErrorState: false,
       videoMuted: false,
@@ -102,7 +104,14 @@ export default class Publisher extends React.Component {
     }
   }
 
+  componentWillMount () {
+    console.log('Publisher:componentWillMount()')
+    AppState.addEventListener('change', this._handleAppStateChange)
+  }
+
   componentWillUnmount () {
+    console.log('Publisher:componentWillUnmount()')
+    AppState.removeEventListener('change', this._handleAppStateChange)
     const nodeHandle = findNodeHandle(this.red5pro_video_publisher)
     const {
       streamProps: {
@@ -114,6 +123,24 @@ export default class Publisher extends React.Component {
     if (nodeHandle) {
       unpublish(nodeHandle, streamName)
     }
+  }
+
+  _handleAppStateChange = (nextAppState) => {
+    console.log(`Publisher:AppState - ${nextAppState}`)
+    const { streamProps: { enableBackgroundStreaming } } = this.props
+    const nodeHandle = findNodeHandle(this.red5pro_video_publisher)
+    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+      console.log('Publisher:AppState - App has come to the foreground.')
+    } else if (nextAppState.match(/inactive|background/) && this.state.appState === 'active') {
+      console.log('Publisher:AppState - App has gone to the background.')
+      if (!enableBackgroundStreaming) {
+        console.log('Publisher:AppState - unpublish()')
+        unpublish(nodeHandle)
+      }
+    }
+    this.setState({
+      appState: nextAppState
+    })
   }
 
   render () {
@@ -215,7 +242,7 @@ export default class Publisher extends React.Component {
     console.log(`Publisher:onUnpublishNotification:: ${JSON.stringify(event.nativeEvent.status, null, 2)}`)
     this.setState({
       isInErrorState: false,
-      toastProps: {...this.state.toastProps, value: 'waiting...'}
+      toastProps: {...this.state.toastProps, value: 'Unpublished'}
     })
   }
 

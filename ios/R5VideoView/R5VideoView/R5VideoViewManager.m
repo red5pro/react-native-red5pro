@@ -180,32 +180,6 @@ RCT_EXPORT_METHOD(setPlaybackVolume:(nonnull NSNumber *)reactTag value:(int)valu
     
 }
 
-//RCT_EXPORT_METHOD(sendToBackground:(nonnull NSNumber *)reactTag) {
-//    
-//    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
-//        R5VideoView *view = viewRegistry[reactTag];
-//        if (![view isKindOfClass:[R5VideoView class]]) {
-//            RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
-//        } else {
-//            [view sendToBackground];
-//        }
-//    }];
-//    
-//}
-//
-//RCT_EXPORT_METHOD(bringToForeground:(nonnull NSNumber *)reactTag) {
-//    
-//    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
-//        R5VideoView *view = viewRegistry[reactTag];
-//        if (![view isKindOfClass:[R5VideoView class]]) {
-//            RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
-//        } else {
-//            [view bringToForeground];
-//        }
-//    }];
-//    
-//}
-
 # pragma RN Properties
 RCT_EXPORT_VIEW_PROPERTY(logLevel, int);
 RCT_EXPORT_VIEW_PROPERTY(scaleMode, int);
@@ -245,21 +219,8 @@ RCT_CUSTOM_VIEW_PROPERTY(configuration, R5Configuration, R5VideoView) {
 
 }
 
-//- (void)onDeviceOrientation:(NSNotification *)notification {
-//  [r5View onDeviceOrientation:notification];
-//}
-//
-//- (void)addObservers {
-//  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onDeviceOrientation:) name:UIDeviceOrientationDidChangeNotification object:nil];
-//}
-//
-//- (void)removeObservers {
-//  [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
-//}
-
 - (UIView *)view {
   R5VideoView *r5View = [[R5VideoView alloc] init];
-//  [self addObservers];
   return r5View;
 }
 
