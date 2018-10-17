@@ -5,6 +5,7 @@
 	};
 	objectVersion = 46;
 	objects = {
+
 /* Begin PBXBuildFile section */
 		00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302AC1ABCB8CE00DB3ED1 /* libRCTActionSheet.a */; };
 		00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */; };
@@ -25,10 +26,10 @@
 		2BB80BE60A454341ACFA67D6 /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C01B53F7801D46F29EF07334 /* SimpleLineIcons.ttf */; };
 		35A7719C07264113A4159B3B /* Feather.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FC8CAE3AE3A24F8DAE2BFC3C /* Feather.ttf */; };
 		4885C7071FBCD3EB00E77415 /* R5Streaming.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4885C7061FBCD3EB00E77415 /* R5Streaming.framework */; };
-		4885C7481FBCD99200E77415 /* libstdc++.6.0.9.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 4885C7471FBCD99200E77415 /* libstdc++.6.0.9.tbd */; };
 		4885C74A1FBCD99900E77415 /* libiconv.2.4.0.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 4885C7491FBCD99900E77415 /* libiconv.2.4.0.tbd */; };
 		4885C74C1FBCD99F00E77415 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 4885C74B1FBCD99F00E77415 /* libz.tbd */; };
 		4885C74E1FBCD9A500E77415 /* libbz2.1.0.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 4885C74D1FBCD9A500E77415 /* libbz2.1.0.tbd */; };
+		48B5730B217758AF005E9967 /* libc++.1.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 48B5730A217758AF005E9967 /* libc++.1.tbd */; };
 		492B7D1C5542409EB36C73EC /* libR5VideoView.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 49FCB1AB163541A9AAB78157 /* libR5VideoView.a */; };
 		595D4BD8A76642B6AFB0E9DE /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2E41D941852045BEB4E58299 /* Ionicons.ttf */; };
 		5C55FD2C639445518AF9A452 /* EvilIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 21FC3EC77AE94C598ACF90D9 /* EvilIcons.ttf */; };
@@ -374,6 +375,7 @@
 		4885C7511FBCD9BD00E77415 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 		4885C7521FBCD9C400E77415 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		4885C7531FBCD9CB00E77415 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
+		48B5730A217758AF005E9967 /* libc++.1.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.1.tbd"; path = "usr/lib/libc++.1.tbd"; sourceTree = SDKROOT; };
 		4924DB273490463486BD8B8D /* FontAwesome5_Solid.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome5_Solid.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Solid.ttf"; sourceTree = "<group>"; };
 		49FCB1AB163541A9AAB78157 /* libR5VideoView.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libR5VideoView.a; sourceTree = "<group>"; };
 		4D56EA92F45F4CC3AFD7AEBD /* R5VideoView.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = R5VideoView.xcodeproj; path = "../node_modules/react-native-red5pro/ios/R5VideoView/R5VideoView.xcodeproj"; sourceTree = "<group>"; };
@@ -407,6 +409,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				48B5730B217758AF005E9967 /* libc++.1.tbd in Frameworks */,
 				ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */,
 				4885C74E1FBCD9A500E77415 /* libbz2.1.0.tbd in Frameworks */,
 				5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */,
@@ -424,7 +427,6 @@
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
-				4885C7481FBCD99200E77415 /* libstdc++.6.0.9.tbd in Frameworks */,
 				A2F334B6EF184D2A92131314 /* libReactNativePermissions.a in Frameworks */,
 				492B7D1C5542409EB36C73EC /* libR5VideoView.a in Frameworks */,
 				B12CCF8B85C64040ADED8AD8 /* libRNVectorIcons.a in Frameworks */,
@@ -563,6 +565,7 @@
 		4885C7051FBCD38300E77415 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				48B5730A217758AF005E9967 /* libc++.1.tbd */,
 				4885C7531FBCD9CB00E77415 /* VideoToolbox.framework */,
 				4885C7521FBCD9C400E77415 /* CoreFoundation.framework */,
 				4885C7511FBCD9BD00E77415 /* OpenAL.framework */,
@@ -1316,6 +1319,7 @@
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 				);
 				INFOPLIST_FILE = Red5ProVideoViewExample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -1349,6 +1353,7 @@
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 				);
 				INFOPLIST_FILE = Red5ProVideoViewExample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
