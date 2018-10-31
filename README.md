@@ -312,7 +312,7 @@ The following describe the API available for the `react-native-red5pro` componen
 | streamType | int | 0 | Enumerated value of [R5PublishType](src/enum/R5VideoView.publishtype.js). | x | |
 | publishVideo | boolean | true | Flag to include video in broadcast. | x | |
 | publishAudio | boolean | true | Flag to include audio in broadcast. | x | |
-| subscribeView | boolean | true | Flag to include video in subscription. | x | |
+| subscribeVideo | boolean | true | Flag to include video in subscription. | x | |
 | cameraWidth | int | 640 | Width dimension of Camera to use in broadcast. | x | |
 | cameraHeight | int | 360 | Height dimension of Camera to use in broadcast. | x | |
 | bitrate | int | 750 | The video bitrate to broadcast at. | x | |
@@ -322,6 +322,9 @@ The following describe the API available for the `react-native-red5pro` componen
 | useAdaptiveBitrateController | boolean | false | Use of adaptive bitrate streaming for broadcasting.  | x | |
 | useBackfacingCamera | boolean | false | Use the backfacing camera of the device to start broadcasting. | x | |
 | audioMode | int | 0 | Enumerated value of [R5AudioMode](src/enum/R5VideoView.audiomode.js). | | x |
+| enableBackgroundStreaming | boolean | false | Turns on ability to continue to publish or subscribe to audio while app is in the background. |
+| zOrderOnTop | boolean | false | Setting of layout order of stream view. _Android only._ |
+| zOrderMediaOverlay | boolean | false | Setting of layout order of stream view. _Android only._ |
 | configuration | shape | `REQUIRED` | [Refer to Configuration Properties](#configuration-properties). | x | x |
 
 ## Configuration Properties
