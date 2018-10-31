@@ -1,9 +1,17 @@
 package com.red5pro.reactnative.view;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.hardware.Camera;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Surface;
 import android.view.View;
@@ -29,13 +37,16 @@ import com.red5pro.streaming.source.R5Camera;
 import com.red5pro.streaming.source.R5Microphone;
 import com.red5pro.streaming.view.R5VideoView;
 
-public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListener, LifecycleEventListener {
+public class R5VideoViewLayout extends FrameLayout
+        implements R5ConnectionListener, LifecycleEventListener,
+        PublishService.PublishServicable, SubscribeService.SubscribeServicable {
 
     public int logLevel;
     public int scaleMode;
     public boolean showDebug;
 
     protected String mStreamName;
+    protected R5Stream.RecordType mStreamType;
     protected boolean mIsPublisher;
     protected boolean mIsStreaming;
     protected R5VideoView mVideoView;
@@ -43,9 +54,47 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
     protected ThemedReactContext mContext;
     protected RCTEventEmitter mEventEmitter;
+    protected R5Configuration mConfiguration;
     protected R5Connection mConnection;
     protected R5Stream mStream;
     protected R5Camera mCamera;
+
+    protected boolean mIsRestrainingVideo;
+    protected boolean mIsBackgroundBound;
+
+    protected PublishService mBackgroundPublishService;
+    private Intent mPubishIntent;
+
+    private ServiceConnection mPublishServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d("R5VideoViewLayout", "connection:onServiceConnected()");
+            mBackgroundPublishService = ((PublishService.PublishServiceBinder)service).getService();
+            mBackgroundPublishService.setServicableDelegate(R5VideoViewLayout.this);
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d("R5VideoViewLayout", "connection:onServiceDisconnected()");
+            mBackgroundPublishService = null;
+        }
+    };
+
+    protected SubscribeService mBackgroundSubscribeService;
+    private Intent mSubscribeIntent;
+
+    private ServiceConnection mSubscribeServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d("R5VideoViewLayout", "connection:onServiceConnected()");
+            mBackgroundSubscribeService = ((SubscribeService.SubscribeServiceBinder)service).getService();
+            mBackgroundSubscribeService.setServicableDelegate(R5VideoViewLayout.this);
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d("R5VideoViewLayout", "connection:onServiceDisconnected()");
+            mBackgroundSubscribeService = null;
+        }
+    };
 
     protected boolean mUseVideo = true;
     protected boolean mUseAudio = true;
@@ -59,7 +108,9 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
     protected int mAudioSampleRate = 44100;
     protected boolean mUseAdaptiveBitrateController = false;
     protected boolean mUseBackfacingCamera = false;
-
+    protected boolean mEnableBackgroundStreaming = false;
+    protected boolean mZOrderOnTop = false;
+    protected boolean mZOrderMediaOverlay = false;
 
     protected int mClientWidth;
     protected int mClientHeight;
@@ -103,7 +154,12 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         UNPUBLISH("unpublish", 4),
         SWAP_CAMERA("swapCamera", 5),
         UPDATE_SCALE_MODE("updateScaleMode", 6),
-        UPDATE_SCALE_SIZE("updateScaleSize", 7);
+        UPDATE_SCALE_SIZE("updateScaleSize", 7),
+        MUTE_AUDIO("muteAudio", 8),
+        UNMUTE_AUDIO("unmuteAudio", 9),
+        MUTE_VIDEO("muteVideo", 10),
+        UNMUTE_VIDEO("unmuteVideo", 11),
+        SET_PLAYBACK_VOLUME("setPlaybackVolume", 12);
 
         private final String mName;
         private final int mValue;
@@ -140,17 +196,27 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         mVideoView = new R5VideoView(mContext);
         mVideoView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mVideoView.setBackgroundColor(Color.BLACK);
+        mVideoView.setZOrderOnTop(mZOrderOnTop);
+//        mVideoView.setZOrderMediaOverlay(mZOrderMediaOverlay);
         addView(mVideoView);
 
     }
 
     public void loadConfiguration(final R5Configuration configuration, final String forKey) {
 
+        mConfiguration = configuration;
         initiate(configuration, forKey);
 
     }
 
     public void initiate(R5Configuration configuration, String forKey) {
+
+        establishConnection(configuration);
+        onConfigured(forKey);
+
+    }
+
+    private void establishConnection(R5Configuration configuration) {
 
         R5AudioController.mode = mAudioMode == 1
                 ? R5AudioController.PlaybackMode.STANDARD
@@ -165,24 +231,54 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         mStream.setLogLevel(logLevel);
         mStream.setScaleMode(scaleMode);
 
-        onConfigured(forKey);
-
     }
 
-    public void subscribe (String streamName) {
-
-        mStreamName = streamName;
+    private void doSubscribe (String streamName, Boolean showDebug) {
 
         if (mPlaybackVideo && this.getVideoView() == null) {
             createVideoView();
             mVideoView.attachStream(mStream);
             mVideoView.showDebugView(showDebug);
+        } else if (mPlaybackVideo && this.getVideoView() != null) {
+            mVideoView.attachStream(mStream);
         }
         mStream.play(streamName);
 
     }
 
+    public void subscribeBound () {
+
+        Log.d("R5VideoViewLayout", "doSubscribeBound()");
+        doSubscribe(mStreamName, showDebug);
+
+    }
+
+    public void subscribe (String streamName) {
+
+        Log.d("R5VideoViewLayout", "subscribe()");
+
+        mStreamName = streamName;
+
+        if (mStream == null) {
+            Log.d("R5VideoViewLayout", "subscriber re-establishing connection.");
+            establishConnection(mConfiguration);
+        }
+
+        if (mEnableBackgroundStreaming) {
+            Log.d("R5VideoViewLayout", "setting up bound subscriber for background streaming.");
+            // Set up service and offload setup.
+            mSubscribeIntent = new Intent(mContext.getCurrentActivity(), SubscribeService.class);
+            detectToStartService(mSubscribeIntent, mSubscribeServiceConnection);
+            return;
+        }
+
+        doSubscribe(mStreamName, showDebug);
+
+    }
+
     public void unsubscribe () {
+
+        Log.d("R5VideoViewLayout", "unsubscribe()");
 
         if (mVideoView != null) {
             mVideoView.attachStream(null);
@@ -269,14 +365,37 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         mIsPublisherSetup = true;
     }
 
-    public void publish (String streamName, R5Stream.RecordType streamType) {
+    private void detectToStartService (Intent intent, ServiceConnection connection) {
+        Log.d("R5VideoViewLayout", "detectStartService()");
+        boolean found = false;
+        Activity activity = mContext.getCurrentActivity();
+        ActivityManager actManager = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
+        try {
+            for (ActivityManager.RunningServiceInfo serviceInfo : actManager.getRunningServices(Integer.MAX_VALUE)) {
+                if (serviceInfo.service.getClassName().equals(PublishService.class.getName())) {
+                    found = true;
+                }
+            }
+        } catch (NullPointerException e){}
+
+        if(!found){
+            Log.d("R5VideoViewLayout", "detectStartService:start()");
+            mContext.getCurrentActivity().startService(intent);
+        }
+
+        Log.d("R5VideoViewLayout", "detectStartService:bind()");
+        activity.bindService(intent, connection, Context.BIND_IMPORTANT);
+        mIsBackgroundBound = true;
+    }
+
+    private void doPublish (String streamName, R5Stream.RecordType streamType) {
 
         Log.d("R5VideoViewLayout", "publish");
         Boolean hasPreview = mIsPublisherSetup;
         if (!mIsPublisherSetup) {
             setupPublisher(false);
         }
-        mStreamName = streamName;
+
         mIsPublisher = true;
 
         if (this.getVideoView() != null) {
@@ -301,16 +420,53 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
     }
 
+    public void publishBound () {
+
+        Log.d("R5VideoViewLayout", "doPublishBound()");
+        doPublish(mStreamName, mStreamType);
+
+    }
+
+    public void publish (String streamName, R5Stream.RecordType streamType) {
+
+        Log.d("R5VideoViewLayout", "publish()");
+
+        mStreamName = streamName;
+        mStreamType = streamType;
+
+        if (mStream == null) {
+            Log.d("R5VideoViewLayout", "publisher re-establishing connection.");
+            establishConnection(mConfiguration);
+        }
+
+        if (mEnableBackgroundStreaming) {
+            Log.d("R5VideoViewLayout", "setting up bound publisher for background streaming.");
+            // Set up service and offload setup.
+            mPubishIntent = new Intent(mContext.getCurrentActivity(), PublishService.class);
+            detectToStartService(mPubishIntent, mPublishServiceConnection);
+            return;
+        }
+
+        doPublish(mStreamName, mStreamType);
+
+    }
+
     public void unpublish () {
+
+        Log.d("R5VideoViewLayout", "unpublish()");
 
         if (mVideoView != null) {
             mVideoView.attachStream(null);
         }
 
         if (mCamera != null) {
-            Camera c = mCamera.getCamera();
-            c.stopPreview();
-            c.release();
+            try {
+                Camera c = mCamera.getCamera();
+                c.stopPreview();
+                c.release();
+            } catch (Exception e) {
+                Log.w("R5VideoViewLayout", "unpublish:stop:error  " + e.getMessage());
+            }
             mCamera = null;
         }
 
@@ -399,10 +555,44 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
     }
 
+    public void muteAudio () {
+        if (mIsPublisher) {
+            mStream.restrainAudio(true);
+        }
+    }
+    public void unmuteAudio () {
+        if (mIsPublisher) {
+            mStream.restrainAudio(false);
+        }
+    }
+
+    public void muteVideo () {
+        if (mIsPublisher) {
+            mIsRestrainingVideo = true;
+            mStream.restrainVideo(true);
+        }
+    }
+    public void unmuteVideo () {
+        if (mIsPublisher) {
+            mIsRestrainingVideo = false;
+            mStream.restrainVideo(false);
+        }
+    }
+
+    public void setPlaybackVolume (float value) {
+        Log.d("R5VideoViewLayout", "setPlaybackVolume(" + value + ")");
+        if (mIsStreaming && !mIsPublisher) {
+            if (mStream != null && mStream.audioController != null) {
+                mStream.audioController.setPlaybackGain(value);
+            }
+        }
+    }
+
     protected void cleanup() {
 
         Log.d("R5VideoViewLayout", ":cleanup (" + mStreamName + ")!");
         if (mStream != null) {
+            mStream.attachCamera(null);
             mStream.client = null;
             mStream.setListener(null);
             mStream = null;
@@ -412,12 +602,15 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
             mConnection.removeListener();
             mConnection = null;
         }
+
         if (mVideoView != null) {
             mVideoView.attachStream(null);
-//            removeView(mVideoView);
-            mVideoView = null;
+//            mVideoView = null;
         }
+
         mIsStreaming = false;
+        mIsPublisherSetup = false;
+        mIsRestrainingVideo = false;
 
     }
 
@@ -431,6 +624,50 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
                 }
             }
         };
+    }
+
+    protected void setPublisherDisplayOn (Boolean setOn) {
+
+        Log.d("R5VideoViewLayout", "setPublisherDisplayOn(" + setOn + ")");
+        if (!setOn) {
+            if (mStream != null) {
+                Log.d("R5VideoViewLayout", "Stream:restraingVideo()");
+                mStream.restrainVideo(true);
+            }
+			if (mCamera != null && mCamera.getCamera() != null) {
+                Log.d("R5VideoViewLayout", "Camera:stop()");
+                try {
+                    Camera c = mCamera.getCamera();
+                    c.stopPreview();
+                    c.release();
+                    mCamera.setCamera(null);
+                } catch (Exception e) {
+                    Log.w("R5VideoViewLayout", "Camera:stop:error - " + e.getMessage());
+                }
+            }
+        } else if (mCamera != null && mStream != null && !mIsRestrainingVideo) {
+            Log.d("R5VideoViewLayout", "setPublisherDisplayOn:reset()");
+            int rotate = mUseBackfacingCamera ? 0 : 180;
+            int displayOrientation = (mDisplayOrientation + rotate) % 360;
+            Camera device = mUseBackfacingCamera
+                    ? openBackFacingCameraGingerbread()
+                    : openFrontFacingCameraGingerbread();
+            device.setDisplayOrientation(displayOrientation);
+
+            mCamera.setCamera(device);
+			mCamera.setOrientation(mCameraOrientation);
+
+			mStream.restrainVideo(false);
+            mStream.updateStreamMeta();
+            device.startPreview();
+        } else {
+            Log.d("R5VideoViewLayout", "setPublisherDisplayOn:bypassed");
+        }
+
+        if (mBackgroundPublishService != null) {
+            mBackgroundPublishService.setDisplayOn(setOn);
+        }
+
     }
 
     protected void reorient() {
@@ -551,6 +788,26 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
     }
 
+    protected void setSubscriberDisplayOn (Boolean setOn) {
+
+        Log.d("R5VideoViewLayout", "setSubscriberDisplayOn(" + setOn + ")");
+        if (!setOn) {
+            if (mStream != null) {
+                Log.d("R5VideoViewLayout", "Stream:deactivate_display()");
+                mStream.deactivate_display();
+            }
+        } else if (mStream != null) {
+            Log.d("R5VideoViewLayout", "Stream:activate_display()");
+            mStream.activate_display();
+
+        }
+
+        if (mBackgroundSubscribeService != null) {
+            mBackgroundSubscribeService.setDisplayOn(setOn);
+        }
+
+    }
+
     protected void onConfigured(String key) {
 
         Log.d("R5VideoViewLayout", "onConfigured()");
@@ -565,6 +822,42 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         if (this.getVideoView() != null) {
             this.getVideoView().setStreamRotation(value);
         }
+    }
+
+    public void sendToBackground () {
+
+        Log.d("R5VideoViewLayout", "sendToBackground()");
+        if (!mEnableBackgroundStreaming) {
+            Log.d("R5VideoViewLayout", "sendToBackground:shutdown");
+            if (mIsPublisher) {
+                this.unpublish();
+            } else {
+                this.unsubscribe();
+            }
+            return;
+        }
+
+        if (mIsPublisher && mEnableBackgroundStreaming) {
+            Log.d("R5VideoViewLayout", "sendToBackground:publiserPause");
+            this.setPublisherDisplayOn(false);
+        } else if (mIsStreaming && mEnableBackgroundStreaming) {
+            Log.d("R5VideoViewLayout", "sendToBackground:subscriberPause");
+            this.setSubscriberDisplayOn(false);
+        }
+
+    }
+
+    public void bringToForeground () {
+
+        Log.d("R5VideoViewLayout", "bringToForeground()");
+        if (mIsPublisher && mEnableBackgroundStreaming) {
+            Log.d("R5VideoViewLayout", "sendToBackground:publiserResume");
+            this.setPublisherDisplayOn(true);
+        } else if (mIsStreaming && mEnableBackgroundStreaming) {
+            Log.d("R5VideoViewLayout", "sendToBackground:publiserResume");
+            this.setSubscriberDisplayOn(true);
+        }
+
     }
 
     public void onMetaData(String metadata) {
@@ -625,6 +918,9 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
             mLayoutListener = setUpOrientationListener();
         }
         this.addOnLayoutChangeListener(mLayoutListener);
+
+        Log.d("R5VideoViewLayout", "onHostResume()");
+        bringToForeground();
     }
 
     @Override
@@ -632,11 +928,25 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
         if (mLayoutListener != null) {
             this.removeOnLayoutChangeListener(mLayoutListener);
         }
+        Log.d("R5VideoViewLayout", "onHostPause()");
+        sendToBackground();
     }
 
     @Override
     public void onHostDestroy() {
-        //Log.d("R5VideoViewLayout", "onHostDestroy");
+        Log.d("R5VideoViewLayout", "onHostDestroy()");
+        Activity activity = mContext.getCurrentActivity();
+        if (mPubishIntent != null && mIsBackgroundBound) {
+            this.setPublisherDisplayOn(false);
+            activity.unbindService(mPublishServiceConnection);
+            activity.stopService(mPubishIntent);
+            mIsBackgroundBound = false;
+        } else if (mSubscribeIntent != null && mIsBackgroundBound) {
+            this.setSubscriberDisplayOn(false);
+            activity.unbindService(mSubscribeServiceConnection);
+            activity.stopService(mSubscribeIntent);
+            mIsBackgroundBound = false;
+        }
     }
 
     @Override
@@ -711,6 +1021,18 @@ public class R5VideoViewLayout extends FrameLayout implements R5ConnectionListen
 
     public void updatePublisherUseBackfacingCamera(boolean value) {
         this.mUseBackfacingCamera = value;
+    }
+
+    public void updatePubSubBackgroundStreaming(boolean value) {
+        this.mEnableBackgroundStreaming = value;
+    }
+
+    public void updateZOrderOnTop(boolean value) {
+        this.mZOrderOnTop = value;
+    }
+
+    public void updateZOrderMediaOverlay(boolean value) {
+        this.mZOrderMediaOverlay = value;
     }
 
     public R5VideoView getVideoView() {

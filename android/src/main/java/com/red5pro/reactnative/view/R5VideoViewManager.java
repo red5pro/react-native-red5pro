@@ -40,6 +40,15 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     private static final int COMMAND_SWAP_CAMERA = 5;
     private static final int COMMAND_UPDATE_SCALE_MODE = 6;
     private static final int COMMAND_UPDATE_SCALE_SIZE = 7;
+    private static final int COMMAND_MUTE_AUDIO = 8;
+    private static final int COMMAND_UNMUTE_AUDIO = 9;
+    private static final int COMMAND_MUTE_VIDEO = 10;
+    private static final int COMMAND_UNMUTE_VIDEO = 11;
+    private static final int COMMAND_SET_PLAYBACK_VOLUME = 12;
+
+    public R5VideoViewLayout getmView() {
+        return mView;
+    }
 
     private R5VideoViewLayout mView;
     private ThemedReactContext mContext;
@@ -125,6 +134,24 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
                 root.updateScaleMode(mode);
 
                 break;
+            case COMMAND_MUTE_AUDIO:
+                root.muteAudio();
+                break;
+            case COMMAND_UNMUTE_AUDIO:
+                root.unmuteAudio();
+                break;
+            case COMMAND_MUTE_VIDEO:
+                root.muteVideo();
+                break;
+            case COMMAND_UNMUTE_VIDEO:
+                root.unmuteVideo();
+                break;
+            case COMMAND_SET_PLAYBACK_VOLUME:
+
+                final int value = args.getInt(0);
+                root.setPlaybackVolume(value/100);
+
+                break;
             default:
                 super.receiveCommand(root, commandId, args);
                 break;
@@ -179,6 +206,8 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
         float bufferTime = hasBufferTime ? (float) configuration.getDouble(PROP_BUFFER_TIME) : 1.0f;
         float streamBufferTime = hasStreamBufferTime ? (float) configuration.getDouble(PROP_STREAM_BUFFER_TIME) : 2.0f;
         String parameters = hasParameters ? configuration.getString(PROP_PARAMETERS) : "";
+
+        Log.d("R5VideoViewManager", "Parameters: " + parameters);
 
         R5Configuration config = new R5Configuration(protocol, host, port, contextName, bufferTime, parameters);
 
@@ -279,6 +308,21 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     @ReactProp(name = "useBackfacingCamera", defaultBoolean = false)
     public void setUseBackfacingCamera(R5VideoViewLayout view, boolean value) {
         view.updatePublisherUseBackfacingCamera(value);
+    }
+
+    @ReactProp(name = "enableBackgroundStreaming", defaultBoolean = false)
+    public void setEnableBackgroundStreaming(R5VideoViewLayout view, boolean value) {
+        view.updatePubSubBackgroundStreaming(value);
+    }
+
+    @ReactProp(name = "zOrderOnTop", defaultBoolean = true)
+    public  void setZOrderOnTop(R5VideoViewLayout view, boolean value) {
+        view.updateZOrderOnTop(value);
+    }
+
+    @ReactProp(name = "zOrderMediaOverlay", defaultBoolean = true)
+    public  void setZOrderOverlayMedia(R5VideoViewLayout view, boolean value) {
+        view.updateZOrderMediaOverlay(value);
     }
 
     @Nullable

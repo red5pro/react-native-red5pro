@@ -1,9 +1,10 @@
 {
   "name": "react-native-red5pro",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "React Native Red5 Pro Publisher/Subscriber",
   "main": "index.js",
   "scripts": {
+    "version": "changes",
     "test": "test"
   },
   "repository": {
@@ -41,5 +42,10 @@
     "url": "https://github.com/infrared5/react-native-red5pro/issues"
   },
   "homepage": "https://github.com/infrared5/react-native-red5pro#readme",
-  "devDependencies": {}
+  "devDependencies": {
+    "@studio/changes": "^1.7.0",
+    "babel-eslint": "^9.0.0",
+    "eslint": "^5.5.0"
+  },
+  "dependencies": {}
 }

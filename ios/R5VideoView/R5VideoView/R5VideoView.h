@@ -19,6 +19,7 @@
 
 @property R5Stream *stream;
 @property R5Connection *connection;
+@property R5Configuration *configuration;
 @property R5VideoViewController *controller;
 
 - (void)loadConfiguration:(R5Configuration *)configuration forKey:(NSString *)key;
@@ -40,6 +41,11 @@
 - (void)swapCamera;
 - (void)updateScaleMode:(int)mode;
 - (void)updateScaleSize:(int)width withHeight:(int)height withScreenWidth:(int)screenWidth withScreenHeight:(int)screenHeight;
+- (void)muteAudio;
+- (void)unmuteAudio;
+- (void)muteVideo;
+- (void)unmuteVideo;
+- (void)setPlaybackVolume:(int)value;
 
 # pragma RN Properties
 - (BOOL)getShowDebugInfo;

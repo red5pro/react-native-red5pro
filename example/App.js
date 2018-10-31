@@ -6,6 +6,9 @@ import {
   TextInput,
   View
 } from 'react-native'
+import {
+  CheckBox
+} from 'react-native-elements'
 import Permissions from 'react-native-permissions'
 import { 
   R5LogLevel,
@@ -27,12 +30,17 @@ export default class App extends React.Component {
     this.onHostChange = this.onHostChange.bind(this)
     this.onLicenseChange = this.onLicenseChange.bind(this)
     this.onStreamNameChange = this.onStreamNameChange.bind(this)
+    this.onEnableBackgroundStreamingChange = this.onEnableBackgroundStreamingChange.bind(this)
+    this.onUseAuthenticationChange = this.onUseAuthenticationChange.bind(this)
+    this.onUsernameChange = this.onUsernameChange.bind(this)
+    this.onPasswordChange = this.onPasswordChange.bind(this)
 
     // Props.
     this.state = {
       hasPermissions: false,
       hasStarted: false,
       isPublisher: false,
+      useAuthentication: false,
       isInErrorState: false,
       hostFieldProps: {
         placeholder: 'Host',
@@ -58,6 +66,22 @@ export default class App extends React.Component {
         style: styles.inputField,
         value: ''
       },
+      usernameFieldProps: {
+        placeholder: 'Username',
+        autoCorrect: false,
+        underlineColorAndroid: '#00000000',
+        clearTextOnFocus: true,
+        style: styles.inputFieldAuth,
+        value: ''
+      },
+      passwordFieldProps: {
+        placeholder: 'Password',
+        autoCorrect: false,
+        underlineColorAndroid: '#00000000',
+        clearTextOnFocus: true,
+        style: [styles.inputFieldAuth, {marginBottom: 20}],
+        value: ''
+      },
       streamProps: {
         collapsable: false,
         configuration: {
@@ -69,11 +93,14 @@ export default class App extends React.Component {
           bufferTime: 0.5,
           streamBufferTime: 2.0,
           bundleID: 'com.red5pro.reactnative',
+          parameters: '',
           key: Math.floor(Math.random() * 0x10000).toString(16)
         },
+        subscribeVideo: true,
         showDebugView: true,
         logLevel: R5LogLevel.DEBUG,
-        useBackfacingCamera: false
+        useBackfacingCamera: false,
+        enableBackgroundStreaming: false
       }
     }
 
@@ -88,17 +115,30 @@ export default class App extends React.Component {
 
         if (!hasCamera || !hasMic) {
           this.requestPermissions()
-          this.setState({hasPermissions: false})
+          this.setState({
+            hasPermissions: false
+          })
         } else {
-          this.setState({hasPermissions: true})
+          this.setState({
+            hasPermissions: true
+          })
         }
       })
   }
 
   render () {
+    const {
+      useAuthentication,
+      streamProps: {
+        enableBackgroundStreaming
+      }
+    } = this.state
+
     const assignHostRef = (host) => { this.host_field = host }
     const assignLicenseRef = (license) => { this.license_field = license }
     const assignStreamNameRef = (streamName) => { this.stream_name_field = streamName }
+    const assignUsernameRef = (username) => { this.username_field = username }
+    const assignPasswordRef = (password) => { this.password_field = password }
 
     if (this.state.hasPermissions && this.state.hasStarted) {
       if (this.state.isPublisher) {
@@ -144,6 +184,31 @@ export default class App extends React.Component {
               onChangeText={this.onStreamNameChange}
             />
           </View>
+          <View style={styles.formField}>
+            <CheckBox title='Allow Background Streaming'
+              checked={enableBackgroundStreaming}
+              onPress={this.onEnableBackgroundStreamingChange}
+            />
+          </View>
+          <View style={styles.formField}>
+            <CheckBox title='Use Authentication'
+              checked={useAuthentication}
+              onPress={this.onUseAuthenticationChange}
+            />
+          </View>
+          { useAuthentication && <View>
+              <TextInput
+                ref={assignUsernameRef.bind(this)}
+                {...this.state.usernameFieldProps}
+                onChangeText={this.onUsernameChange}
+              />
+              <TextInput
+                ref={assignPasswordRef.bind(this)}
+                {...this.state.passwordFieldProps}
+                onChangeText={this.onPasswordChange}
+              />
+            </View>
+          }
           {!this.state.hasPermissions && <Text style={{color: 'white', backgroundColor: 'blue'}}>Waiting on permissions...</Text>}
           {this.state.hasPermissions && <View>
             <Button
@@ -180,16 +245,21 @@ export default class App extends React.Component {
           .then((micResponse) => {
             micPermission = isAuthorized.test(micResponse)
 
-            this.setState({hasPermissions: camPermission && micPermission})
+            this.setState({
+              hasPermissions: camPermission && micPermission
+            })
           })
       })
   }
 
-  onSubscribe (event) {
+  getStateFromProps () {
+    const { useAuthentication } = this.state
     const hostValue = this.host_field.props.value
     const licenseValue = this.license_field.props.value
     const streamNameValue = this.stream_name_field.props.value
-    this.setState({
+    const usernameValue = useAuthentication ? this.username_field.props.value : undefined
+    const passwordValue = useAuthentication ? this.password_field.props.value : undefined
+    return {
       hostFieldProps: {...this.state.hostFieldProps, value: hostValue},
       licenseFieldProps: {...this.state.licenseFieldProps, value: licenseValue},
       streamNameFieldProps: {...this.state.streamNameFieldProps, value: streamNameValue},
@@ -197,29 +267,29 @@ export default class App extends React.Component {
         configuration: {...this.state.streamProps.configuration,
           host: hostValue,
           licenseKey: licenseValue,
-          streamName: streamNameValue
+          streamName: streamNameValue,
+          parameters: !useAuthentication ? '' : [
+            ['username', usernameValue].join('='),
+            ['password', passwordValue].join('=')
+          ].join(';') + ';'
         }
-      },
+      }  
+    }
+  }
+
+  onSubscribe (event) {
+    const stateUpdate = this.getStateFromProps()
+    this.setState({
+      ...stateUpdate,
       isPublisher: false,
       hasStarted: true
     })
   }
 
   onPublish (event) {
-    const hostValue = this.host_field.props.value
-    const licenseValue = this.license_field.props.value
-    const streamNameValue = this.stream_name_field.props.value
+    const stateUpdate = this.getStateFromProps()
     this.setState({
-      hostFieldProps: {...this.state.hostFieldProps, value: hostValue},
-      licenseFieldProps: {...this.state.licenseFieldProps, value: licenseValue},
-      streamNameFieldProps: {...this.state.streamNameFieldProps, value: streamNameValue},
-      streamProps: {...this.state.streamProps,
-        configuration: {...this.state.streamProps.configuration,
-          host: hostValue,
-          licenseKey: licenseValue,
-          streamName: streamNameValue
-        }
-      },
+      ...stateUpdate,
       isPublisher: true,
       hasStarted: true
     })
@@ -252,6 +322,35 @@ export default class App extends React.Component {
     })
   }
 
+  onUsernameChange (text) {
+    this.setState({
+      usernameFieldProps: {...this.state.usernameFieldProps, value: text}
+    })
+  }
+
+  onPasswordChange (text) {
+    this.setState({
+      passwordFieldProps: {...this.state.passwordFieldProps, value: text}
+    })
+  }
+
+  onEnableBackgroundStreamingChange () {
+    const { streamProps: { enableBackgroundStreaming } } = this.state
+    this.setState({
+      streamProps: {
+        ...this.state.streamProps,
+        enableBackgroundStreaming: !enableBackgroundStreaming
+      }
+    })
+  }
+
+  onUseAuthenticationChange () {
+    const { useAuthentication } = this.state
+    this.setState({
+      useAuthentication: !useAuthentication
+    })
+  }
+
   onStop (event) {
     console.log('App:onStop()')
     this.setState({
@@ -272,6 +371,15 @@ const styles = StyleSheet.create({
   },
   inputField: {
     paddingLeft: 10,
+    height: 36,
+    borderBottomColor: 'gray',
+    borderBottomWidth: 1
+  },
+  inputFieldAuth: {
+    padding: 10,
+    marginLeft: 20,
+    marginRight: 20,
+    marginBottom: 10,
     height: 36,
     borderBottomColor: 'gray',
     borderBottomWidth: 1
