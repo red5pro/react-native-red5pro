@@ -312,6 +312,7 @@ The following describe the API available for the `react-native-red5pro` componen
 | streamType | int | 0 | Enumerated value of [R5PublishType](src/enum/R5VideoView.publishtype.js). | x | |
 | publishVideo | boolean | true | Flag to include video in broadcast. | x | |
 | publishAudio | boolean | true | Flag to include audio in broadcast. | x | |
+| subscribeView | boolean | true | Flag to include video in subscription. | x | |
 | cameraWidth | int | 640 | Width dimension of Camera to use in broadcast. | x | |
 | cameraHeight | int | 360 | Height dimension of Camera to use in broadcast. | x | |
 | bitrate | int | 750 | The video bitrate to broadcast at. | x | |
@@ -367,7 +368,13 @@ import { subscribe,
          publish,
          unpublish,
          swapCamera,
-         updateScaleMode } from 'react-native-red5pro'
+         updateScaleMode,
+         setPlaybackVolume,
+         muteAudio,
+         unmuteAudio,
+         muteVideo,
+         unmuteVideo
+} from 'react-native-red5pro'
 ```
 
 | Name | Arguments | Description | Publisher | Subscriber |
@@ -378,6 +385,11 @@ import { subscribe,
 | unpublish | `<ref>` | Request to stop broadcast. | x | |
 | swapCamera | `<ref>` | Request to swap camera on device, from front-facing to back-facing and vice-versa. | x | |
 | updateScaleMode | `<ref>`, `mode` | Request to change playback scalemode (0: `fill with aspect ratio`, 1: `fit, with letterboxing`, 2: `fill to view`). | | x |
+| setPlaybackVolume | `<ref>`, `int` | Request to set playback volume. _From `0` to `100`._ | | | x |
+| muteAudio | `<ref>` | Request to not send audio on broadcast during a publish session. | x | |
+| unmuteAudio | `<ref>` | Request to send audio on broadcast during a publish session. | x | |
+| muteVideo | `<ref>` | Request to not send video on broadcast during a publish session. | x | |
+| unmuteVideo | `<ref>` | Request to send video on broadcast during a publish session. | x | |
 
 ## Event Callbacks
 

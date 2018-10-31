@@ -3,7 +3,9 @@
   "version": "0.3.0",
   "private": true,
   "devDependencies": {
-    "babel-preset-react-native-stage-0": "^1.0.1",
+    "babel-eslint": "^9.0.0",
+    "babel-preset-react-native": "^4.0.0",
+    "eslint": "^5.5.0",
     "jest-expo": "^27.0.0",
     "react-test-renderer": "16.3.2"
   },
@@ -17,9 +19,11 @@
     "preset": "jest-expo"
   },
   "dependencies": {
-    "react": "16.3.2",
-    "react-native": "^0.55.3",
+    "react": "16.3.1",
+    "react-native": "^0.55.4",
+    "react-native-elements": "^0.19.1",
     "react-native-permissions": "^1.1.1",
-    "react-native-red5pro": "https://github.com/infrared5/react-native-red5pro/tarball/develop"
+    "react-native-red5pro": "https://github.com/infrared5/react-native-red5pro/tarball/release/3.0.0",
+    "react-native-vector-icons": "^5.0.0"
   }
 }

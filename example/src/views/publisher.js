@@ -1,16 +1,20 @@
 import React from 'react'
 import {
+  AppState,
   findNodeHandle,
   Button,
   StyleSheet,
   Text,
   View
 } from 'react-native'
+import { Icon } from 'react-native-elements'
 import {
   R5VideoView,
   publish,
   unpublish,
-  swapCamera
+  swapCamera,
+  muteAudio, unmuteAudio,
+  muteVideo, unmuteVideo
 } from 'react-native-red5pro'
 
 const styles = StyleSheet.create({
@@ -41,6 +45,22 @@ const styles = StyleSheet.create({
     padding: 10,
     textAlign: 'center',
     backgroundColor: 'rgba(0, 0, 0, 1.0)'
+  },
+  muteIcon: {
+    position: 'absolute',
+    top: 10,
+    padding: 6,
+    borderRadius: 40,
+    backgroundColor: 'white'
+  },
+  muteIconRightmost: {
+    right: 10
+  },
+  muteIconRight: {
+    right: 70
+  },
+  muteIconToggled: {
+    backgroundColor: '#2089dc'
   }
 })
 
@@ -59,9 +79,14 @@ export default class Publisher extends React.Component {
     this.onUnpublishNotification = this.onUnpublishNotification.bind(this)
 
     this.onSwapCamera = this.onSwapCamera.bind(this)
+    this.onToggleAudioMute = this.onToggleAudioMute.bind(this)
+    this.onToggleVideoMute = this.onToggleVideoMute.bind(this)
 
     this.state = {
+      appState: AppState.currentState,
+      audioMuted: false,
       isInErrorState: false,
+      videoMuted: false,
       buttonProps: {
         style: styles.button
       },
@@ -79,7 +104,14 @@ export default class Publisher extends React.Component {
     }
   }
 
+  componentWillMount () {
+    console.log('Publisher:componentWillMount()')
+    AppState.addEventListener('change', this._handleAppStateChange)
+  }
+
   componentWillUnmount () {
+    console.log('Publisher:componentWillUnmount()')
+    AppState.removeEventListener('change', this._handleAppStateChange)
     const nodeHandle = findNodeHandle(this.red5pro_video_publisher)
     const {
       streamProps: {
@@ -93,11 +125,31 @@ export default class Publisher extends React.Component {
     }
   }
 
+  _handleAppStateChange = (nextAppState) => {
+    console.log(`Publisher:AppState - ${nextAppState}`)
+    const { streamProps: { enableBackgroundStreaming } } = this.props
+    const nodeHandle = findNodeHandle(this.red5pro_video_publisher)
+    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+      console.log('Publisher:AppState - App has come to the foreground.')
+    } else if (nextAppState.match(/inactive|background/) && this.state.appState === 'active') {
+      console.log('Publisher:AppState - App has gone to the background.')
+      if (!enableBackgroundStreaming) {
+        console.log('Publisher:AppState - unpublish()')
+        unpublish(nodeHandle)
+      }
+    }
+    this.setState({
+      appState: nextAppState
+    })
+  }
+
   render () {
     const {
       videoProps,
       toastProps,
-      buttonProps
+      buttonProps,
+      audioMuted,
+      videoMuted
     } = this.state
 
     const {
@@ -107,6 +159,11 @@ export default class Publisher extends React.Component {
 
     const setup = Object.assign({}, streamProps, videoProps)
 
+    const audioIconColor = audioMuted ? '#fff' : '#000'
+    const videoIconColor = videoMuted ? '#fff' : '#000'
+    const audioIconStyle = audioMuted ? [styles.muteIcon, styles.muteIconRight, styles.muteIconToggled] : [styles.muteIcon, styles.muteIconRight]
+    const videoIconStyle = videoMuted ? [styles.muteIcon, styles.muteIconRightmost, styles.muteIconToggled] : [styles.muteIcon, styles.muteIconRightmost]
+
     const assignVideoRef = (video) => { this.red5pro_video_publisher = video }
     const assignToastRef = (toast) => { this.toast_field = toast }
     return (
@@ -114,6 +171,24 @@ export default class Publisher extends React.Component {
         <R5VideoView
           {...setup}
           ref={assignVideoRef.bind(this)}
+        />
+        <Icon
+          name={audioMuted ? 'mic-off' : 'mic'}
+          type='feathericon'
+          size={36}
+          color={audioIconColor}
+          hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
+          onPress={this.onToggleAudioMute}
+          containerStyle={audioIconStyle}
+        />
+        <Icon
+          name={videoMuted ? 'videocam-off' : 'videocam'}
+          type='feathericon'
+          size={36}
+          color={videoIconColor}
+          hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
+          onPress={this.onToggleVideoMute}
+          containerStyle={videoIconStyle}
         />
         <Text
           ref={assignToastRef.bind(this)}
@@ -167,12 +242,38 @@ export default class Publisher extends React.Component {
     console.log(`Publisher:onUnpublishNotification:: ${JSON.stringify(event.nativeEvent.status, null, 2)}`)
     this.setState({
       isInErrorState: false,
-      toastProps: {...this.state.toastProps, value: 'waiting...'}
+      toastProps: {...this.state.toastProps, value: 'Unpublished'}
     })
   }
 
   onSwapCamera (event) {
     console.log('Publisher:onSwapCamera()')
     swapCamera(findNodeHandle(this.red5pro_video_publisher))
+  }
+
+  onToggleAudioMute () {
+    console.log('Publisher:onToggleAudioMute()')
+    const { audioMuted } = this.state
+    if (audioMuted) {
+      unmuteAudio(findNodeHandle(this.red5pro_video_publisher))
+    } else {
+      muteAudio(findNodeHandle(this.red5pro_video_publisher))
+    }
+    this.setState({
+      audioMuted: !audioMuted
+    })
+  }
+
+  onToggleVideoMute () {
+    console.log('Publisher:onToggleVideoMute()')
+    const { videoMuted } = this.state
+    if (videoMuted) {
+      unmuteVideo(findNodeHandle(this.red5pro_video_publisher))
+    } else {
+      muteVideo(findNodeHandle(this.red5pro_video_publisher))
+    }
+    this.setState({
+      videoMuted: !videoMuted
+    })
   }
 }

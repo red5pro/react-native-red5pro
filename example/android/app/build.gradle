@@ -70,6 +70,7 @@ dependencies {
     compile fileTree(dir: "libs", include: ["*.jar"], excludes: ["red5streaming.jar"])
     compile "com.android.support:appcompat-v7:25.3.1"
     compile "com.facebook.react:react-native:+"  // From node_modules
+    compile project(':react-native-vector-icons')
     compile project(':react-native-red5pro')
 }
 

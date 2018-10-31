@@ -31,3 +31,22 @@ export const updateScaleSize = (handle, width, height, screenWidth, screenHeight
   UIManager.dispatchViewManagerCommand(handle, UIManager.R5VideoView.Commands.updateScaleSize, [width, height, screenWidth, screenHeight])
 }
 
+export const muteAudio = (handle) => {
+  UIManager.dispatchViewManagerCommand(handle, UIManager.R5VideoView.Commands.muteAudio, null)
+}
+
+export const unmuteAudio = (handle) => {
+  UIManager.dispatchViewManagerCommand(handle, UIManager.R5VideoView.Commands.unmuteAudio, null)
+}
+
+export const muteVideo = (handle) => {
+  UIManager.dispatchViewManagerCommand(handle, UIManager.R5VideoView.Commands.muteVideo, null)
+}
+
+export const unmuteVideo = (handle) => {
+  UIManager.dispatchViewManagerCommand(handle, UIManager.R5VideoView.Commands.unmuteVideo, null)
+}
+
+export const setPlaybackVolume = (handle, value) => {
+  UIManager.dispatchViewManagerCommand(handle, UIManager.R5VideoView.Commands.setPlaybackVolume, [value])
+}
