@@ -94,19 +94,25 @@
 - (void)loadConfiguration:(R5Configuration *)configuration forKey:(NSString *)key {
   
     dispatch_async(dispatch_get_main_queue(), ^{
-        R5Connection *connection = [[R5Connection alloc] initWithConfig:configuration];
-        R5Stream *stream = [[R5Stream alloc] initWithConnection:connection];
-        [stream setDelegate:self];
-        [stream setClient:self];
         
-        self.stream = stream;
-        self.connection = connection;
-        
+        [self establishConnection:configuration];
         if (self.onConfigured) {
             self.onConfigured(@{@"key": key});
         }
+        
     });
   
+}
+
+- (void)establishConnection:(R5Configuration *)configuration {
+    R5Connection *connection = [[R5Connection alloc] initWithConfig:configuration];
+    R5Stream *stream = [[R5Stream alloc] initWithConnection:connection];
+    [stream setDelegate:self];
+    [stream setClient:self];
+    
+    self.stream = stream;
+    self.connection = connection;
+    self.configuration = configuration;
 }
 
 - (AVCaptureDevice *)getCameraDevice:(BOOL)backfacing {
@@ -133,8 +139,13 @@
 - (void)subscribe:(NSString *)streamName {
   
     dispatch_async(dispatch_get_main_queue(), ^{
+        
         _isPublisher = NO;
         _streamName = streamName;
+        
+        if (self.stream == nil) {
+            [self establishConnection:self.configuration];
+        }
  
         if (_playbackVideo) {
             
@@ -197,8 +208,13 @@
 - (void)publish:(NSString *)streamName withMode:(int)publishMode {
   
     dispatch_async(dispatch_get_main_queue(), ^{
+        
         _isPublisher = YES;
         _streamName = streamName;
+        
+        if (self.stream == nil) {
+            [self establishConnection:self.configuration];
+        }
         
         if (_useAdaptiveBitrateController) {
             R5AdaptiveBitrateController *abrController = [[R5AdaptiveBitrateController alloc] init];
@@ -368,10 +384,11 @@
         if (self.stream != nil) {
             [self.stream setDelegate:nil];
             [self.stream setClient:nil];
-    }
+        }
   
         _streamName = nil;
         _isStreaming = NO;
+        self.stream = nil;
     });
     _hasExplicitlyPausedVideo = NO;
     [self removeObservers];

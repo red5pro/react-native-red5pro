@@ -85,11 +85,19 @@ export default class Subscriber extends React.Component {
     this.onScaleMode = this.onScaleMode.bind(this)
     this.onToggleAudioMute = this.onToggleAudioMute.bind(this)
 
+    this.doSubscribe = this.doSubscribe.bind(this)
+    this.doUnsubscribe = this.doUnsubscribe.bind(this)
+    this.retry = this.retry.bind(this)
+    this.startRetry = this.startRetry.bind(this)
+    this.stopRetry = this.stopRetry.bind(this)
+
     this.state = {
       appState: AppState.currentState,
       scaleMode: R5ScaleMode.SCALE_TO_FILL,
       audioMuted: false,
       isInErrorState: false,
+      isConnecting: false,
+      isDisconnected: true,
       buttonProps: {
         style: styles.button
       },
@@ -114,31 +122,21 @@ export default class Subscriber extends React.Component {
 
   componentWillUnmount () {
     console.log('Subscriber:componentWillUnmount()')
+    this.stopRetry()
     AppState.removeEventListener('change', this._handleAppStateChange)
-    const nodeHandle = findNodeHandle(this.red5pro_video_subscriber)
-    const {
-      streamProps: {
-        configuration: {
-          streamName
-        }
-      }
-    } = this.props
-    if (nodeHandle) {
-      unsubscribe(nodeHandle, streamName)
-    }
+    this.doUnsubscribe()
   }
 
   _handleAppStateChange = (nextAppState) => {
     console.log(`Subscriber:AppState - ${nextAppState}`)
     const { streamProps: { enableBackgroundStreaming } } = this.props
-    const nodeHandle = findNodeHandle(this.red5pro_video_subscriber)
     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
       console.log('Subscriber:AppState - App has come to the foreground.')
     } else if (nextAppState === 'inactive') {
       console.log('Subscriber:AppState - App has gone to the background.')
       if (!enableBackgroundStreaming) {
         console.log('Subscriber:AppState - unpublish()')
-        unsubscribe(nodeHandle)
+        this.doUnsubscribe()
       }
     }
     this.setState({
@@ -151,7 +149,8 @@ export default class Subscriber extends React.Component {
       videoProps,
       toastProps,
       buttonProps,
-      audioMuted
+      audioMuted,
+      isDisconnected
     } = this.state
 
     const {
@@ -193,11 +192,16 @@ export default class Subscriber extends React.Component {
         <Text
           ref={assignToastRef.bind(this)}
           {...toastProps}>{toastProps.value}</Text>
+        { isDisconnected && <Button {...buttonProps}
+          onPress={this.startRetry}
+          title="Resubscribe"
+          accessibilityLabel="Resubscribe" />
+        }
         <Button
           {...buttonProps}
           onPress={onStop}
-          title='Stop'
-          accessibilityLabel='Stop'
+          title="Stop"
+          accessibilityLabel="Stop"
         />
         <Button
           {...buttonProps}
@@ -214,23 +218,27 @@ export default class Subscriber extends React.Component {
   }
 
   onConfigured (event) {
-    const {
-      streamProps: {
-        configuration: {
-          streamName
-        }
-      }
-    } = this.props
-
     console.log(`Subscriber:onConfigured :: ${event.nativeEvent.key}`)
-    subscribe(findNodeHandle(this.red5pro_video_subscriber), streamName)
-    setPlaybackVolume(findNodeHandle(this.red5pro_video_subscriber), 100)
+    this.doSubscribe()
   }
 
   onSubscriberStreamStatus (event) {
     console.log(`Subscriber:onSubscriberStreamStatus :: ${JSON.stringify(event.nativeEvent.status, null, 2)}`)
     const status = event.nativeEvent.status
     let message = isValidStatusMessage(status.message) ? status.message : status.name
+    if (status.name.toLowerCase() === 'error' ||
+        message.toLowerCase() === 'disconnected') {
+      this.doUnsubscribe()
+      this.setState({
+        isDisconnected: true,
+        isConnecting: false
+      })
+    } else if (message.toLowerCase() === 'connected') {
+      this.setState({
+        isDisconnected: false,
+        isConnecting: false
+      })
+    }
     if (!this.state.inErrorState) {
       this.setState({
         toastProps: {...this.state.toastProps, value: message},
@@ -273,5 +281,51 @@ export default class Subscriber extends React.Component {
     this.setState({
       audioMuted: !audioMuted
     })
+  }
+
+  doSubscribe () {
+    const {
+      streamProps: {
+        configuration: {
+          streamName
+        }
+      }
+    } = this.props
+    const nodeHandle = findNodeHandle(this.red5pro_video_subscriber)
+    if (nodeHandle) {
+      subscribe(findNodeHandle(this.red5pro_video_subscriber), streamName)
+      setPlaybackVolume(findNodeHandle(this.red5pro_video_subscriber), 100)
+    }
+  }
+
+  doUnsubscribe () {
+    const nodeHandle = findNodeHandle(this.red5pro_video_subscriber)
+    if (nodeHandle) {
+      unsubscribe(nodeHandle)
+    }
+  }
+
+  startRetry () {
+    this.stopRetry()
+    this.retryTimer = setTimeout(() => {
+      this.retry()
+    }, 1000)
+  }
+
+  stopRetry () {
+    clearTimeout(this.retryTimer)
+  }
+
+  retry () {
+    const {
+      streamProps: {
+        configuration: {
+          streamName
+        }
+      }
+    } = this.props
+
+    console.log(`attempting retry for stream name :: ${streamName}`)
+    subscribe(findNodeHandle(this.red5pro_video_subscriber), streamName)
   }
 }
