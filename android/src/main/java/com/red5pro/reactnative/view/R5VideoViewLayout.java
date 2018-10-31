@@ -9,7 +9,9 @@ import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.hardware.Camera;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Surface;
 import android.view.View;
@@ -52,6 +54,7 @@ public class R5VideoViewLayout extends FrameLayout
 
     protected ThemedReactContext mContext;
     protected RCTEventEmitter mEventEmitter;
+    protected R5Configuration mConfiguration;
     protected R5Connection mConnection;
     protected R5Stream mStream;
     protected R5Camera mCamera;
@@ -201,11 +204,19 @@ public class R5VideoViewLayout extends FrameLayout
 
     public void loadConfiguration(final R5Configuration configuration, final String forKey) {
 
+        mConfiguration = configuration;
         initiate(configuration, forKey);
 
     }
 
     public void initiate(R5Configuration configuration, String forKey) {
+
+        establishConnection(configuration);
+        onConfigured(forKey);
+
+    }
+
+    private void establishConnection(R5Configuration configuration) {
 
         R5AudioController.mode = mAudioMode == 1
                 ? R5AudioController.PlaybackMode.STANDARD
@@ -220,8 +231,6 @@ public class R5VideoViewLayout extends FrameLayout
         mStream.setLogLevel(logLevel);
         mStream.setScaleMode(scaleMode);
 
-        onConfigured(forKey);
-
     }
 
     private void doSubscribe (String streamName, Boolean showDebug) {
@@ -230,6 +239,8 @@ public class R5VideoViewLayout extends FrameLayout
             createVideoView();
             mVideoView.attachStream(mStream);
             mVideoView.showDebugView(showDebug);
+        } else if (mPlaybackVideo && this.getVideoView() != null) {
+            mVideoView.attachStream(mStream);
         }
         mStream.play(streamName);
 
@@ -244,7 +255,14 @@ public class R5VideoViewLayout extends FrameLayout
 
     public void subscribe (String streamName) {
 
+        Log.d("R5VideoViewLayout", "subscribe()");
+
         mStreamName = streamName;
+
+        if (mStream == null) {
+            Log.d("R5VideoViewLayout", "subscriber re-establishing connection.");
+            establishConnection(mConfiguration);
+        }
 
         if (mEnableBackgroundStreaming) {
             Log.d("R5VideoViewLayout", "setting up bound subscriber for background streaming.");
@@ -259,6 +277,8 @@ public class R5VideoViewLayout extends FrameLayout
     }
 
     public void unsubscribe () {
+
+        Log.d("R5VideoViewLayout", "unsubscribe()");
 
         if (mVideoView != null) {
             mVideoView.attachStream(null);
@@ -413,6 +433,11 @@ public class R5VideoViewLayout extends FrameLayout
 
         mStreamName = streamName;
         mStreamType = streamType;
+
+        if (mStream == null) {
+            Log.d("R5VideoViewLayout", "publisher re-establishing connection.");
+            establishConnection(mConfiguration);
+        }
 
         if (mEnableBackgroundStreaming) {
             Log.d("R5VideoViewLayout", "setting up bound publisher for background streaming.");
@@ -580,9 +605,11 @@ public class R5VideoViewLayout extends FrameLayout
 
         if (mVideoView != null) {
             mVideoView.attachStream(null);
-            mVideoView = null;
+//            mVideoView = null;
         }
+
         mIsStreaming = false;
+        mIsPublisherSetup = false;
         mIsRestrainingVideo = false;
 
     }

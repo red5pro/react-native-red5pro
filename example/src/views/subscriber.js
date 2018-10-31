@@ -168,9 +168,6 @@ export default class Subscriber extends React.Component {
     const assignVideoRef = (video) => { this.red5pro_video_subscriber = video }
     const assignToastRef = (toast) => { this.toast_field = toast }
 
-    const buttonLabel = isDisconnected ? 'Resubscribe' : 'Stop'
-    const buttonAction = isDisconnected ? this.startRetry : onStop
-
     return (
       <View style={styles.container}>
         <R5VideoView
@@ -195,11 +192,16 @@ export default class Subscriber extends React.Component {
         <Text
           ref={assignToastRef.bind(this)}
           {...toastProps}>{toastProps.value}</Text>
+        { isDisconnected && <Button {...buttonProps}
+          onPress={this.startRetry}
+          title="Resubscribe"
+          accessibilityLabel="Resubscribe" />
+        }
         <Button
           {...buttonProps}
-          onPress={buttonAction}
-          title={buttonLabel}
-          accessibilityLabel={buttonLabel}
+          onPress={onStop}
+          title="Stop"
+          accessibilityLabel="Stop"
         />
         <Button
           {...buttonProps}
