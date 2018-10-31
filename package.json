@@ -4,6 +4,7 @@
   "description": "React Native Red5 Pro Publisher/Subscriber",
   "main": "index.js",
   "scripts": {
+    "version": "changes",
     "test": "test"
   },
   "repository": {
@@ -42,6 +43,7 @@
   },
   "homepage": "https://github.com/infrared5/react-native-red5pro#readme",
   "devDependencies": {
+    "@studio/changes": "^1.7.0",
     "babel-eslint": "^9.0.0",
     "eslint": "^5.5.0"
   },
