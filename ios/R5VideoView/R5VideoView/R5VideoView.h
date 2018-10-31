@@ -19,6 +19,7 @@
 
 @property R5Stream *stream;
 @property R5Connection *connection;
+@property R5Configuration *configuration;
 @property R5VideoViewController *controller;
 
 - (void)loadConfiguration:(R5Configuration *)configuration forKey:(NSString *)key;
