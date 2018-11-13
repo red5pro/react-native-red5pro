@@ -322,9 +322,9 @@ The following describe the API available for the `react-native-red5pro` componen
 | useAdaptiveBitrateController | boolean | false | Use of adaptive bitrate streaming for broadcasting.  | x | |
 | useBackfacingCamera | boolean | false | Use the backfacing camera of the device to start broadcasting. | x | |
 | audioMode | int | 0 | Enumerated value of [R5AudioMode](src/enum/R5VideoView.audiomode.js). | | x |
-| enableBackgroundStreaming | boolean | false | Turns on ability to continue to publish or subscribe to audio while app is in the background. |
-| zOrderOnTop | boolean | false | Setting of layout order of stream view. _Android only._ |
-| zOrderMediaOverlay | boolean | false | Setting of layout order of stream view. _Android only._ |
+| enableBackgroundStreaming | boolean | false | Turns on ability to continue to publish or subscribe to audio while app is in the background. | x | x |
+| zOrderOnTop | boolean | false | Setting of layout order of stream view. _Android only._ | x | x |
+| zOrderMediaOverlay | boolean | false | Setting of layout order of stream view. _Android only._ | x | x |
 | configuration | shape | `REQUIRED` | [Refer to Configuration Properties](#configuration-properties). | x | x |
 
 ## Configuration Properties
