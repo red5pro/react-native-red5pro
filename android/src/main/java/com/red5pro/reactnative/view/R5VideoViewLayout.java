@@ -196,8 +196,12 @@ public class R5VideoViewLayout extends FrameLayout
         mVideoView = new R5VideoView(mContext);
         mVideoView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mVideoView.setBackgroundColor(Color.BLACK);
-        mVideoView.setZOrderOnTop(mZOrderOnTop);
-//        mVideoView.setZOrderMediaOverlay(mZOrderMediaOverlay);
+        if (mZOrderOnTop) {
+            mVideoView.setZOrderOnTop(mZOrderOnTop);
+        }
+        if (mZOrderMediaOverlay) {
+            mVideoView.setZOrderMediaOverlay(mZOrderMediaOverlay);
+        }
         addView(mVideoView);
 
     }
