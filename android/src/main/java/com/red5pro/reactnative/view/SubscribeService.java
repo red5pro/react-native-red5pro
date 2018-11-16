@@ -86,8 +86,8 @@ public class SubscribeService  extends Service {
 		super.onDestroy();
 	}
 
-	class SubscribeServiceBinder extends Binder {
-		SubscribeService getService() {
+	public class SubscribeServiceBinder extends Binder {
+		public SubscribeService getService() {
 			return SubscribeService.this;
 		}
 	}

@@ -14,6 +14,7 @@ import com.red5pro.streaming.R5Stream;
 import com.red5pro.streaming.R5StreamProtocol;
 import com.red5pro.streaming.config.R5Configuration;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -45,6 +46,12 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     private static final int COMMAND_MUTE_VIDEO = 10;
     private static final int COMMAND_UNMUTE_VIDEO = 11;
     private static final int COMMAND_SET_PLAYBACK_VOLUME = 12;
+    private static final int COMMAND_DETACH = 13;
+    private static final int COMMAND_ATTACH = 14;
+
+    private static int COUNT = 0;
+
+    protected Map<String, R5Stream> streamMap;
 
     public R5VideoViewLayout getmView() {
         return mView;
@@ -55,6 +62,9 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
 
     public R5VideoViewManager() {
         super();
+        COUNT = COUNT + 1;
+        streamMap = new HashMap<>();
+        Log.d("R5VideoViewManager", "Ref count: " + COUNT);
     }
 
     @Override
@@ -65,6 +75,7 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     @Override
     protected R5VideoViewLayout createViewInstance(ThemedReactContext reactContext) {
 
+        Log.d("R5VideoViewManager", "createViewInstance(), Ref count: " + COUNT);
         mContext = reactContext;
         mView = new R5VideoViewLayout(reactContext);
         return mView;
@@ -73,6 +84,7 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
 
     @Override
     public void receiveCommand(final R5VideoViewLayout root, int commandId, @Nullable ReadableArray args) {
+        Log.d("R5VideoViewManager", "Command(" + commandId + ")");
         if (args != null) {
             Log.d("R5VideoViewManager", "Args are " + args.toString());
         }
@@ -152,6 +164,15 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
                 root.setPlaybackVolume(value/100);
 
                 break;
+            case COMMAND_DETACH:
+
+                final String stream_name = root.getStreamName();
+                root.updatePubSubBackgroundStreaming(true);
+                root.onHostPause();
+
+                streamMap.put(stream_name, root.getStream());
+
+                break;
             default:
                 super.receiveCommand(root, commandId, args);
                 break;
@@ -222,7 +243,11 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
 
     @ReactProp(name = "configuration")
     public void setConfiguration(R5VideoViewLayout view, ReadableMap configuration) {
-        view.loadConfiguration(createConfigurationFromMap(configuration), configuration.getString("key"));
+        R5Configuration conf = createConfigurationFromMap(configuration);
+        boolean autoConnect = configuration.hasKey("autoConnect") ? configuration.getBoolean("autoConnect") : true;
+        if (autoConnect) {
+            view.updateConfiguration(conf, configuration.getString("key"), autoConnect);
+        }
     }
 
     @ReactProp(name = "showDebugView", defaultBoolean = false)

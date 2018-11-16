@@ -9,9 +9,7 @@ import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.hardware.Camera;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.util.Log;
 import android.view.Surface;
 import android.view.View;
@@ -55,6 +53,7 @@ public class R5VideoViewLayout extends FrameLayout
     protected ThemedReactContext mContext;
     protected RCTEventEmitter mEventEmitter;
     protected R5Configuration mConfiguration;
+    protected String mConfigurationKey;
     protected R5Connection mConnection;
     protected R5Stream mStream;
     protected R5Camera mCamera;
@@ -159,7 +158,8 @@ public class R5VideoViewLayout extends FrameLayout
         UNMUTE_AUDIO("unmuteAudio", 9),
         MUTE_VIDEO("muteVideo", 10),
         UNMUTE_VIDEO("unmuteVideo", 11),
-        SET_PLAYBACK_VOLUME("setPlaybackVolume", 12);
+        SET_PLAYBACK_VOLUME("setPlaybackVolume", 12),
+        DETACH("detach", 13);
 
         private final String mName;
         private final int mValue;
@@ -206,15 +206,9 @@ public class R5VideoViewLayout extends FrameLayout
 
     }
 
-    public void loadConfiguration(final R5Configuration configuration, final String forKey) {
+    protected void initiate(R5Configuration configuration, String forKey) {
 
-        mConfiguration = configuration;
-        initiate(configuration, forKey);
-
-    }
-
-    public void initiate(R5Configuration configuration, String forKey) {
-
+        Log.d("R5VideoViewLayout", "initiate()");
         establishConnection(configuration);
         onConfigured(forKey);
 
@@ -958,6 +952,17 @@ public class R5VideoViewLayout extends FrameLayout
         updateDeviceOrientationOnLayoutChange();
     }
 
+    public void updateConfiguration(final R5Configuration configuration, final String forKey, boolean autoConnect) {
+
+        Log.d("R5VideoViewLayout", "loadConfiguration()");
+        mConfiguration = configuration;
+        mConfigurationKey = forKey;
+        if (autoConnect) {
+            initiate(configuration, forKey);
+        }
+
+    }
+
     public void updateShowDebug(boolean show) {
         this.showDebug = show;
         if (this.getVideoView() != null) {
@@ -1037,6 +1042,14 @@ public class R5VideoViewLayout extends FrameLayout
 
     public void updateZOrderMediaOverlay(boolean value) {
         this.mZOrderMediaOverlay = value;
+    }
+
+    public R5Stream getStream() {
+        return mStream;
+    }
+
+    public String getStreamName() {
+        return mStreamName;
     }
 
     public R5VideoView getVideoView() {
