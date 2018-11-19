@@ -6,6 +6,7 @@ import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
+import com.red5pro.reactnative.module.R5StreamModule;
 import com.red5pro.reactnative.view.R5VideoViewManager;
 
 import java.util.Collections;
@@ -24,7 +25,9 @@ public class R5Package implements ReactPackage {
     @Override
     public List<NativeModule> createNativeModules(
             ReactApplicationContext reactContext) {
-        return Collections.emptyList();
+        return Collections.<NativeModule>singletonList(
+                new R5StreamModule(reactContext)
+        );
     }
 
 }

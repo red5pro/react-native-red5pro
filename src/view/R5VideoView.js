@@ -76,7 +76,7 @@ class R5VideoView extends React.Component {
     this.red5provideo = video
   }
 
-  _onLayout = (event) => {
+  _onLayout = (event) => { // eslint-disable-line no-unused-vars
     // const layout = event.nativeEvent.layout
     // console.log(`R5Video:onLayout: ${event.nativeEvent.layout.x}, ${event.nativeEvent.layout.y}, ${event.nativeEvent.layout.width}x${event.nativeEvent.layout.height}`);
   }
@@ -129,7 +129,7 @@ R5VideoView.propTypes = {
       streamBufferTime: PropTypes.number,
       parameters: PropTypes.string,
       key: PropTypes.string.isRequired
-    }).isRequired,
+    }),
     onConfigured: PropTypes.func,
     onMetaDataEvent: PropTypes.func,
     onPublisherStreamStatus: PropTypes.func,

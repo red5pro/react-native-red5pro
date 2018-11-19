@@ -9,23 +9,31 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.red5pro.reactnative.view.PublishService;
+import com.red5pro.reactnative.view.R5VideoViewLayout;
 import com.red5pro.reactnative.view.SubscribeService;
 import com.red5pro.streaming.R5Connection;
 import com.red5pro.streaming.R5Stream;
 import com.red5pro.streaming.config.R5Configuration;
 import com.red5pro.streaming.event.R5ConnectionEvent;
 import com.red5pro.streaming.media.R5AudioController;
+import com.red5pro.streaming.view.R5VideoView;
 
 public class R5StreamSubscriber implements R5StreamInstance,
 		SubscribeService.SubscribeServicable {
 
-	private ReactApplicationContext mContext;
-	private DeviceEventManagerModule.RCTDeviceEventEmitter mEventEmitter;
+	private ReactContext mContext;
+	private DeviceEventManagerModule.RCTDeviceEventEmitter deviceEventEmitter;
+
+	protected RCTEventEmitter mEventEmitter;
 
 	private R5Configuration mConfiguration;
 	private R5Connection mConnection;
@@ -71,10 +79,16 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
 	}
 
+	public R5StreamSubscriber (ThemedReactContext context) {
+		this.mContext = context;
+		this.deviceEventEmitter = mContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
+	}
+
 	public R5StreamSubscriber (ReactApplicationContext context) {
+		Log.d("R5StreamSubscriber", "new()");
 		this.mContext = context;
 		this.mContext.addLifecycleEventListener(this);
-		this.mEventEmitter = mContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
+		this.deviceEventEmitter = mContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
 	}
 
 	private void cleanup() {
@@ -91,6 +105,8 @@ public class R5StreamSubscriber implements R5StreamInstance,
 			mConnection = null;
 		}
 		mIsStreaming = false;
+
+		// TODO: Notify R5StreamModule for removal...
 
 	}
 
@@ -165,7 +181,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
 		establishConnection(configuration, audioMode, logLevel, scaleMode);
 		WritableMap evt = new WritableNativeMap();
-		mEventEmitter.emit(R5StreamSubscriber.Events.CONFIGURED.toString(), evt);
+		deviceEventEmitter.emit(R5StreamSubscriber.Events.CONFIGURED.toString(), evt);
 
 		if (enableBackground) {
 			Log.d("R5StreamSubscriber", "Setting up bound subscriber for background streaming.");
@@ -183,6 +199,16 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
 	public void unsubscribe () {
 
+		if (mStream != null && mIsStreaming) {
+			mStream.stop();
+		}
+		else {
+			WritableMap map = Arguments.createMap();
+			deviceEventEmitter.emit(R5VideoViewLayout.Events.UNSUBSCRIBE_NOTIFICATION.toString(), map);
+			Log.d("R5StreamSubscriber", "UNSUBSCRIBE");
+			cleanup();
+		}
+
 	}
 
 	public void setPlaybackVolume (float value) {
@@ -191,6 +217,24 @@ public class R5StreamSubscriber implements R5StreamInstance,
 			if (mStream != null && mStream.audioController != null) {
 				mStream.audioController.setPlaybackGain(value);
 			}
+		}
+	}
+
+	public void setVideoView (R5VideoView view) {
+		Log.d("R5StreamSubscriber", "setVideoView");
+		if (mStream != null) {
+			view.attachStream(mStream);
+			mStream.activate_display();
+		}
+	}
+
+	public void removeVideoView (R5VideoView view) {
+		Log.d("R5StreamSubscriber", "removeVideoView");
+		if (mStream != null) {
+			mStream.deactivate_display();
+		}
+		if (view != null) {
+			view.attachStream(null);
 		}
 	}
 
@@ -245,7 +289,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		Log.d("R5StreamSubscriber", "onMetaData() : " + metadata);
 		WritableMap map = new WritableNativeMap();
 		map.putString("metadata", metadata);
-		mEventEmitter.emit(R5StreamSubscriber.Events.METADATA.toString(), map);
+		deviceEventEmitter.emit(R5StreamSubscriber.Events.METADATA.toString(), map);
 
 	}
 
@@ -261,14 +305,14 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		statusMap.putString("streamName", mConfiguration.getStreamName());
 		map.putMap("status", statusMap);
 
-		mEventEmitter.emit(R5StreamSubscriber.Events.SUBSCRIBER_STATUS.toString(), map);
+		deviceEventEmitter.emit(R5StreamSubscriber.Events.SUBSCRIBER_STATUS.toString(), map);
 
 		if (event == R5ConnectionEvent.START_STREAMING) {
 			mIsStreaming = true;
 		}
 		else if (event == R5ConnectionEvent.DISCONNECTED && mIsStreaming) {
 			WritableMap evt = new WritableNativeMap();
-			mEventEmitter.emit(R5StreamSubscriber.Events.UNSUBSCRIBE_NOTIFICATION.toString(), evt);
+			deviceEventEmitter.emit(R5StreamSubscriber.Events.UNSUBSCRIBE_NOTIFICATION.toString(), evt);
 			Log.d("R5StreamSubscriber", "DISCONNECT");
 			cleanup();
 			mIsStreaming = false;

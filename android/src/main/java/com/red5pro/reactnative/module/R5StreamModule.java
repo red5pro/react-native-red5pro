@@ -1,11 +1,14 @@
 package com.red5pro.reactnative.module;
 
+import android.util.Log;
+
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.red5pro.reactnative.stream.R5StreamInstance;
 import com.red5pro.reactnative.stream.R5StreamSubscriber;
+import com.red5pro.reactnative.view.R5VideoViewLayout;
 import com.red5pro.streaming.R5StreamProtocol;
 import com.red5pro.streaming.config.R5Configuration;
 
@@ -71,15 +74,27 @@ public class R5StreamModule extends ReactContextBaseJavaModule {
 		config.setStreamName(streamName);
 		config.setLicenseKey(licenseKey);
 
+		Log.d("R5StreamModule", "init(" + streamName + ")");
 		streamMap.put(streamName, new R5StreamItem(config));
 
 		return streamName;
 
 	}
 
+	// CANT DO: Cannot pass in view context :/
+//	@ReactMethod
+//	public void setVideoView (final R5VideoViewLayout root, String name) {
+//		if (streamMap.containsKey(name)) {
+//			R5StreamItem item = streamMap.get(name);
+//			R5StreamInstance instance = new R5StreamSubscriber(this.getReactApplicationContext());
+//			instance.setVideoView(root.getOrCreateVideoView());
+//		}
+//	}
+
 	@ReactMethod
 	public boolean subscribe (String name, boolean enableBackground) {
 		if (streamMap.containsKey(name)) {
+			Log.d("R5StreamModule", "subscribe(" + name + ")");
 			R5StreamItem item = streamMap.get(name);
 			R5StreamInstance instance = new R5StreamSubscriber(this.getReactApplicationContext());
 			item.setInstance(instance);
@@ -92,6 +107,7 @@ public class R5StreamModule extends ReactContextBaseJavaModule {
 	@ReactMethod
 	public boolean unsubscribe (String name) {
 		if (streamMap.containsKey(name)) {
+			Log.d("R5StreamModule", "unsubscribe(" + name + ")");
 			R5StreamItem item = streamMap.get(name);
 			R5StreamSubscriber instance = ((R5StreamSubscriber) item.getInstance());
 			if (instance != null) {

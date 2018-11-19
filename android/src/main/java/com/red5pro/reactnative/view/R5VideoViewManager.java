@@ -10,9 +10,13 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 
+import com.red5pro.reactnative.module.R5StreamItem;
+import com.red5pro.reactnative.stream.R5StreamInstance;
+import com.red5pro.reactnative.stream.R5StreamSubscriber;
 import com.red5pro.streaming.R5Stream;
 import com.red5pro.streaming.R5StreamProtocol;
 import com.red5pro.streaming.config.R5Configuration;
+import com.red5pro.streaming.view.R5VideoView;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,10 +52,11 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     private static final int COMMAND_SET_PLAYBACK_VOLUME = 12;
     private static final int COMMAND_DETACH = 13;
     private static final int COMMAND_ATTACH = 14;
+    private static final int COMMAND_SUBSCRIBE_VIEWLESS = 15;
 
     private static int COUNT = 0;
 
-    protected Map<String, R5Stream> streamMap;
+    protected Map<String, R5StreamItem> streamMap;
 
     public R5VideoViewLayout getmView() {
         return mView;
@@ -82,6 +87,45 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
 
     }
 
+    public R5Configuration genereateConfiguration(ReadableMap configuration) {
+
+        boolean hasHost = configuration.hasKey(PROP_HOST);
+        boolean hasPort = configuration.hasKey(PROP_PORT);
+        boolean hasContextName = configuration.hasKey(PROP_CONTEXT_NAME);
+        boolean hasStreamName = configuration.hasKey(PROP_STREAM_NAME);
+        boolean hasBufferTime = configuration.hasKey(PROP_BUFFER_TIME);
+        boolean hasStreamBufferTime = configuration.hasKey(PROP_STREAM_BUFFER_TIME);
+        boolean hasBundleID = configuration.hasKey(PROP_BUNDLE_ID);
+        boolean hasLicenseKey = configuration.hasKey(PROP_LICENSE_KEY);
+        boolean hasParameters = configuration.hasKey(PROP_PARAMETERS);
+
+        boolean hasRequired = hasHost && hasPort && hasContextName && hasStreamName;
+
+        if (!hasRequired) {
+            return null;
+        }
+
+        R5StreamProtocol protocol = R5StreamProtocol.RTSP;
+        String host = configuration.getString(PROP_HOST);
+        int port = configuration.getInt(PROP_PORT);
+        String contextName = configuration.getString(PROP_CONTEXT_NAME);
+        String streamName = configuration.getString(PROP_STREAM_NAME);
+        String bundleID = hasBundleID ? configuration.getString(PROP_BUNDLE_ID) : "com.red5pro.android";
+        String licenseKey = hasLicenseKey ? configuration.getString(PROP_LICENSE_KEY) : "";
+        float bufferTime = hasBufferTime ? (float) configuration.getDouble(PROP_BUFFER_TIME) : 0.5f;
+        float streamBufferTime = hasStreamBufferTime ? (float) configuration.getDouble(PROP_STREAM_BUFFER_TIME) : 2.0f;
+        String parameters = hasParameters ? configuration.getString(PROP_PARAMETERS) : "";
+
+        R5Configuration config = new R5Configuration(protocol, host, port, contextName, bufferTime, parameters);
+        config.setStreamBufferTime(streamBufferTime);
+        config.setBundleID(bundleID);
+        config.setStreamName(streamName);
+        config.setLicenseKey(licenseKey);
+
+        return config;
+
+    }
+
     @Override
     public void receiveCommand(final R5VideoViewLayout root, int commandId, @Nullable ReadableArray args) {
         Log.d("R5VideoViewManager", "Command(" + commandId + ")");
@@ -98,9 +142,6 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
                 root.updateScaleSize(updateWidth, updateHeight, screenWidth, screenHeight);
                 break;
             case COMMAND_SUBSCRIBE:
-
-                int w = root.getWidth();
-                int h = root.getHeight();
 
                 final String streamName = args.getString(0);
                 root.subscribe(streamName);
@@ -166,11 +207,33 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
                 break;
             case COMMAND_DETACH:
 
-                final String stream_name = root.getStreamName();
-                root.updatePubSubBackgroundStreaming(true);
-                root.onHostPause();
+                final String detach_stream_name = args.getString(0);
+                final R5StreamInstance detach_stream_instance = streamMap.get(detach_stream_name).getInstance();
+                detach_stream_instance.removeVideoView(root.getVideoView());
 
-                streamMap.put(stream_name, root.getStream());
+                break;
+            case COMMAND_ATTACH:
+
+                Log.d("R5VideoViewManager", "setVideoView");
+
+                final String stream_name = args.getString(0);
+                final R5VideoView view = root.getOrCreateVideoView();
+                view.showDebugView(root.showDebug);
+                final R5StreamInstance stream_instance = streamMap.get(stream_name).getInstance();
+                stream_instance.setVideoView(view);
+
+                break;
+            case COMMAND_SUBSCRIBE_VIEWLESS:
+
+                ReadableMap configurationMap = args.getMap(0);
+                boolean enableBackground = args.getBoolean(1);
+
+                R5Configuration configuration = genereateConfiguration(configurationMap);
+                R5StreamItem item = new R5StreamItem(configuration);
+                R5StreamInstance instance = new R5StreamSubscriber(mContext);
+                item.setInstance(instance);
+                ((R5StreamSubscriber) instance).subscribe(item.getConfiguration(), enableBackground);
+                streamMap.put(configuration.getStreamName(), item);
 
                 break;
             default:

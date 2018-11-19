@@ -19,6 +19,7 @@ import android.util.DisplayMetrics;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
+import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -159,7 +160,9 @@ public class R5VideoViewLayout extends FrameLayout
         MUTE_VIDEO("muteVideo", 10),
         UNMUTE_VIDEO("unmuteVideo", 11),
         SET_PLAYBACK_VOLUME("setPlaybackVolume", 12),
-        DETACH("detach", 13);
+        DETACH("detach", 13),
+        ATTACH("attach", 14),
+        SUBSCRIBE_VIEWLESS("subscribeViewless", 15);
 
         private final String mName;
         private final int mValue;
@@ -183,6 +186,8 @@ public class R5VideoViewLayout extends FrameLayout
     R5VideoViewLayout(ThemedReactContext context) {
 
         super(context);
+
+        Log.d("R5VideoViewLayout", "new()");
 
         mContext = context;
         mEventEmitter = mContext.getJSModule(RCTEventEmitter.class);
@@ -260,6 +265,8 @@ public class R5VideoViewLayout extends FrameLayout
         if (mStream == null) {
             Log.d("R5VideoViewLayout", "subscriber re-establishing connection.");
             establishConnection(mConfiguration);
+            // Do we need to following to allow for more than one subscriber?
+//            mStream.audioController = new R5AudioController();
         }
 
         if (mEnableBackgroundStreaming) {
@@ -1054,6 +1061,28 @@ public class R5VideoViewLayout extends FrameLayout
 
     public R5VideoView getVideoView() {
         return mVideoView;
+    }
+
+    public R5VideoView getOrCreateVideoView () {
+
+        Log.d("R5VideoViewLayout", "getOrCreateVideoView()");
+        if (mVideoView == null) {
+
+            mVideoView = new R5VideoView(mContext);
+            mVideoView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            mVideoView.setBackgroundColor(Color.BLACK);
+            if (mZOrderOnTop) {
+                mVideoView.setZOrderOnTop(mZOrderOnTop);
+            }
+            if (mZOrderMediaOverlay) {
+                mVideoView.setZOrderMediaOverlay(mZOrderMediaOverlay);
+            }
+            addView(mVideoView);
+
+        }
+
+        return mVideoView;
+
     }
 
     /*
