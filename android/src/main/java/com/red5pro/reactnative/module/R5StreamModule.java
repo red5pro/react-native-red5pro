@@ -135,6 +135,20 @@ public class R5StreamModule extends ReactContextBaseJavaModule {
         promise.reject(E_STREAM_ERROR, "Stream with id(" + streamId + ") not found.");
 	}
 
+	@ReactMethod
+    public void setPlaybackVolume (String streamId, int value) {
+        if (streamMap.containsKey(streamId)) {
+            Log.d(TAG, "setPlaybackVolume:id(" + streamId + ") = " + value);
+            R5StreamItem item = streamMap.get(streamId);
+            R5StreamSubscriber instance = ((R5StreamSubscriber) item.getInstance());
+            if (instance != null) {
+                instance.setPlaybackVolume(value/100);
+                return;
+            }
+        }
+        Log.d(TAG, "Could not set playback volume. Stream :id(" + streamId + ") not found.");
+    }
+
 	public R5StreamInstance getStreamInstance (String streamId) {
 		if (streamMap.containsKey(streamId)) {
 			Log.d(TAG, "getStreamInstance(" + streamId + ")");

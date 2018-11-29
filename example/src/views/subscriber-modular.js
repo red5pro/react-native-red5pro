@@ -342,11 +342,14 @@ export default class Subscriber extends React.Component {
 
   onToggleAudioMute () {
     console.log('Subscriber:onToggleAudioMute()')
-    const { audioMuted } = this.state
-    if (audioMuted) {
-      setPlaybackVolume(findNodeHandle(this.red5pro_video_subscriber), 100)
+    const {
+      audioMuted,
+      attached
+    } = this.state
+    if (attached) {
+      setPlaybackVolume(findNodeHandle(this.red5pro_video_subscriber), audioMuted ? 100 : 0)
     } else {
-      setPlaybackVolume(findNodeHandle(this.red5pro_video_subscriber), 0)
+      R5StreamModule.setPlaybackVolume(this.streamId, audioMuted ? 100 : 0)
     }
     this.setState({
       audioMuted: !audioMuted
