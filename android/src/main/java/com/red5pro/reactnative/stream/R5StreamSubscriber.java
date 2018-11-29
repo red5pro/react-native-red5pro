@@ -30,14 +30,23 @@ import com.red5pro.streaming.view.R5VideoView;
 public class R5StreamSubscriber implements R5StreamInstance,
 		SubscribeService.SubscribeServicable {
 
+	private static final String TAG = "R5StreamSubscriber";
+
 	private ReactContext mContext;
 	private DeviceEventManagerModule.RCTDeviceEventEmitter deviceEventEmitter;
 
-	protected RCTEventEmitter mEventEmitter;
+	private int mEmitterId;
+	private RCTEventEmitter mEventEmitter;
 
 	private R5Configuration mConfiguration;
 	private R5Connection mConnection;
 	private R5Stream mStream;
+
+	private int mLogLevel = 3;
+	private int mAudioMode = 0;
+	private int mScaleMode = 0;
+	private boolean mPlaybackVideo = true;
+	private boolean mShowDebugView = false;
 
 	private boolean mIsStreaming;
 	private boolean mIsBackgroundBound;
@@ -48,13 +57,13 @@ public class R5StreamSubscriber implements R5StreamInstance,
 	private ServiceConnection mSubscribeServiceConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			Log.d("R5StreamSubscriber", "connection:onServiceConnected()");
+			Log.d(TAG, "connection:onServiceConnected()");
 			mBackgroundSubscribeService = ((SubscribeService.SubscribeServiceBinder)service).getService();
 			mBackgroundSubscribeService.setServicableDelegate(R5StreamSubscriber.this);
 		}
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
-			Log.d("R5StreamSubscriber", "connection:onServiceDisconnected()");
+			Log.d(TAG, "connection:onServiceDisconnected()");
 			mBackgroundSubscribeService = null;
 		}
 	};
@@ -85,7 +94,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 	}
 
 	public R5StreamSubscriber (ReactApplicationContext context) {
-		Log.d("R5StreamSubscriber", "new()");
+		Log.d(TAG, "new()");
 		this.mContext = context;
 		this.mContext.addLifecycleEventListener(this);
 		this.deviceEventEmitter = mContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
@@ -93,7 +102,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
 	private void cleanup() {
 
-		Log.d("R5StreamSubscriber", ":cleanup (" + mConfiguration.getStreamName() + ")!");
+		Log.d(TAG, ":cleanup (" + mConfiguration.getStreamName() + ")!");
 		if (mStream != null) {
 			mStream.client = null;
 			mStream.setListener(null);
@@ -111,7 +120,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 	}
 
 	private void detectToStartService (Intent intent, ServiceConnection connection) {
-		Log.d("R5StreamSubscriber", "detectStartService()");
+		Log.d(TAG, "detectStartService()");
 		boolean found = false;
 		Activity activity = mContext.getCurrentActivity();
 		ActivityManager actManager = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
@@ -156,35 +165,68 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
 	private void doSubscribe (String streamName) {
 
-		Log.d("R5StreamSubscriber", "doSubscribe()");
+		Log.d(TAG, "doSubscribe()");
+		if (mPlaybackVideo) {
+			mStream.activate_display();
+		} else {
+			mStream.deactivate_display();
+		}
 		mStream.play(streamName);
 
 	}
 
 	public void subscribeBound () {
 
-		Log.d("R5StreamSubscriber", "doSubscribeBound()");
+		Log.d(TAG, "doSubscribeBound()");
 		doSubscribe(mConfiguration.getStreamName());
 
 	}
 
 	public R5StreamSubscriber subscribe (R5Configuration configuration,
 										 boolean enableBackground) {
-		return subscribe(configuration, enableBackground, 1, 3, 0);
+
+		return subscribe(configuration, true, enableBackground,
+				mAudioMode, mLogLevel, mScaleMode, false);
+
 	}
 
 	public R5StreamSubscriber subscribe (R5Configuration configuration,
+										 boolean playbackVideo,
+										 boolean enableBackground) {
+
+		return subscribe(configuration, playbackVideo, enableBackground,
+				mAudioMode, mLogLevel, mScaleMode, false);
+
+	}
+
+    public R5StreamSubscriber subscribe (R5Configuration configuration,
+                                         boolean playbackVideo,
+                                         boolean enableBackground,
+                                         int audioMode,
+                                         int logLevel,
+                                         int scaleMode) {
+
+        return subscribe(configuration, playbackVideo, enableBackground,
+                audioMode, logLevel, scaleMode, false);
+
+    }
+
+	public R5StreamSubscriber subscribe (R5Configuration configuration,
+										 boolean playbackVideo,
 										 boolean enableBackground,
 										 int audioMode,
 										 int logLevel,
-										 int scaleMode) {
+										 int scaleMode,
+                                         boolean showDebugView) {
+
+		mPlaybackVideo = playbackVideo;
+		mShowDebugView = showDebugView;
 
 		establishConnection(configuration, audioMode, logLevel, scaleMode);
-		WritableMap evt = new WritableNativeMap();
-		deviceEventEmitter.emit(R5StreamSubscriber.Events.CONFIGURED.toString(), evt);
 
+		Log.d(TAG, "Show Debug View? " + mShowDebugView);
 		if (enableBackground) {
-			Log.d("R5StreamSubscriber", "Setting up bound subscriber for background streaming.");
+			Log.d(TAG, "Setting up bound subscriber for background streaming.");
 			// Set up service and offload setup.
 			mEnableBackgroundStreaming = true;
 			mSubscribeIntent = new Intent(mContext.getCurrentActivity(), SubscribeService.class);
@@ -204,15 +246,15 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		}
 		else {
 			WritableMap map = Arguments.createMap();
-			deviceEventEmitter.emit(R5VideoViewLayout.Events.UNSUBSCRIBE_NOTIFICATION.toString(), map);
-			Log.d("R5StreamSubscriber", "UNSUBSCRIBE");
+			this.emitEvent(R5VideoViewLayout.Events.UNSUBSCRIBE_NOTIFICATION.toString(), map);
+			Log.d(TAG, "UNSUBSCRIBE");
 			cleanup();
 		}
 
 	}
 
 	public void setPlaybackVolume (float value) {
-		Log.d("R5StreamSubscriber", "setPlaybackVolume(" + value + ")");
+		Log.d(TAG, "setPlaybackVolume(" + value + ")");
 		if (mIsStreaming) {
 			if (mStream != null && mStream.audioController != null) {
 				mStream.audioController.setPlaybackGain(value);
@@ -221,16 +263,20 @@ public class R5StreamSubscriber implements R5StreamInstance,
 	}
 
 	public void setVideoView (R5VideoView view) {
-		Log.d("R5StreamSubscriber", "setVideoView");
+		Log.d(TAG, "setVideoView(" + mShowDebugView + ")");
 		if (mStream != null) {
 			view.attachStream(mStream);
-			mStream.activate_display();
+			view.showDebugView(mShowDebugView);
+			if (mPlaybackVideo) {
+				mStream.activate_display();
+			}
 		}
 	}
 
 	public void removeVideoView (R5VideoView view) {
-		Log.d("R5StreamSubscriber", "removeVideoView");
+		Log.d(TAG, "removeVideoView()");
 		if (mStream != null) {
+            view.showDebugView(false);
 			mStream.deactivate_display();
 		}
 		if (view != null) {
@@ -240,14 +286,14 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
 	private void setSubscriberDisplayOn (Boolean setOn) {
 
-		Log.d("R5StreamSubscriber", "setSubscriberDisplayOn(" + setOn + ")");
+		Log.d(TAG, "setSubscriberDisplayOn(" + setOn + ")");
 		if (!setOn) {
 			if (mStream != null) {
-				Log.d("R5StreamSubscriber", "Stream:deactivate_display()");
+				Log.d(TAG, "Stream:deactivate_display()");
 				mStream.deactivate_display();
 			}
-		} else if (mStream != null) {
-			Log.d("R5StreamSubscriber", "Stream:activate_display()");
+		} else if (mStream != null && mPlaybackVideo) {
+			Log.d(TAG, "Stream:activate_display()");
 			mStream.activate_display();
 
 		}
@@ -260,15 +306,15 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
 	private void sendToBackground () {
 
-		Log.d("R5StreamSubscriber", "sendToBackground()");
+		Log.d(TAG, "sendToBackground()");
 		if (!mEnableBackgroundStreaming) {
-			Log.d("R5StreamSubscriber", "sendToBackground:shutdown");
+			Log.d(TAG, "sendToBackground:shutdown");
 			this.unsubscribe();
 			return;
 		}
 
 		if (mIsStreaming && mEnableBackgroundStreaming) {
-			Log.d("R5StreamSubscriber", "sendToBackground:subscriberPause");
+			Log.d(TAG, "sendToBackground:subscriberPause");
 			this.setSubscriberDisplayOn(false);
 		}
 
@@ -276,27 +322,35 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
 	private void bringToForeground () {
 
-		Log.d("R5StreamSubscriber", "bringToForeground()");
+		Log.d(TAG, "bringToForeground()");
 		if (mIsStreaming && mEnableBackgroundStreaming) {
-			Log.d("R5StreamSubscriber", "sendToBackground:publiserResume");
+			Log.d(TAG, "sendToBackground:publiserResume");
 			this.setSubscriberDisplayOn(true);
 		}
 
 	}
 
+	private void emitEvent (String type, WritableMap map) {
+		if (mEventEmitter != null) {
+			mEventEmitter.receiveEvent(this.getEmitterId(), type, map);
+		} else {
+			deviceEventEmitter.emit(type, map);
+		}
+	}
+
 	public void onMetaData(String metadata) {
 
-		Log.d("R5StreamSubscriber", "onMetaData() : " + metadata);
+		Log.d(TAG, "onMetaData() : " + metadata);
 		WritableMap map = new WritableNativeMap();
 		map.putString("metadata", metadata);
-		deviceEventEmitter.emit(R5StreamSubscriber.Events.METADATA.toString(), map);
+		this.emitEvent(R5StreamSubscriber.Events.METADATA.toString(), map);
 
 	}
 
 	@Override
 	public void onConnectionEvent(R5ConnectionEvent event) {
 
-		Log.d("R5StreamSubscriber", ":onConnectionEvent " + event.name());
+		Log.d(TAG, ":onConnectionEvent " + event.name());
 		WritableMap map = new WritableNativeMap();
 		WritableMap statusMap = new WritableNativeMap();
 		statusMap.putInt("code", event.value());
@@ -305,36 +359,71 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		statusMap.putString("streamName", mConfiguration.getStreamName());
 		map.putMap("status", statusMap);
 
-		deviceEventEmitter.emit(R5StreamSubscriber.Events.SUBSCRIBER_STATUS.toString(), map);
+		this.emitEvent(R5StreamSubscriber.Events.SUBSCRIBER_STATUS.toString(), map);
 
 		if (event == R5ConnectionEvent.START_STREAMING) {
 			mIsStreaming = true;
 		}
 		else if (event == R5ConnectionEvent.DISCONNECTED && mIsStreaming) {
 			WritableMap evt = new WritableNativeMap();
-			deviceEventEmitter.emit(R5StreamSubscriber.Events.UNSUBSCRIBE_NOTIFICATION.toString(), evt);
-			Log.d("R5StreamSubscriber", "DISCONNECT");
+			this.emitEvent(R5StreamSubscriber.Events.UNSUBSCRIBE_NOTIFICATION.toString(), evt);
+			Log.d(TAG, "DISCONNECT");
 			cleanup();
 			mIsStreaming = false;
 		}
 
 	}
 
+
+	public void updateSubscribeVideo(boolean playbackVideo) {
+		this.mPlaybackVideo = playbackVideo;
+	}
+
+	public void updateScaleMode(int mode) {
+		this.mScaleMode = mode;
+		if (mStream != null) {
+			mStream.setScaleMode(mode);
+		}
+	}
+
+	public void updateLogLevel(int level) {
+		this.mLogLevel = level;
+		if (mStream != null) {
+			mStream.setLogLevel(level);
+		}
+	}
+
+	public void updateSubscriberAudioMode(int value) {
+		this.mAudioMode = value;
+	}
+
+	public int getEmitterId () {
+		return this.mEmitterId;
+	}
+	public void setEmitterId (int id) {
+		this.mEmitterId = id;
+		if (mEmitterId > -1 && mEventEmitter == null) {
+			mEventEmitter = mContext.getJSModule(RCTEventEmitter.class);
+		} else if (mEmitterId < 0) {
+			mEventEmitter = null;
+		}
+	}
+
 	@Override
 	public void onHostResume() {
-		Log.d("R5StreamSubscriber", "onHostResume()");
+		Log.d(TAG, "onHostResume()");
 		bringToForeground();
 	}
 
 	@Override
 	public void onHostPause() {
-		Log.d("R5StreamSubscriber", "onHostPause()");
+		Log.d(TAG, "onHostPause()");
 		sendToBackground();
 	}
 
 	@Override
 	public void onHostDestroy() {
-		Log.d("R5StreamSubscriber", "onHostDestroy()");
+		Log.d(TAG, "onHostDestroy()");
 		Activity activity = mContext.getCurrentActivity();
 		if (mSubscribeIntent != null && mIsBackgroundBound) {
 			this.setSubscriberDisplayOn(false);

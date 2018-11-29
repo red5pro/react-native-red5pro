@@ -11,7 +11,9 @@ import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 
 import com.red5pro.reactnative.module.R5StreamItem;
+import com.red5pro.reactnative.module.R5StreamModule;
 import com.red5pro.reactnative.stream.R5StreamInstance;
+import com.red5pro.reactnative.stream.R5StreamMapManager;
 import com.red5pro.reactnative.stream.R5StreamSubscriber;
 import com.red5pro.streaming.R5Stream;
 import com.red5pro.streaming.R5StreamProtocol;
@@ -24,8 +26,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
 
-public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
+public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> implements
+        R5StreamMapManager {
 
+    private static final String TAG = "R5VideoViewManager";
     private static final String REACT_CLASS = "R5VideoView";
 
     private static final String PROP_HOST = "host";
@@ -52,24 +56,38 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     private static final int COMMAND_SET_PLAYBACK_VOLUME = 12;
     private static final int COMMAND_DETACH = 13;
     private static final int COMMAND_ATTACH = 14;
-    private static final int COMMAND_SUBSCRIBE_VIEWLESS = 15;
 
-    private static int COUNT = 0;
+    protected Map<String, R5StreamInstance> streamMap;
 
-    protected Map<String, R5StreamItem> streamMap;
-
-    public R5VideoViewLayout getmView() {
-        return mView;
+    public boolean addManagedStream (String name, R5StreamInstance item) {
+        if (!streamMap.containsKey(name)) {
+            streamMap.put(name, item);
+            return true;
+        }
+        return false;
+    }
+    public boolean removeManagedStream (String name) {
+        if (streamMap.containsKey(name)) {
+            streamMap.remove(name);
+            return true;
+        }
+        return false;
     }
 
     private R5VideoViewLayout mView;
     private ThemedReactContext mContext;
+    private R5StreamModule mStreamModule;
 
-    public R5VideoViewManager() {
+    public void setModuleManager(R5StreamModule streamModule) {
+        Log.d(TAG, "setModuleManager(): " + (streamModule == null));
+        this.mStreamModule = streamModule;
+    }
+
+    public R5VideoViewManager(R5StreamModule streamModule) {
         super();
-        COUNT = COUNT + 1;
+        Log.d(TAG, "got stream module: " + (streamModule == null));
+        mStreamModule = streamModule;
         streamMap = new HashMap<>();
-        Log.d("R5VideoViewManager", "Ref count: " + COUNT);
     }
 
     @Override
@@ -80,14 +98,13 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     @Override
     protected R5VideoViewLayout createViewInstance(ThemedReactContext reactContext) {
 
-        Log.d("R5VideoViewManager", "createViewInstance(), Ref count: " + COUNT);
         mContext = reactContext;
         mView = new R5VideoViewLayout(reactContext);
         return mView;
 
     }
 
-    public R5Configuration genereateConfiguration(ReadableMap configuration) {
+    protected R5Configuration genereateConfiguration(ReadableMap configuration) {
 
         boolean hasHost = configuration.hasKey(PROP_HOST);
         boolean hasPort = configuration.hasKey(PROP_PORT);
@@ -99,7 +116,7 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
         boolean hasLicenseKey = configuration.hasKey(PROP_LICENSE_KEY);
         boolean hasParameters = configuration.hasKey(PROP_PARAMETERS);
 
-        boolean hasRequired = hasHost && hasPort && hasContextName && hasStreamName;
+        boolean hasRequired = hasHost && hasPort && hasContextName;
 
         if (!hasRequired) {
             return null;
@@ -128,30 +145,54 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
 
     @Override
     public void receiveCommand(final R5VideoViewLayout root, int commandId, @Nullable ReadableArray args) {
-        Log.d("R5VideoViewManager", "Command(" + commandId + ")");
+
+        Log.d(TAG, "Command(" + commandId + ")");
         if (args != null) {
-            Log.d("R5VideoViewManager", "Args are " + args.toString());
+            Log.d(TAG, "Args are " + args.toString());
         }
 
         switch (commandId) {
             case COMMAND_UPDATE_SCALE_SIZE:
+
                 int updateWidth = args.getInt(0);
                 int updateHeight = args.getInt(1);
                 int screenWidth = args.getInt(2);
                 int screenHeight = args.getInt(3);
                 root.updateScaleSize(updateWidth, updateHeight, screenWidth, screenHeight);
+
                 break;
             case COMMAND_SUBSCRIBE:
 
                 final String streamName = args.getString(0);
-                root.subscribe(streamName);
+
+                R5StreamInstance instance;
+                if (!streamMap.containsKey(streamName)) {
+                    instance = new R5StreamSubscriber(mContext);
+                    streamMap.put(streamName, instance);
+                    root.setStreamInstance(instance);
+                    root.subscribe(streamName);
+                } else {
+                    instance = streamMap.get(streamName);
+                    root.setStreamInstance(instance);
+                    if (root.mAttached) {
+                        root.attach();
+                    }
+                }
+
+                break;
+            case COMMAND_UNSUBSCRIBE:
+
+                root.unsubscribe();
+                root.setStreamInstance(null);
+
+                // TODO: remove from map.
 
                 break;
             case COMMAND_PUBLISH:
 
                 int width = root.getWidth();
                 int height = root.getHeight();
-                Log.d("R5VideoViewManager", "dims: (" + width + ", " + height + ")");
+                Log.d(TAG, "dims: (" + width + ", " + height + ")");
 
 
                 final int type = args.getInt(1);
@@ -164,11 +205,6 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
                     recordType = R5Stream.RecordType.Append;
                 }
                 root.publish(name, recordType);
-
-                break;
-            case COMMAND_UNSUBSCRIBE:
-
-                root.unsubscribe();
 
                 break;
             case COMMAND_UNPUBLISH:
@@ -207,33 +243,31 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
                 break;
             case COMMAND_DETACH:
 
-                final String detach_stream_name = args.getString(0);
-                final R5StreamInstance detach_stream_instance = streamMap.get(detach_stream_name).getInstance();
-                detach_stream_instance.removeVideoView(root.getVideoView());
+                Log.d(TAG, ":detach()");
+
+                root.detach();
+
+                final String detach_stream_id = args.getString(0);
+                R5StreamInstance detach_stream = mStreamModule.getStreamInstance(detach_stream_id);
+                if (detach_stream != null) {
+                    root.setStreamInstance(null);
+                } else {
+                    Log.d(TAG, "Could not detach. No matching stream with id:(" + detach_stream_id + ") stored.");
+                }
 
                 break;
             case COMMAND_ATTACH:
 
-                Log.d("R5VideoViewManager", "setVideoView");
+                Log.d(TAG, ":attach()");
 
-                final String stream_name = args.getString(0);
-                final R5VideoView view = root.getOrCreateVideoView();
-                view.showDebugView(root.showDebug);
-                final R5StreamInstance stream_instance = streamMap.get(stream_name).getInstance();
-                stream_instance.setVideoView(view);
-
-                break;
-            case COMMAND_SUBSCRIBE_VIEWLESS:
-
-                ReadableMap configurationMap = args.getMap(0);
-                boolean enableBackground = args.getBoolean(1);
-
-                R5Configuration configuration = genereateConfiguration(configurationMap);
-                R5StreamItem item = new R5StreamItem(configuration);
-                R5StreamInstance instance = new R5StreamSubscriber(mContext);
-                item.setInstance(instance);
-                ((R5StreamSubscriber) instance).subscribe(item.getConfiguration(), enableBackground);
-                streamMap.put(configuration.getStreamName(), item);
+                final String attach_stream_id = args.getString(0);
+                R5StreamInstance attach_stream = mStreamModule.getStreamInstance(attach_stream_id);
+                if (attach_stream != null) {
+                    root.setStreamInstance(attach_stream);
+                    root.attach();
+                } else {
+                    Log.d(TAG, "Could not attach. No matching stream with id:(" + attach_stream_id + ") stored.");
+                }
 
                 break;
             default:
@@ -291,7 +325,7 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
         float streamBufferTime = hasStreamBufferTime ? (float) configuration.getDouble(PROP_STREAM_BUFFER_TIME) : 2.0f;
         String parameters = hasParameters ? configuration.getString(PROP_PARAMETERS) : "";
 
-        Log.d("R5VideoViewManager", "Parameters: " + parameters);
+        Log.d(TAG, "Parameters: " + parameters);
 
         R5Configuration config = new R5Configuration(protocol, host, port, contextName, bufferTime, parameters);
 
@@ -307,10 +341,8 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> {
     @ReactProp(name = "configuration")
     public void setConfiguration(R5VideoViewLayout view, ReadableMap configuration) {
         R5Configuration conf = createConfigurationFromMap(configuration);
-        boolean autoConnect = configuration.hasKey("autoConnect") ? configuration.getBoolean("autoConnect") : true;
-        if (autoConnect) {
-            view.updateConfiguration(conf, configuration.getString("key"), autoConnect);
-        }
+        boolean autoAttachView = configuration.hasKey("autoAttachView") ? configuration.getBoolean("autoAttachView") : true;
+        view.updateConfiguration(conf, configuration.getString("key"), autoAttachView);
     }
 
     @ReactProp(name = "showDebugView", defaultBoolean = false)

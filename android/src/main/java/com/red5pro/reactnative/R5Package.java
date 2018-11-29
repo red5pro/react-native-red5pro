@@ -14,19 +14,27 @@ import java.util.List;
 
 public class R5Package implements ReactPackage {
 
+    R5StreamModule mStreamModule;
+    R5VideoViewManager mStreamVideoViewManager;
+
     @Override
     public List<ViewManager> createViewManagers(
             ReactApplicationContext reactContext) {
+        mStreamVideoViewManager = new R5VideoViewManager(mStreamModule);
         return Collections.<ViewManager>singletonList(
-                new R5VideoViewManager()
+                mStreamVideoViewManager
         );
     }
 
     @Override
     public List<NativeModule> createNativeModules(
             ReactApplicationContext reactContext) {
+        mStreamModule = new R5StreamModule(reactContext);
+        if (mStreamVideoViewManager != null) {
+            mStreamVideoViewManager.setModuleManager(mStreamModule);
+        }
         return Collections.<NativeModule>singletonList(
-                new R5StreamModule(reactContext)
+                mStreamModule
         );
     }
 

@@ -128,7 +128,8 @@ R5VideoView.propTypes = {
       bufferTime: PropTypes.number,
       streamBufferTime: PropTypes.number,
       parameters: PropTypes.string,
-      key: PropTypes.string.isRequired
+      key: PropTypes.string.isRequired,
+      autoAttachView: PropTypes.bool
     }),
     onConfigured: PropTypes.func,
     onMetaDataEvent: PropTypes.func,
