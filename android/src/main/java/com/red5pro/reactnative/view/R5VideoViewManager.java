@@ -163,7 +163,8 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> imp
                 break;
             case COMMAND_SUBSCRIBE:
 
-                final String streamName = args.getString(0);
+                final String streamName = args.size() > 0
+                        ? args.getString(0) : root.getConfiguration().getStreamName();
 
                 R5StreamInstance instance;
                 if (!streamMap.containsKey(streamName)) {
@@ -182,10 +183,17 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> imp
                 break;
             case COMMAND_UNSUBSCRIBE:
 
-                root.unsubscribe();
-                root.setStreamInstance(null);
+                final String unsubscribe_streamName = args.size() > 0
+                        ? args.getString(0) : root.getConfiguration().getStreamName();
 
-                // TODO: remove from map.
+                R5StreamInstance unsubscribe_instance;
+                if (streamMap.containsKey(unsubscribe_streamName)) {
+                    unsubscribe_instance = streamMap.get(unsubscribe_streamName);
+                    ((R5StreamSubscriber)unsubscribe_instance).unsubscribe();
+                    root.unsubscribe();
+                    root.setStreamInstance(null);
+                    streamMap.remove(unsubscribe_streamName);
+                }
 
                 break;
             case COMMAND_PUBLISH:

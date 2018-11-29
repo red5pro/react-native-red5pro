@@ -115,8 +115,6 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		}
 		mIsStreaming = false;
 
-		// TODO: Notify R5StreamModule for removal...
-
 	}
 
 	private void detectToStartService (Intent intent, ServiceConnection connection) {

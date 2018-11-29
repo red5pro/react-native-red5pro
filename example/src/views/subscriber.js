@@ -2,7 +2,6 @@
 import React from 'react'
 import {
   AppState,
-  DeviceEventEmitter,
   findNodeHandle,
   Button,
   Image,
@@ -11,16 +10,13 @@ import {
   View
 } from 'react-native'
 import { Icon } from 'react-native-elements'
-import {
-  R5StreamModule,
+import { 
   R5VideoView,
   R5ScaleMode,
   subscribe,
   unsubscribe,
   updateScaleMode,
-  setPlaybackVolume,
-  subscribeViewless,
-  attach, detach
+  setPlaybackVolume
 } from 'react-native-red5pro'
 
 const isValidStatusMessage = (value) => {
@@ -85,16 +81,11 @@ export default class Subscriber extends React.Component {
     this.onMetaData = this.onMetaData.bind(this)
     this.onConfigured = this.onConfigured.bind(this)
     this.onSubscriberStreamStatus = this.onSubscriberStreamStatus.bind(this)
-    this.onSubscriberStreamStatusEmit = this.onSubscriberStreamStatusEmit.bind(this)
     this.onUnsubscribeNotification = this.onUnsubscribeNotification.bind(this)
 
     this.onScaleMode = this.onScaleMode.bind(this)
-    this.onToggleDetach = this.onToggleDetach.bind(this)
-    this.onSwapLayout = this.onSwapLayout.bind(this)
     this.onToggleAudioMute = this.onToggleAudioMute.bind(this)
 
-    this.doAttach = this.doAttach.bind(this)
-    this.doDetach = this.doDetach.bind(this)
     this.doSubscribe = this.doSubscribe.bind(this)
     this.doUnsubscribe = this.doUnsubscribe.bind(this)
     this.retry = this.retry.bind(this)
@@ -108,8 +99,6 @@ export default class Subscriber extends React.Component {
       isInErrorState: false,
       isConnecting: false,
       isDisconnected: true,
-      attached: false,
-      swappedLayout: false,
       buttonProps: {
         style: styles.button
       },
@@ -127,7 +116,7 @@ export default class Subscriber extends React.Component {
     }
   }
 
-  componentWillMount () {
+  UNSAFE_componentWillMount () {
     console.log('Subscriber:componentWillMount()')
     AppState.addEventListener('change', this._handleAppStateChange)
   }
@@ -137,18 +126,6 @@ export default class Subscriber extends React.Component {
     this.stopRetry()
     AppState.removeEventListener('change', this._handleAppStateChange)
     this.doUnsubscribe()
-  }
-
-  componentDidMount () {
-    const {
-      streamProps: {
-        configuration
-      }
-    } = this.props
-    var node = findNodeHandle(this.red5pro_video_subscriber)
-    console.log(`[R5StreamModule:didMount]: ${JSON.stringify(configuration, null, 2)}`)
-    DeviceEventEmitter.addListener('onSubscriberStreamStatus', this.onSubscriberStreamStatusEmit)
-    subscribeViewless(node, configuration, false)
   }
 
   _handleAppStateChange = (nextAppState) => {
@@ -174,8 +151,7 @@ export default class Subscriber extends React.Component {
       toastProps,
       buttonProps,
       audioMuted,
-      isDisconnected,
-      swappedLayout
+      isDisconnected
     } = this.state
 
     const {
@@ -195,12 +171,10 @@ export default class Subscriber extends React.Component {
 
     return (
       <View style={styles.container}>
-        { !swappedLayout &&
-          <R5VideoView
-            style={styles.videoView}
-            ref={assignVideoRef.bind(this)}
-          />
-        }
+        <R5VideoView
+          {...setup}
+          ref={assignVideoRef.bind(this)}
+        />
         { !displayVideo && <View style={styles.imageContainer}>
             <Image 
               style={{ width: 69, height: 68 }}
@@ -236,22 +210,6 @@ export default class Subscriber extends React.Component {
           title='Swap Scale'
           accessibilityLabel='Swap Scale'
         />
-        <Button
-          {...buttonProps}
-          onPress={this.onToggleDetach}
-          title='Toggle Detach'
-        />
-        <Button
-          {...buttonProps}
-          onPress={this.onSwapLayout}
-          title='Swap Layout'
-        />
-        { swappedLayout &&
-          <R5VideoView
-            style={styles.videoView}
-            ref={assignVideoRef.bind(this)}
-          />
-        }
       </View>
     )
   }
@@ -262,21 +220,7 @@ export default class Subscriber extends React.Component {
 
   onConfigured (event) {
     console.log(`Subscriber:onConfigured :: ${event.nativeEvent.key}`)
-    //    this.doSubscribe()
-  }
-
-  onSubscriberStreamStatusEmit (event) {
-    console.log(`Subscriber:onSubscriberStreamStatusEmit(R5Stream) :: ${JSON.stringify(event, null, 2)}`)
-    const status = event.status
-    let message = isValidStatusMessage(status.message) ? status.message : status.name
-    if (message.toLowerCase() === 'connected') {
-      console.log(`Subscriber:onSubscriberStreamStatusEmit(R5Stream) :: doAttach()`)
-      this.doAttach()
-      this.setState({
-        isDisconnected: false,
-        isConnecting: false
-      })
-    }
+    this.doSubscribe()
   }
 
   onSubscriberStreamStatus (event) {
@@ -312,29 +256,6 @@ export default class Subscriber extends React.Component {
     })
   }
 
-  onToggleDetach () {
-    console.log('Subscriber:onToggleDetach()')
-    const {
-      attached
-    } = this.state
-    if (attached) {
-      this.doDetach()
-    } else {
-      this.doAttach()
-    }
-  }
-
-  onSwapLayout () {
-    console.log('Subscriber:onSwapLayout()')
-    const {
-      swappedLayout
-    } = this.state
-    this.setState({
-      attached: false,
-      swappedLayout: !swappedLayout
-    })
-  }
-
   onScaleMode () {
     console.log('Subscriber:onScaleMode()')
     const {
@@ -353,58 +274,14 @@ export default class Subscriber extends React.Component {
   onToggleAudioMute () {
     console.log('Subscriber:onToggleAudioMute()')
     const { audioMuted } = this.state
-        const {
-      streamProps: {
-        configuration: {
-          streamName
-        }
-      }
-    } = this.props
     if (audioMuted) {
-      R5StreamModule.setPlaybackVolume(streamName, 100)
+      setPlaybackVolume(findNodeHandle(this.red5pro_video_subscriber), 100)
     } else {
-      R5StreamModule.setPlaybackVolume(streamName, 0)
+      setPlaybackVolume(findNodeHandle(this.red5pro_video_subscriber), 0)
     }
     this.setState({
       audioMuted: !audioMuted
     })
-  }
-
-  doDetach () {
-    const {
-      streamProps: {
-        configuration: {
-          streamName
-        }
-      }
-    } = this.props
-    const nodeHandle = findNodeHandle(this.red5pro_video_subscriber)
-    if (nodeHandle) {
-      console.log(`[R5StreamModule:doSubscribe]: found view...`)
-      detach(nodeHandle, streamName)
-      this.setState({
-        attached: false
-      })
-    }
-  }
-
-
-  doAttach () {
-    const {
-      streamProps: {
-        configuration: {
-          streamName
-        }
-      }
-    } = this.props
-    const nodeHandle = findNodeHandle(this.red5pro_video_subscriber)
-    if (nodeHandle) {
-      console.log(`[R5StreamModule:doSubscribe]: found view...`)
-      attach(nodeHandle, streamName)
-      this.setState({
-        attached: true
-      })
-    }
   }
 
   doSubscribe () {
@@ -415,7 +292,11 @@ export default class Subscriber extends React.Component {
         }
       }
     } = this.props
-    subscribe(findNodeHandle(this.red5pro_video_subscriber), streamName)
+    const nodeHandle = findNodeHandle(this.red5pro_video_subscriber)
+    if (nodeHandle) {
+      subscribe(findNodeHandle(this.red5pro_video_subscriber), streamName)
+      setPlaybackVolume(findNodeHandle(this.red5pro_video_subscriber), 100)
+    }
   }
 
   doUnsubscribe () {
