@@ -10,5 +10,6 @@ public interface R5StreamInstance extends R5ConnectionListener, LifecycleEventLi
 	void setEmitterId(int id);
 	void setVideoView (R5VideoView view);
 	void removeVideoView (R5VideoView view);
+	void updateLogLevel(int level);
 
 }

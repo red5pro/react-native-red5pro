@@ -2,6 +2,7 @@
 import React from 'react'
 import {
   AppState,
+  DeviceEventEmitter,
   findNodeHandle,
   Button,
   StyleSheet,
@@ -10,12 +11,9 @@ import {
 } from 'react-native'
 import { Icon } from 'react-native-elements'
 import {
+  R5StreamModule,
   R5VideoView,
-  publish,
-  unpublish,
-  swapCamera,
-  muteAudio, unmuteAudio,
-  muteVideo, unmuteVideo
+  attach, detach
 } from 'react-native-red5pro'
 
 const styles = StyleSheet.create({
@@ -73,23 +71,35 @@ export default class Publisher extends React.Component {
   constructor (props) {
     super(props)
 
-    // Events.
+    const {
+      streamProps: {
+        configuration
+      }
+    } = this.props
+
+   // Events.
     this.onMetaData = this.onMetaData.bind(this)
     this.onConfigured = this.onConfigured.bind(this)
     this.onPublisherStreamStatus = this.onPublisherStreamStatus.bind(this)
     this.onUnpublishNotification = this.onUnpublishNotification.bind(this)
 
     this.onSwapCamera = this.onSwapCamera.bind(this)
+    this.onToggleDetach = this.onToggleDetach.bind(this)
     this.onToggleAudioMute = this.onToggleAudioMute.bind(this)
     this.onToggleVideoMute = this.onToggleVideoMute.bind(this)
-    this.onSwitch = this.onSwitch.bind(this)
+    this.onSwapLayout = this.onSwapLayout.bind(this)
+
+    this.doAttach = this.doAttach.bind(this)
+    this.doDetach = this.doDetach.bind(this)
+    this.doPublish = this.doPublish.bind(this)
+    this.doUnpublish = this.doUnpublish.bind(this)
 
     this.state = {
       appState: AppState.currentState,
       audioMuted: false,
       isInErrorState: false,
       videoMuted: false,
-      flipped: false,
+      swappedLayout: false,
       buttonProps: {
         style: styles.button
       },
@@ -105,51 +115,50 @@ export default class Publisher extends React.Component {
         onUnpublishNotification: this.onUnpublishNotification
       }
     }
+
+    const streamIdToUse = [configuration.streamName, Math.floor(Math.random() * 0x10000).toString(16)].join('-')
+    R5StreamModule.init(streamIdToUse, configuration)
+      .then(streamId => {
+        console.log('R5StreamModule configuration with ' + streamId)
+        this.streamId = streamId
+        this.doPublish()
+      })
+      .catch(error => {
+        console.log('Subscriber:Stream Setup Error - ' + error)
+      })
   }
 
-  componentWillMount () {
+  UNSAFE_componentWillMount () {
     console.log('Publisher:componentWillMount()')
     AppState.addEventListener('change', this._handleAppStateChange)
+
+    DeviceEventEmitter.addListener('onMetaData', this.onMetaData)
+    DeviceEventEmitter.addListener('onConfigured', this.onConfigured)
+    DeviceEventEmitter.addListener('onPublisherStreamStatus', this.onPublisherStreamStatus)
+    DeviceEventEmitter.addListener('onUnpublishNotification', this.onUnpublishNotification)
   }
 
   componentWillUnmount () {
     console.log('Publisher:componentWillUnmount()')
     AppState.removeEventListener('change', this._handleAppStateChange)
-    const nodeHandle = findNodeHandle(this.red5pro_video_publisher)
-    const {
-      streamProps: {
-        configuration: {
-          streamName
-        }
-      }
-    } = this.props
-    if (nodeHandle) {
-      unpublish(nodeHandle, streamName)
-    }
-  }
+    this.doUnpublish()
 
-  componentWillUpdate (newProps, newState) {
-    const { flipped } = this.state
-    if (flipped !== newState.flipped) {
-      console.log('[R5VideoView] Publisher:componentWillUpdate, flip it!')
-      const nodeHandle = findNodeHandle(this.red5pro_video_publisher)
-      if (nodeHandle) {
-        //        detach(nodeHandle)
-      }
-    }
+    DeviceEventEmitter.removeListener('onMetaData', this.onMetaData)
+    DeviceEventEmitter.removeListener('onConfigured', this.onConfigured)
+    DeviceEventEmitter.removeListener('onPublisherStreamStatus', this.onPublisherStreamStatus)
+    DeviceEventEmitter.removeListener('onUnpublishNotification', this.onUnpublishNotification)  
   }
 
   _handleAppStateChange = (nextAppState) => {
     console.log(`Publisher:AppState - ${nextAppState}`)
     const { streamProps: { enableBackgroundStreaming } } = this.props
-    const nodeHandle = findNodeHandle(this.red5pro_video_publisher)
     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
       console.log('Publisher:AppState - App has come to the foreground.')
     } else if (nextAppState.match(/inactive|background/) && this.state.appState === 'active') {
       console.log('Publisher:AppState - App has gone to the background.')
       if (!enableBackgroundStreaming) {
         console.log('Publisher:AppState - unpublish()')
-        unpublish(nodeHandle)
+        this.doUnpublish()
       }
     }
     this.setState({
@@ -159,20 +168,16 @@ export default class Publisher extends React.Component {
 
   render () {
     const {
-      videoProps,
       toastProps,
       buttonProps,
       audioMuted,
       videoMuted,
-      flipped
+      swappedLayout
     } = this.state
 
     const {
       onStop,
-      streamProps
     } = this.props
-
-    const setup = Object.assign({}, streamProps, videoProps)
 
     const audioIconColor = audioMuted ? '#fff' : '#000'
     const videoIconColor = videoMuted ? '#fff' : '#000'
@@ -183,22 +188,9 @@ export default class Publisher extends React.Component {
     const assignToastRef = (toast) => { this.toast_field = toast }
     return (
       <View style={styles.container}>
-        { flipped && <View style={styles.container}>
-            <Button
-              {...this.state.buttonProps}
-              onPress={this.onSwitch}
-              title='Switch Position'
-              accessibilityLabel='Switch Position'
-            />
-           <R5VideoView
-              {...setup}
-              ref={assignVideoRef.bind(this)}
-            />
-          </View>
-        }
-        { !flipped &&
+        { !swappedLayout &&
           <R5VideoView
-            {...setup}
+            style={styles.videoView}
             ref={assignVideoRef.bind(this)}
           />
         }
@@ -235,12 +227,15 @@ export default class Publisher extends React.Component {
           title='Swap Camera'
           accessibilityLabel='Swap Camera'
         />
-        { !flipped &&
-          <Button
-            {...this.state.buttonProps}
-            onPress={this.onSwitch}
-            title='Switch Position'
-            accessibilityLabel='Switch Position'
+        <Button
+          {...buttonProps}
+          onPress={this.onToggleDetach}
+          title='Toggle Detach'
+        />
+        { swappedLayout &&
+          <R5VideoView
+            style={styles.videoView}
+            ref={assignVideoRef.bind(this)}
           />
         }
       </View>
@@ -252,21 +247,13 @@ export default class Publisher extends React.Component {
   }
 
   onConfigured (event) {
-    const {
-      streamProps: {
-        configuration: {
-          streamName
-        }
-      }
-    } = this.props
-
-    console.log(`Publisher:onConfigured :: ${event.nativeEvent.key}`)
-    publish(findNodeHandle(this.red5pro_video_publisher), streamName)
+    const key = event.hasOwnProperty('nativeEvent') ? event.nativeEvent.key : event.key
+    console.log(`Publisher:onConfigured :: ${key}`)
   }
 
   onPublisherStreamStatus (event) {
-    console.log(`Publisher:onPublisherStreamStatus :: ${JSON.stringify(event.nativeEvent.status, null, 2)}`)
-    const status = event.nativeEvent.status
+    const status = event.hasOwnProperty('nativeEvent') ? event.nativeEvent.status : event.status
+    console.log(`Publisher:onPublisherStreamStatus :: ${JSON.stringify(status, null, 2)}`)
     let message = isValidStatusMessage(status.message) ? status.message : status.name
     if (!this.state.inErrorState) {
       this.setState({
@@ -277,25 +264,49 @@ export default class Publisher extends React.Component {
   }
 
   onUnpublishNotification (event) {
-    console.log(`Publisher:onUnpublishNotification:: ${JSON.stringify(event.nativeEvent.status, null, 2)}`)
+    const status = event.hasOwnProperty('nativeEvent') ? event.nativeEvent.status : event.status
+    console.log(`Publisher:onUnpublishNotification:: ${JSON.stringify(status, null, 2)}`)
     this.setState({
       isInErrorState: false,
       toastProps: {...this.state.toastProps, value: 'Unpublished'}
     })
   }
 
+  onToggleDetach () {
+    console.log('Subscriber:onToggleDetach()')
+    const {
+      attached
+    } = this.state
+    if (attached) {
+      this.doDetach()
+    } else {
+      this.doAttach()
+    }
+  }
+
+  onSwapLayout () {
+    console.log('Subscriber:onSwapLayout()')
+    const {
+      swappedLayout
+    } = this.state
+    this.setState({
+      attached: false,
+      swappedLayout: !swappedLayout
+    })
+  }
+
   onSwapCamera () {
     console.log('Publisher:onSwapCamera()')
-    swapCamera(findNodeHandle(this.red5pro_video_publisher))
+    R5StreamModule.swapCamera(this.streamId)
   }
 
   onToggleAudioMute () {
     console.log('Publisher:onToggleAudioMute()')
     const { audioMuted } = this.state
     if (audioMuted) {
-      unmuteAudio(findNodeHandle(this.red5pro_video_publisher))
+      R5StreamModule.unmuteAudio(this.streamId)
     } else {
-      muteAudio(findNodeHandle(this.red5pro_video_publisher))
+      R5StreamModule.muteAudio(this.streamId)
     }
     this.setState({
       audioMuted: !audioMuted
@@ -306,19 +317,59 @@ export default class Publisher extends React.Component {
     console.log('Publisher:onToggleVideoMute()')
     const { videoMuted } = this.state
     if (videoMuted) {
-      unmuteVideo(findNodeHandle(this.red5pro_video_publisher))
+      R5StreamModule.unmuteVideo(this.streamId)
     } else {
-      muteVideo(findNodeHandle(this.red5pro_video_publisher))
+      R5StreamModule.muteVideo(this.streamId)
     }
     this.setState({
       videoMuted: !videoMuted
     })
   }
 
-  onSwitch () {
-    const { flipped } = this.state
-    this.setState({
-      flipped: !flipped
-    })
+  doDetach () {
+    const nodeHandle = findNodeHandle(this.red5pro_video_publisher)
+    if (nodeHandle) {
+      console.log(`[R5StreamModule:doDetach]: found view...`)
+      detach(nodeHandle, this.streamId)
+      this.setState({
+        attached: false
+      })
+    }
   }
+
+  doAttach () {
+    const nodeHandle = findNodeHandle(this.red5pro_video_publisher)
+    if (nodeHandle) {
+      console.log(`[R5StreamModule:doAttach]: found view...`)
+     attach(nodeHandle, this.streamId)
+      this.setState({
+        attached: true
+      })
+    }
+  }
+
+  doPublish () {
+    const {
+      streamProps
+    } = this.props
+
+    R5StreamModule.publish(this.streamId, streamProps)
+      .then(streamId => {
+        console.log('R5StreamModule publisher with ' + streamId);
+      })
+      .catch(error => {
+        console.log('Publisher:Stream Subscribe Error - ' + error)
+      })
+  }
+
+  doUnpublish () {
+    R5StreamModule.unpublish(this.streamId)
+      .then(streamId => {
+        console.log('R5StreamModule publisher with ' + streamId);
+      })
+      .catch(error => {
+        console.log('Publisher:Stream Unpublisher Error - ' + error)
+      })
+  }
+
 }

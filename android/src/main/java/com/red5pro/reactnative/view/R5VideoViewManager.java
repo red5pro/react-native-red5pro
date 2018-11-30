@@ -1,6 +1,5 @@
 package com.red5pro.reactnative.view;
 
-import android.app.Activity;
 import android.util.Log;
 
 import com.facebook.react.bridge.ReadableArray;
@@ -10,19 +9,18 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 
-import com.red5pro.reactnative.module.R5StreamItem;
 import com.red5pro.reactnative.module.R5StreamModule;
 import com.red5pro.reactnative.stream.R5StreamInstance;
 import com.red5pro.reactnative.stream.R5StreamMapManager;
+import com.red5pro.reactnative.stream.R5StreamPublisher;
 import com.red5pro.reactnative.stream.R5StreamSubscriber;
+import com.red5pro.reactnative.util.RecordTypeUtil;
 import com.red5pro.streaming.R5Stream;
 import com.red5pro.streaming.R5StreamProtocol;
 import com.red5pro.streaming.config.R5Configuration;
-import com.red5pro.streaming.view.R5VideoView;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
 
@@ -198,26 +196,41 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> imp
                 break;
             case COMMAND_PUBLISH:
 
-                int width = root.getWidth();
-                int height = root.getHeight();
-                Log.d(TAG, "dims: (" + width + ", " + height + ")");
-
-
                 final int type = args.getInt(1);
-                final String name = args.getString(0);
-                R5Stream.RecordType recordType = R5Stream.RecordType.Live;
-                if (type == 1) {
-                    recordType = R5Stream.RecordType.Record;
+
+                R5Stream.RecordType recordType = RecordTypeUtil.typeFromJSEnumValue(type);
+
+                final String pub_streamName = args.size() > 0
+                        ? args.getString(0) : root.getConfiguration().getStreamName();
+
+                R5StreamInstance pub_instance;
+                if (!streamMap.containsKey(pub_streamName)) {
+                    pub_instance = new R5StreamPublisher(mContext);
+                    streamMap.put(pub_streamName, pub_instance);
+                    root.setStreamInstance(pub_instance);
+                    root.publish(pub_streamName, recordType);
+                } else {
+                    pub_instance = streamMap.get(pub_streamName);
+                    root.setStreamInstance(pub_instance);
+                    if (root.mAttached) {
+                        root.attach();
+                    }
                 }
-                else if (type == 2) {
-                    recordType = R5Stream.RecordType.Append;
-                }
-                root.publish(name, recordType);
 
                 break;
             case COMMAND_UNPUBLISH:
 
-                root.unpublish();
+                final String unpublish_streamName = args.size() > 0
+                        ? args.getString(0) : root.getConfiguration().getStreamName();
+
+                R5StreamInstance unpublish_instance;
+                if (streamMap.containsKey(unpublish_streamName)) {
+                    unpublish_instance = streamMap.get(unpublish_streamName);
+                    ((R5StreamPublisher)unpublish_instance).unpublish();
+                    root.unpublish();
+                    root.setStreamInstance(null);
+                    streamMap.remove(unpublish_streamName);
+                }
 
                 break;
             case COMMAND_SWAP_CAMERA:
@@ -232,16 +245,24 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> imp
 
                 break;
             case COMMAND_MUTE_AUDIO:
+
                 root.muteAudio();
+
                 break;
             case COMMAND_UNMUTE_AUDIO:
+
                 root.unmuteAudio();
+
                 break;
             case COMMAND_MUTE_VIDEO:
+
                 root.muteVideo();
+
                 break;
             case COMMAND_UNMUTE_VIDEO:
+
                 root.unmuteVideo();
+
                 break;
             case COMMAND_SET_PLAYBACK_VOLUME:
 

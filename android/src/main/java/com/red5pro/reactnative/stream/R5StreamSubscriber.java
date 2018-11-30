@@ -100,7 +100,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		this.deviceEventEmitter = mContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
 	}
 
-	private void cleanup() {
+	protected void cleanup() {
 
 		Log.d(TAG, ":cleanup (" + mConfiguration.getStreamName() + ")!");
 		if (mStream != null) {
@@ -117,7 +117,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
 	}
 
-	private void detectToStartService (Intent intent, ServiceConnection connection) {
+	protected void detectToStartService (Intent intent, ServiceConnection connection) {
 		Log.d(TAG, "detectStartService()");
 		boolean found = false;
 		Activity activity = mContext.getCurrentActivity();
@@ -131,16 +131,16 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		} catch (NullPointerException e){}
 
 		if(!found){
-			Log.d("R5StreamSubscriber", "detectStartService:start()");
+			Log.d(TAG, "detectStartService:start()");
 			mContext.getCurrentActivity().startService(intent);
 		}
 
-		Log.d("R5StreamSubscriber", "detectStartService:bind()");
+		Log.d(TAG, "detectStartService:bind()");
 		activity.bindService(intent, connection, Context.BIND_IMPORTANT);
 		mIsBackgroundBound = true;
 	}
 
-	private void establishConnection(R5Configuration configuration,
+	protected void establishConnection(R5Configuration configuration,
 									 int audioMode,
 									 int logLevel,
 									 int scaleMode) {
@@ -161,7 +161,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
 	}
 
-	private void doSubscribe (String streamName) {
+	protected void doSubscribe (String streamName) {
 
 		Log.d(TAG, "doSubscribe()");
 		if (mPlaybackVideo) {
@@ -209,6 +209,19 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
     }
 
+    public R5StreamSubscriber subscribe (R5Configuration configuration, R5StreamProps props) {
+
+		return subscribe(configuration,
+				props.subscribeVideo,
+				props.enableBackgroundStreaming,
+				props.audioMode,
+				props.logLevel,
+				props.scaleMode,
+				props.showDebugView);
+
+	}
+
+
 	public R5StreamSubscriber subscribe (R5Configuration configuration,
 										 boolean playbackVideo,
 										 boolean enableBackground,
@@ -217,6 +230,9 @@ public class R5StreamSubscriber implements R5StreamInstance,
 										 int scaleMode,
                                          boolean showDebugView) {
 
+		mLogLevel = logLevel;
+		mAudioMode = audioMode;
+		mScaleMode = scaleMode;
 		mPlaybackVideo = playbackVideo;
 		mShowDebugView = showDebugView;
 
@@ -282,7 +298,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		}
 	}
 
-	private void setSubscriberDisplayOn (Boolean setOn) {
+	protected void setSubscriberDisplayOn (Boolean setOn) {
 
 		Log.d(TAG, "setSubscriberDisplayOn(" + setOn + ")");
 		if (!setOn) {
@@ -302,7 +318,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
 	}
 
-	private void sendToBackground () {
+	protected void sendToBackground () {
 
 		Log.d(TAG, "sendToBackground()");
 		if (!mEnableBackgroundStreaming) {
@@ -318,7 +334,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
 	}
 
-	private void bringToForeground () {
+	protected void bringToForeground () {
 
 		Log.d(TAG, "bringToForeground()");
 		if (mIsStreaming && mEnableBackgroundStreaming) {
@@ -328,7 +344,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
 	}
 
-	private void emitEvent (String type, WritableMap map) {
+	protected void emitEvent (String type, WritableMap map) {
 		if (mEventEmitter != null) {
 			mEventEmitter.receiveEvent(this.getEmitterId(), type, map);
 		} else {
@@ -372,7 +388,6 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
 	}
 
-
 	public void updateSubscribeVideo(boolean playbackVideo) {
 		this.mPlaybackVideo = playbackVideo;
 	}
@@ -398,6 +413,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 	public int getEmitterId () {
 		return this.mEmitterId;
 	}
+
 	public void setEmitterId (int id) {
 		this.mEmitterId = id;
 		if (mEmitterId > -1 && mEventEmitter == null) {

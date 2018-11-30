@@ -100,9 +100,6 @@ export default class Subscriber extends React.Component {
     this.doDetach = this.doDetach.bind(this)
     this.doSubscribe = this.doSubscribe.bind(this)
     this.doUnsubscribe = this.doUnsubscribe.bind(this)
-    this.retry = this.retry.bind(this)
-    this.startRetry = this.startRetry.bind(this)
-    this.stopRetry = this.stopRetry.bind(this)
 
     this.state = {
       appState: AppState.currentState,
@@ -149,7 +146,6 @@ export default class Subscriber extends React.Component {
 
   componentWillUnmount () {
     console.log('Subscriber:componentWillUnmount()')
-    this.stopRetry()
     AppState.removeEventListener('change', this._handleAppStateChange)
     this.doUnsubscribe()
 
@@ -359,7 +355,7 @@ export default class Subscriber extends React.Component {
   doDetach () {
     const nodeHandle = findNodeHandle(this.red5pro_video_subscriber)
     if (nodeHandle) {
-      console.log(`[R5StreamModule:doSubscribe]: found view...`)
+      console.log(`[R5StreamModule:doDetach]: found view...`)
       detach(nodeHandle, this.streamId)
       this.setState({
         attached: false
@@ -367,10 +363,10 @@ export default class Subscriber extends React.Component {
     }
   }
 
-
   doAttach () {
     const nodeHandle = findNodeHandle(this.red5pro_video_subscriber)
     if (nodeHandle) {
+      console.log(`[R5StreamModule:doAttach]: found view...`)
       attach(nodeHandle, this.streamId)
       this.setState({
         attached: true
@@ -413,31 +409,8 @@ export default class Subscriber extends React.Component {
         console.log('R5StreamModule unsubscribed with ' + streamId);
       })
       .catch(error => {
-        console.log('Subscriber:Stream Subscribe Error - ' + error)
+        console.log('Subscriber:Stream Unsubscribe Error - ' + error)
       })
   }
 
-  startRetry () {
-    this.stopRetry()
-    this.retryTimer = setTimeout(() => {
-      this.retry()
-    }, 1000)
-  }
-
-  stopRetry () {
-    clearTimeout(this.retryTimer)
-  }
-
-  retry () {
-    const {
-      streamProps: {
-        configuration: {
-          streamName
-        }
-      }
-    } = this.props
-
-    console.log(`attempting retry for stream name :: ${streamName}`)
-    this.doSubscribe()
-  }
 }
