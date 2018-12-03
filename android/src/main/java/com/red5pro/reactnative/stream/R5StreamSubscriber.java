@@ -211,6 +211,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
     public R5StreamSubscriber subscribe (R5Configuration configuration, R5StreamProps props) {
 
+		Log.d(TAG, props.toString());
 		return subscribe(configuration,
 				props.subscribeVideo,
 				props.enableBackgroundStreaming,

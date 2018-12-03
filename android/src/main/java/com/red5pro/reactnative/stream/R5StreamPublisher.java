@@ -34,7 +34,7 @@ import com.red5pro.streaming.view.R5VideoView;
 public class R5StreamPublisher implements R5StreamInstance,
 		PublishService.PublishServicable {
 
-	private static final String TAG = "R5StreamSubscriber";
+	private static final String TAG = "R5StreamPublisher";
 
 	private ReactContext mContext;
 	private DeviceEventManagerModule.RCTDeviceEventEmitter deviceEventEmitter;
@@ -126,6 +126,7 @@ public class R5StreamPublisher implements R5StreamInstance,
 
 	protected void unpackProps (R5StreamProps props, R5StreamPublisher target) {
 
+		target.mShowDebugView = props.showDebugView;
 		target.mUseVideo = props.publishVideo;
 		target.mUseAudio = props.publishAudio;
 		target.mCameraWidth = props.cameraWidth;
@@ -207,7 +208,14 @@ public class R5StreamPublisher implements R5StreamInstance,
 						 R5StreamProps props) {
 
 		unpackProps(props, this);
-		publish(configuration, recordType, this.mEnableBackgroundStreaming);
+		Log.d(TAG, props.toString());
+		publish(configuration,
+				recordType,
+				mEnableBackgroundStreaming,
+				mAudioMode,
+				mLogLevel,
+				mScaleMode,
+				mShowDebugView);
 
 	}
 
@@ -343,6 +351,7 @@ public class R5StreamPublisher implements R5StreamInstance,
 	protected void doPublish (String streamName, R5Stream.RecordType streamType) {
 
 		Log.d(TAG, "doPublish()");
+
 		Boolean hasPreview = mIsPublisherSetup;
 		if (!mIsPublisherSetup) {
 			setupPublisher(false);
@@ -350,14 +359,17 @@ public class R5StreamPublisher implements R5StreamInstance,
 
 		Boolean shouldPublishVideo = (mCamera != null && mCamera.getCamera() != null && mUseVideo);
 
+		Log.d(TAG, "Should publish video? " + shouldPublishVideo);
 		if (shouldPublishVideo && hasPreview) {
 			mCamera.getCamera().stopPreview();
 		}
 
 		reorient();
+		Log.d(TAG, ">> Publish");
 		mStream.publish(streamName, streamType);
 
 		if (shouldPublishVideo) {
+			Log.d(TAG, ">> Start Preview");
 			mCamera.getCamera().startPreview();
 		}
 
@@ -557,28 +569,30 @@ public class R5StreamPublisher implements R5StreamInstance,
 	}
 
 	public void setVideoView (R5VideoView view) {
+
 		Log.d(TAG, "setVideoView(" + mShowDebugView + ")");
-		if (mStream != null) {
-			view.attachStream(mStream);
+		if (mStream != null && mUseVideo) {
+			setPublisherDisplayOn(true, false);
 			view.showDebugView(mShowDebugView);
-			if (!mIsRestrainingVideo) {
-				mStream.activate_display();
-			}
+			view.attachStream(mStream);
+			mStream.updateStreamMeta();
 		}
+
 	}
 
 	public void removeVideoView (R5VideoView view) {
+
 		Log.d(TAG, "removeVideoView()");
 		if (mStream != null) {
+			setPublisherDisplayOn(false, false);
 			view.showDebugView(false);
-			mStream.deactivate_display();
-		}
-		if (view != null) {
 			view.attachStream(null);
+			mStream.updateStreamMeta();
 		}
+
 	}
 
-	protected void setPublisherDisplayOn (Boolean setOn) {
+	protected void setPublisherDisplayOn (Boolean setOn, Boolean useService) {
 
 		Log.d(TAG, "setPublisherDisplayOn(" + setOn + ")");
 		if (!setOn) {
@@ -633,7 +647,7 @@ public class R5StreamPublisher implements R5StreamInstance,
 
 		if (mEnableBackgroundStreaming) {
 			Log.d("R5VideoViewLayout", "sendToBackground:publiserPause");
-			this.setPublisherDisplayOn(false);
+			this.setPublisherDisplayOn(false, true);
 		}
 
 	}
@@ -643,17 +657,21 @@ public class R5StreamPublisher implements R5StreamInstance,
 		Log.d(TAG, "bringToForeground()");
 		if (mEnableBackgroundStreaming) {
 			Log.d(TAG, "sendToBackground:publiserResume");
-			this.setPublisherDisplayOn(true);
+			this.setPublisherDisplayOn(true, true);
 		}
 
 	}
 
 	protected void emitEvent (String type, WritableMap map) {
+
 		if (mEventEmitter != null) {
+			Log.d(TAG, "Dispatch using Event emitter.");
 			mEventEmitter.receiveEvent(this.getEmitterId(), type, map);
 		} else {
+			Log.d(TAG, "Dispatch using Device emitter.");
 			deviceEventEmitter.emit(type, map);
 		}
+
 	}
 
 	public void onMetaData(String metadata) {
@@ -708,7 +726,7 @@ public class R5StreamPublisher implements R5StreamInstance,
 		Log.d(TAG, "onHostDestroy()");
 		Activity activity = mContext.getCurrentActivity();
 		if (mPubishIntent != null && mIsBackgroundBound) {
-			this.setPublisherDisplayOn(false);
+			this.setPublisherDisplayOn(false, true);
 			activity.unbindService(mPublishServiceConnection);
 			activity.stopService(mPubishIntent);
 			mIsBackgroundBound = false;

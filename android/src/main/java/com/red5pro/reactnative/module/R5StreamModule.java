@@ -99,12 +99,7 @@ public class R5StreamModule extends ReactContextBaseJavaModule {
 			R5StreamInstance instance = new R5StreamSubscriber(this.getReactApplicationContext());
 			item.setInstance(instance);
 			((R5StreamSubscriber) instance).subscribe(item.getConfiguration(),
-                    props.subscribeVideo,
-                    props.enableBackgroundStreaming,
-                    props.audioMode,
-                    props.logLevel,
-                    props.scaleMode,
-                    props.showDebugView);
+                    props);
 			promise.resolve(streamId);
 		} else {
 			promise.reject(E_CONFIGURATION_ERROR, "Stream Configuration with id(" + streamId + ") does not exist.");
@@ -141,11 +136,7 @@ public class R5StreamModule extends ReactContextBaseJavaModule {
 			item.setInstance(instance);
 			((R5StreamPublisher) instance).publish(item.getConfiguration(),
 					RecordTypeUtil.typeFromJSEnumValue(streamType),
-					props.enableBackgroundStreaming,
-					props.audioMode,
-					props.logLevel,
-					props.scaleMode,
-					props.showDebugView);
+					props);
 			promise.resolve(streamId);
 		} else {
 			promise.reject(E_CONFIGURATION_ERROR, "Stream Configuration with id(" + streamId + ") does not exist.");

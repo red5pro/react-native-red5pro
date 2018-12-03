@@ -100,6 +100,7 @@ export default class Publisher extends React.Component {
       isInErrorState: false,
       videoMuted: false,
       swappedLayout: false,
+      attached: true,
       buttonProps: {
         style: styles.button
       },
@@ -121,6 +122,8 @@ export default class Publisher extends React.Component {
       .then(streamId => {
         console.log('R5StreamModule configuration with ' + streamId)
         this.streamId = streamId
+        // We need to call attach in order to kick off the A/V codec.
+        this.doAttach()
         this.doPublish()
       })
       .catch(error => {
@@ -149,6 +152,23 @@ export default class Publisher extends React.Component {
     DeviceEventEmitter.removeListener('onUnpublishNotification', this.onUnpublishNotification)  
   }
 
+  componentDidUpdate (prevProps, prevState) {
+    if (prevState.attached !== this.state.attached) {
+      if (this.state.attached) {
+        this.doAttach()
+      } else {
+        this.doDetach()
+      }
+    }
+    if (prevState.swappedLayout !== this.state.swappedLayout) {
+      if (this.state.attached) {
+        this.doAttach()
+      } else {
+        this.doDetach()
+      }
+    }
+  }
+
   _handleAppStateChange = (nextAppState) => {
     console.log(`Publisher:AppState - ${nextAppState}`)
     const { streamProps: { enableBackgroundStreaming } } = this.props
@@ -170,6 +190,7 @@ export default class Publisher extends React.Component {
     const {
       toastProps,
       buttonProps,
+      videoProps,
       audioMuted,
       videoMuted,
       swappedLayout
@@ -190,7 +211,7 @@ export default class Publisher extends React.Component {
       <View style={styles.container}>
         { !swappedLayout &&
           <R5VideoView
-            style={styles.videoView}
+            {...videoProps}
             ref={assignVideoRef.bind(this)}
           />
         }
@@ -232,9 +253,14 @@ export default class Publisher extends React.Component {
           onPress={this.onToggleDetach}
           title='Toggle Detach'
         />
+        <Button
+          {...buttonProps}
+          onPress={this.onSwapLayout}
+          title='Swap Layout'
+        />
         { swappedLayout &&
           <R5VideoView
-            style={styles.videoView}
+            {...videoProps}
             ref={assignVideoRef.bind(this)}
           />
         }
@@ -277,11 +303,9 @@ export default class Publisher extends React.Component {
     const {
       attached
     } = this.state
-    if (attached) {
-      this.doDetach()
-    } else {
-      this.doAttach()
-    }
+    this.setState({
+      attached: !attached
+    })
   }
 
   onSwapLayout () {
@@ -289,8 +313,8 @@ export default class Publisher extends React.Component {
     const {
       swappedLayout
     } = this.state
+    this.doDetach()
     this.setState({
-      attached: false,
       swappedLayout: !swappedLayout
     })
   }
@@ -331,9 +355,6 @@ export default class Publisher extends React.Component {
     if (nodeHandle) {
       console.log(`[R5StreamModule:doDetach]: found view...`)
       detach(nodeHandle, this.streamId)
-      this.setState({
-        attached: false
-      })
     }
   }
 
@@ -342,9 +363,6 @@ export default class Publisher extends React.Component {
     if (nodeHandle) {
       console.log(`[R5StreamModule:doAttach]: found view...`)
      attach(nodeHandle, this.streamId)
-      this.setState({
-        attached: true
-      })
     }
   }
 

@@ -2,6 +2,8 @@ package com.red5pro.reactnative.stream;
 
 import com.facebook.react.bridge.ReadableMap;
 
+import java.util.ArrayList;
+
 public class R5StreamProps {
 
 	public int logLevel;
@@ -43,6 +45,7 @@ public class R5StreamProps {
 	public static final String PROP_ABR_CONTROLLER = "useAdaptiveBitrateController";
 
 	public static R5StreamProps fromMap (ReadableMap map) {
+
 		R5StreamProps props  = new R5StreamProps();
 		props.logLevel = map.hasKey(R5StreamProps.PROP_LOG_LEVEL) ? map.getInt(R5StreamProps.PROP_LOG_LEVEL) : 3;
 		props.audioMode = map.hasKey(R5StreamProps.PROP_AUDIO_MODE) ? map.getInt(R5StreamProps.PROP_AUDIO_MODE) : 0;
@@ -61,5 +64,28 @@ public class R5StreamProps {
 		props.enableBackgroundStreaming = map.hasKey(R5StreamProps.PROP_BACKGROUND_STREAMING) ? map.getBoolean(R5StreamProps.PROP_BACKGROUND_STREAMING) : false;
 		props.useAdaptiveBitrateController = map.hasKey(R5StreamProps.PROP_ABR_CONTROLLER) ? map.getBoolean(R5StreamProps.PROP_ABR_CONTROLLER) : false;
 		return props;
+
+	}
+
+	@Override
+	public String toString () {
+		ArrayList<String> props = new ArrayList<String>();
+		props.add("logLevel=" + logLevel);
+		props.add("audioMode=" + audioMode);
+		props.add("scaleMode=" + scaleMode);
+		props.add("showDebugView=" + showDebugView);
+		props.add("subscribeVideo=" + subscribeVideo);
+		props.add("publishVideo=" + publishVideo);
+		props.add("publishAudio=" + publishAudio);
+		props.add("cameraWidth=" + cameraWidth);
+		props.add("cameraHeight=" + cameraHeight);
+		props.add("bitrate=" + bitrate);
+		props.add("framerate=" + framerate);
+		props.add("audioBitrate=" + audioBitrate);
+		props.add("audioSampleRate=" + audioSampleRate);
+		props.add("useBackfacingCamera=" + useBackfacingCamera);
+		props.add("enableBackgroundStreaming=" + enableBackgroundStreaming);
+		props.add("useAdaptiveBitrateController=" + useAdaptiveBitrateController);
+		return props.toString();
 	}
 }

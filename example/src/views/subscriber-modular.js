@@ -155,6 +155,16 @@ export default class Subscriber extends React.Component {
     DeviceEventEmitter.removeListener('onUnSubscribeNotification', this.onUnSubscribeNotification)
   }
 
+  componentDidUpdate (prevProps, prevState) {
+    if (prevState.attached !== this.state.attached) {
+      if (this.state.attached) {
+        this.doAttach()
+      } else {
+        this.doDetach()
+      }
+    }
+  }
+
   _handleAppStateChange = (nextAppState) => {
     console.log(`Subscriber:AppState - ${nextAppState}`)
     const { streamProps: { enableBackgroundStreaming } } = this.props
@@ -303,11 +313,9 @@ export default class Subscriber extends React.Component {
     const {
       attached
     } = this.state
-    if (attached) {
-      this.doDetach()
-    } else {
-      this.doAttach()
-    }
+    this.setState({
+      attached: !attached
+    })
   }
 
   onSwapLayout () {
@@ -316,7 +324,6 @@ export default class Subscriber extends React.Component {
       swappedLayout
     } = this.state
     this.setState({
-      attached: false,
       swappedLayout: !swappedLayout
     })
   }
@@ -357,9 +364,6 @@ export default class Subscriber extends React.Component {
     if (nodeHandle) {
       console.log(`[R5StreamModule:doDetach]: found view...`)
       detach(nodeHandle, this.streamId)
-      this.setState({
-        attached: false
-      })
     }
   }
 
@@ -368,9 +372,6 @@ export default class Subscriber extends React.Component {
     if (nodeHandle) {
       console.log(`[R5StreamModule:doAttach]: found view...`)
       attach(nodeHandle, this.streamId)
-      this.setState({
-        attached: true
-      })
     }
   }
 
