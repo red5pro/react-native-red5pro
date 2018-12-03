@@ -163,6 +163,13 @@ export default class Subscriber extends React.Component {
         this.doDetach()
       }
     }
+    if (prevState.swappedLayout !== this.state.swappedLayout) {
+      if (this.state.attached) {
+        this.doAttach()
+      } else {
+        this.doDetach()
+      }
+    }
   }
 
   _handleAppStateChange = (nextAppState) => {
@@ -323,6 +330,7 @@ export default class Subscriber extends React.Component {
     const {
       swappedLayout
     } = this.state
+    this.doDetach()
     this.setState({
       swappedLayout: !swappedLayout
     })
