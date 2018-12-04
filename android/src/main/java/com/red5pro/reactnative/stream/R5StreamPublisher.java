@@ -433,6 +433,13 @@ public class R5StreamPublisher implements R5StreamInstance,
 
 	}
 
+	public void updateScaleMode(int mode) {
+		this.mScaleMode = mode;
+		if (mStream != null) {
+			mStream.setScaleMode(mode);
+		}
+	}
+
 	public void updateLogLevel(int level) {
 		this.mLogLevel = level;
 		if (mStream != null) {
