@@ -16,14 +16,13 @@
     BOOL _hasExplicitlyPausedVideo;
     
     RCTEventEmitter *_emitter;
-    int _emitterId;
     int _recordType;
+    NSString *_streamName;  // required.
     
     int _logLevel;
     int _scaleMode;
     int _audioMode;
     BOOL _showDebugInfo;
-    NSString *_streamName;  // required.
     
     BOOL _useVideo;
     BOOL _useAudio;
@@ -248,6 +247,48 @@
     
 }
 
+- (void)muteAudio {
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_isStreaming) {
+            [self.stream setPauseAudio:YES];
+        }
+    });
+    
+}
+
+- (void)unmuteAudio {
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_isStreaming) {
+            [self.stream setPauseAudio:NO];
+        }
+    });
+    
+}
+
+- (void)muteVideo {
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_isStreaming) {
+            _hasExplicitlyPausedVideo = YES;
+            [self.stream setPauseVideo:YES];
+        }
+    });
+    
+}
+
+- (void)unmuteVideo {
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_isStreaming) {
+            _hasExplicitlyPausedVideo = NO;
+            [self.stream setPauseVideo:NO];
+        }
+    });
+    
+}
+
 - (void)onDeviceOrientation:(NSNotification *)notification {
     
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -318,13 +359,12 @@
     [self bringToForeground];
 }
 
-- (int) getEmitter {
-//    return self.viewEmitter;
-    return 0;
+- (NSObject<R5LayoutEventEmitter> *) getEmitter {
+    return self.viewEmitter;
 }
 
-- (void) setEmitter:(int)emitter {
-//    self.viewEmitter = emitter;
+- (void) setEmitter:(NSObject<R5LayoutEventEmitter> *)emitter {
+    self.viewEmitter = emitter;
 }
 
 - (void) setVideoView:(R5VideoViewController *)view {

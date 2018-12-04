@@ -14,6 +14,7 @@
 #import "R5StreamItem.h"
 #import "R5StreamModule.h"
 #import "R5StreamPublisher.h"
+#import "R5StreamSubscriber.h"
 #import "R5VideoViewManager.h"
 
 static NSMutableDictionary *_streamMap;
@@ -32,12 +33,25 @@ RCT_EXPORT_VIEW_PROPERTY(onUnsubscribeNotification, RCTBubblingEventBlock)
 
 RCT_EXPORT_METHOD(subscribe:(nonnull NSNumber *)reactTag streamName:(nonnull NSString *)streamName) {
     
+    RCTLogInfo(@"R5VideoViewManager:subscribe(%@)", streamName);
     [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
         R5VideoView *view = viewRegistry[reactTag];
         if (![view isKindOfClass:[R5VideoView class]]) {
             RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
         } else {
-            [view subscribe:streamName];
+            NSObject<R5StreamInstance> *item = [[R5VideoViewManager streamMap] objectForKey:streamName];
+            if (item == nil) {
+                RCTLog(@"Creating new subscriber instance for %@", streamName);
+                R5StreamSubscriber *subscriber = [[R5StreamSubscriber alloc] init];
+                [[R5VideoViewManager streamMap] setObject:subscriber forKey:streamName];
+                [view setStreamInstance:(NSObject<R5StreamInstance> *)subscriber];
+                [view subscribe:streamName];
+            } else {
+                [view setStreamInstance:item];
+                if ([view getIsAttached]) {
+                    [view attach];
+                }
+            }
         }
     }];
     
@@ -45,19 +59,29 @@ RCT_EXPORT_METHOD(subscribe:(nonnull NSNumber *)reactTag streamName:(nonnull NSS
 
 RCT_EXPORT_METHOD(unsubscribe:(nonnull NSNumber *)reactTag) {
     
+    RCTLogInfo(@"R5VideoViewManager:unsubscribe()");
     [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
         R5VideoView *view = viewRegistry[reactTag];
         if (![view isKindOfClass:[R5VideoView class]]) {
             RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
         } else {
-            [view unsubscribe];
+            NSString *streamName = [view.configuration streamName];
+            NSObject<R5StreamInstance> *item = [[R5VideoViewManager streamMap] objectForKey:streamName];
+            if (item != nil) {
+                [(R5StreamSubscriber *)item unsubscribe];
+                [item setEmitter:nil];
+                [view unsubscribe];
+                [view setStreamInstance:nil];
+                [[R5VideoViewManager streamMap] removeObjectForKey:streamName];
+            }
         }
     }];
+    
 }
 
 RCT_EXPORT_METHOD(publish:(nonnull NSNumber *)reactTag streamName:(nonnull NSString *)streamName withMode:(int)publishMode) {
     
-    RCTLog(@"R5VideoViewManager:publish(%@)", streamName);
+    RCTLogInfo(@"R5VideoViewManager:publish(%@)", streamName);
     [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
         R5VideoView *view = viewRegistry[reactTag];
         if (![view isKindOfClass:[R5VideoView class]]) {
@@ -83,12 +107,21 @@ RCT_EXPORT_METHOD(publish:(nonnull NSNumber *)reactTag streamName:(nonnull NSStr
 
 RCT_EXPORT_METHOD(unpublish:(nonnull NSNumber *)reactTag) {
     
+    RCTLogInfo(@"R5VideoViewManager:unpublish()");
     [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
         R5VideoView *view = viewRegistry[reactTag];
         if (![view isKindOfClass:[R5VideoView class]]) {
             RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
         } else {
-            [view unpublish];
+            NSString *streamName = [view.configuration streamName];
+            NSObject<R5StreamInstance> *item = [[R5VideoViewManager streamMap] objectForKey:streamName];
+            if (item != nil) {
+                [(R5StreamPublisher *)item unpublish];
+                [item setEmitter:nil];
+                [view unpublish];
+                [view setStreamInstance:nil];
+                [[R5VideoViewManager streamMap] removeObjectForKey:streamName];
+            }
         }
     }];
     
