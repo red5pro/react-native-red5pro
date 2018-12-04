@@ -8,6 +8,10 @@
 
 #import <React/RCTViewManager.h>
 
-@interface R5VideoViewManager : RCTViewManager
+@interface R5VideoViewManager : RCTViewManager {
+    
+}
+
++(NSMutableDictionary *)streamMap;
 
 @end

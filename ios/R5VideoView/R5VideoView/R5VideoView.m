@@ -7,6 +7,7 @@
 //
 
 #import "R5VideoView.h"
+#import "R5StreamPublisher.h"
 
 @interface R5VideoView() {
   
@@ -96,10 +97,11 @@
 //  [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
 }
 
-- (void)loadConfiguration:(R5Configuration *)configuration forKey:(NSString *)key {
+- (void)loadConfiguration:(R5Configuration *)configuration forKey:(NSString *)key andAttach:(BOOL)autoAttach {
   
     dispatch_async(dispatch_get_main_queue(), ^{
         
+        _attached = autoAttach;
         [self establishConnection:configuration];
         if (self.onConfigured) {
             self.onConfigured(@{@"key": key});
@@ -210,46 +212,38 @@
     return microphone;
 }
 
+- (NSDictionary *)getPublisherProps {
+    return @{
+             @"logLevel": @(_logLevel),
+             @"scaleMode": @(_scaleMode),
+             @"audioMode": @(_audioMode),
+             @"showDebugView": @(_showDebugInfo),
+             @"publishVideo": @(_useVideo),
+             @"publishAudio": @(_useAudio),
+             @"bitrate": @(_bitrate),
+             @"framerate": @(_framerate),
+             @"audioBitrate": @(_audioBitrate),
+             @"audioSampleRate": @(_audioSampleRate),
+             @"cameraWidth": @(_cameraWidth),
+             @"cameraHeight": @(_cameraHeight),
+             @"useBackfacingCamera": @(_useBackfacingCamera),
+             @"enableBackgroundStreaming": @(_enableBackgroundStreaming),
+             @"useAdaptiveBitrateController": @(_useAdaptiveBitrateController)
+             };
+}
+
 - (void)publish:(NSString *)streamName withMode:(int)publishMode {
   
     dispatch_async(dispatch_get_main_queue(), ^{
         
-        _isPublisher = YES;
-        _streamName = streamName;
-        
-        if (self.stream == nil) {
-            [self establishConnection:self.configuration];
+        if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamPublisher.class]) {
+            [self.configuration setStreamName:streamName];
+            NSDictionary *props = [self getPublisherProps];
+            [(R5StreamPublisher *)_streamInstance publish:self.configuration withType:publishMode andProps:props];
+            if (_attached) {
+                [self attach];
+            }
         }
-        
-        if (_useAdaptiveBitrateController) {
-            R5AdaptiveBitrateController *abrController = [[R5AdaptiveBitrateController alloc] init];
-            [abrController attachToStream:self.stream];
-            [abrController setRequiresVideo:_useVideo];
-        }
-        
-        if (_useAudio) {
-            R5Microphone *microphone = [self setUpMicrophone];
-            [self.stream attachAudio:microphone];
-        }
-  
-        if (_useVideo) {
-            R5Camera *camera = [self setUpCamera];
-            
-            self.controller = [[R5VideoViewController alloc] init];
-            UIView *view = [[UIView alloc] initWithFrame:self.frame];
-            [self.controller setView:view];
-            [self addSubview:view];
-            
-            [self.controller showPreview:YES];
-            [self.controller showDebugInfo:_showDebugInfo];
-            
-            [self.controller attachStream:self.stream];
-            [self.stream attachVideo:camera];
-        }
-  
-        [self.stream publish:streamName type:publishMode];
-        [self onDeviceOrientation:NULL];
-        [self.stream updateStreamMeta];
         
     });
   
@@ -272,11 +266,8 @@
 - (void)swapCamera {
   
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (_isPublisher) {
-            _useBackfacingCamera = !_useBackfacingCamera;
-            AVCaptureDevice *device = [self getCameraDevice:_useBackfacingCamera];
-            R5Camera *camera = (R5Camera *)[self.stream getVideoSource];
-            [camera setDevice:device];
+        if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamPublisher.class]) {
+            [(R5StreamPublisher *)_streamInstance swapCamera];
         }
     });
   
@@ -674,6 +665,7 @@
         if (_streamInstance != nil) {
             _attached = YES;
             self.controller = [self getOrCreateVideoView];
+            [self.controller showDebugInfo:_showDebugInfo];
             [_streamInstance setVideoView:self.controller];
         }
     });
@@ -690,6 +682,10 @@
         }
     });
     
+}
+
+- (BOOL)getIsAttached {
+    return _attached;
 }
 
 @end

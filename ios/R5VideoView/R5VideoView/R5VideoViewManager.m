@@ -11,9 +11,12 @@
 #import <React/RCTUIManager.h>
 
 #import "R5VideoView.h"
-#import "R5VideoViewManager.h"
 #import "R5StreamItem.h"
 #import "R5StreamModule.h"
+#import "R5StreamPublisher.h"
+#import "R5VideoViewManager.h"
+
+static NSMutableDictionary *_streamMap;
 
 @implementation R5VideoViewManager
 
@@ -54,12 +57,25 @@ RCT_EXPORT_METHOD(unsubscribe:(nonnull NSNumber *)reactTag) {
 
 RCT_EXPORT_METHOD(publish:(nonnull NSNumber *)reactTag streamName:(nonnull NSString *)streamName withMode:(int)publishMode) {
     
+    RCTLog(@"R5VideoViewManager:publish(%@)", streamName);
     [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
         R5VideoView *view = viewRegistry[reactTag];
         if (![view isKindOfClass:[R5VideoView class]]) {
             RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
         } else {
-            [view publish:streamName withMode:publishMode];
+            NSObject<R5StreamInstance> *item = [[R5VideoViewManager streamMap] objectForKey:streamName];
+            if (item == nil) {
+                RCTLog(@"Creating new publisher instance for %@", streamName);
+                R5StreamPublisher *publisher = [[R5StreamPublisher alloc] init];
+                [[R5VideoViewManager streamMap] setObject:publisher forKey:streamName];
+                [view setStreamInstance:(NSObject<R5StreamInstance> *)publisher];
+                [view publish:streamName withMode:publishMode];
+            } else {
+                [view setStreamInstance:item];
+                if ([view getIsAttached]) {
+                    [view attach];
+                }
+            }
         }
     }];
     
@@ -233,30 +249,41 @@ RCT_EXPORT_VIEW_PROPERTY(useAdaptiveBitrateController, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(enableBackgroundStreaming, BOOL);
 
 RCT_CUSTOM_VIEW_PROPERTY(showDebugView, BOOL, R5VideoView) {
-  [view setShowDebugInfo:[json boolValue]];
+    [view setShowDebugInfo:[json boolValue]];
 }
 
 RCT_CUSTOM_VIEW_PROPERTY(configuration, R5Configuration, R5VideoView) {
   
-  R5Configuration *configuration = [[R5Configuration alloc] init];
-  configuration.protocol = 1;
-  configuration.host = json[@"host"];
-  configuration.port = [json[@"port"] intValue];
-  configuration.contextName = json[@"contextName"];
-  configuration.streamName = json[@"streamName"];
-  configuration.bundleID = json[@"bundleID"];
-  configuration.licenseKey = json[@"licenseKey"];
-  configuration.buffer_time = [json[@"bufferTime"] floatValue];
-  configuration.stream_buffer_time = [json[@"streamBufferTime"] floatValue];
-  configuration.parameters = json[@"parameters"];
+    R5Configuration *configuration = [[R5Configuration alloc] init];
+    configuration.protocol = 1;
+    configuration.host = json[@"host"];
+    configuration.port = [json[@"port"] intValue];
+    configuration.contextName = json[@"contextName"];
+    configuration.streamName = json[@"streamName"];
+    configuration.bundleID = json[@"bundleID"];
+    configuration.licenseKey = json[@"licenseKey"];
+    configuration.buffer_time = [json[@"bufferTime"] floatValue];
+    configuration.stream_buffer_time = [json[@"streamBufferTime"] floatValue];
+    configuration.parameters = json[@"parameters"];
   
-  [view loadConfiguration:configuration forKey:json[@"key"]];
+    BOOL autoAttach = YES;
+    if (json[@"autoAttachView"] != nil) {
+        autoAttach = [json[@"autoAttachView"] boolValue];
+    }
+    [view loadConfiguration:configuration forKey:json[@"key"] andAttach:autoAttach];
 
 }
 
 - (UIView *)view {
   R5VideoView *r5View = [[R5VideoView alloc] init];
   return r5View;
+}
+
++(NSMutableDictionary *)streamMap {
+    if (_streamMap == nil) {
+        _streamMap = [[NSMutableDictionary alloc] init];
+    }
+    return _streamMap;
 }
 
 @end
