@@ -3,6 +3,8 @@ import React from 'react'
 import {
   AppState,
   DeviceEventEmitter,
+  NativeEventEmitter,
+  Platform,
   findNodeHandle,
   Button,
   Image,
@@ -85,6 +87,8 @@ export default class Subscriber extends React.Component {
       }
     } = this.props
 
+    this.emitter = Platform.OS == 'ios' ? new NativeEventEmitter(R5StreamModule) : DeviceEventEmitter
+
     // Events.
     this.onMetaData = this.onMetaData.bind(this)
     this.onConfigured = this.onConfigured.bind(this)
@@ -138,10 +142,10 @@ export default class Subscriber extends React.Component {
     console.log('Subscriber:componentWillMount()')
     AppState.addEventListener('change', this._handleAppStateChange)
 
-    DeviceEventEmitter.addListener('onMetaData', this.onMetaData)
-    DeviceEventEmitter.addListener('onConfigured', this.onConfigured)
-    DeviceEventEmitter.addListener('onSubscriberStreamStatus', this.onSubscriberStreamStatus)
-    DeviceEventEmitter.addListener('onUnSubscribeNotification', this.onUnSubscribeNotification)
+    this.emitter.addListener('onMetaData', this.onMetaData)
+    this.emitter.addListener('onConfigured', this.onConfigured)
+    this.emitter.addListener('onSubscriberStreamStatus', this.onSubscriberStreamStatus)
+    this.emitter.addListener('onUnSubscribeNotification', this.onUnSubscribeNotification)
   }
 
   componentWillUnmount () {
@@ -149,10 +153,10 @@ export default class Subscriber extends React.Component {
     AppState.removeEventListener('change', this._handleAppStateChange)
     this.doUnsubscribe()
 
-    DeviceEventEmitter.removeListener('onMetaData', this.onMetaData)
-    DeviceEventEmitter.removeListener('onConfigured', this.onConfigured)
-    DeviceEventEmitter.removeListener('onSubscriberStreamStatus', this.onSubscriberStreamStatus)
-    DeviceEventEmitter.removeListener('onUnSubscribeNotification', this.onUnSubscribeNotification)
+    this.emitter.removeListener('onMetaData', this.onMetaData)
+    this.emitter.removeListener('onConfigured', this.onConfigured)
+    this.emitter.removeListener('onSubscriberStreamStatus', this.onSubscriberStreamStatus)
+    this.emitter.removeListener('onUnSubscribeNotification', this.onUnSubscribeNotification)
   }
 
   componentDidUpdate (prevProps, prevState) {
