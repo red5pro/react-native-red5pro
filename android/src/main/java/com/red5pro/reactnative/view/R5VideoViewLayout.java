@@ -485,13 +485,9 @@ public class R5VideoViewLayout extends FrameLayout
 
     public void updateScaleMode(int mode) {
         this.mScaleMode = mode;
-        if (mStreamInstance != null && mStreamInstance instanceof R5StreamSubscriber) {
-            ((R5StreamSubscriber) mStreamInstance).updateScaleMode(mode);
+        if (mStreamInstance != null) {
+            mStreamInstance.updateScaleMode(mode);
         }
-    }
-
-    public void updateSubscribeVideo(boolean playbackVideo) {
-        this.mPlaybackVideo = playbackVideo;
     }
 
     public void updateLogLevel(int level) {
@@ -499,6 +495,10 @@ public class R5VideoViewLayout extends FrameLayout
         if (mStreamInstance != null) {
             mStreamInstance.updateLogLevel(level);
         }
+    }
+
+    public void updateSubscribeVideo(boolean playbackVideo) {
+        this.mPlaybackVideo = playbackVideo;
     }
 
     public void updatePublishVideo(boolean useVideo) {
