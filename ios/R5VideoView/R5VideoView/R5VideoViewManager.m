@@ -12,6 +12,8 @@
 
 #import "R5VideoView.h"
 #import "R5VideoViewManager.h"
+#import "R5StreamItem.h"
+#import "R5StreamModule.h"
 
 @implementation R5VideoViewManager
 
@@ -178,6 +180,39 @@ RCT_EXPORT_METHOD(setPlaybackVolume:(nonnull NSNumber *)reactTag value:(int)valu
         }
     }];
     
+}
+
+RCT_EXPORT_METHOD(attach:(nonnull NSNumber *)reactTag withId:(NSString* )streamId) {
+    NSMutableDictionary *map = [R5StreamModule streamMap];
+    if ([map objectForKey:streamId] != nil) {
+        R5StreamItem *item = [map objectForKey:streamId];
+        [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
+            R5VideoView *view = viewRegistry[reactTag];
+            if (![view isKindOfClass:[R5VideoView class]]) {
+                RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
+            } else {
+                RCTLog(@"Found view for instance %@.", streamId);
+                [view setStreamInstance:[item getStreamInstance]];
+                [view attach];
+            }
+        }];
+    }
+}
+
+RCT_EXPORT_METHOD(detach:(nonnull NSNumber *)reactTag withId:(NSString* )streamId) {
+    NSMutableDictionary *map = [R5StreamModule streamMap];
+    if ([map objectForKey:streamId] != nil) {
+        R5StreamItem *item = [map objectForKey:streamId];
+        [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
+            R5VideoView *view = viewRegistry[reactTag];
+            if (![view isKindOfClass:[R5VideoView class]]) {
+                RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
+            } else {
+                [view detach];
+                [view setStreamInstance:nil];
+            }
+        }];
+    }
 }
 
 # pragma RN Properties

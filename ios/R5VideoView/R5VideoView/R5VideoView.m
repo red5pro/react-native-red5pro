@@ -10,6 +10,9 @@
 
 @interface R5VideoView() {
   
+    BOOL _attached;
+    NSObject<R5StreamInstance> *_streamInstance;
+    
     int _scaleMode;
     int _logLevel;
     int _audioMode;
@@ -43,6 +46,8 @@
   
   if (self = [super init]) {
     
+      _attached = NO;
+      
       _scaleMode = 0;
       _logLevel = 3;
       _showDebugInfo = NO;
@@ -639,6 +644,52 @@
 }
 - (void)setEnableBackgroundStreaming:(BOOL)value {
     _enableBackgroundStreaming = value;
+}
+
+- (void)setStreamInstance:(NSObject<R5StreamInstance> *)streamInstance {
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        _streamInstance = streamInstance;
+        if (streamInstance != nil) {
+            // TODO: setEmitterId?
+            [_streamInstance setEmitter:0];
+        }
+    });
+}
+
+- (R5VideoViewController *)getOrCreateVideoView {
+    R5VideoViewController *ctrl = self.controller;
+    if (ctrl == nil) {
+        ctrl = [[R5VideoViewController alloc] init];
+        UIView *view = [[UIView alloc] initWithFrame:self.frame];
+        [ctrl setView:view];
+        [self addSubview:view];
+    }
+    return ctrl;
+}
+
+- (void)attach {
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_streamInstance != nil) {
+            _attached = YES;
+            self.controller = [self getOrCreateVideoView];
+            [_streamInstance setVideoView:self.controller];
+        }
+    });
+    
+}
+
+- (void)detach {
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        _attached = NO;
+        if (_streamInstance != nil) {
+            [_streamInstance removeVideoView:self.controller];
+            self.controller = nil;
+        }
+    });
+    
 }
 
 @end

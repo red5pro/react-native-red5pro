@@ -3,6 +3,8 @@ import React from 'react'
 import {
   AppState,
   DeviceEventEmitter,
+  NativeEventEmitter,
+  Platform,
   findNodeHandle,
   Button,
   StyleSheet,
@@ -13,6 +15,7 @@ import { Icon } from 'react-native-elements'
 import {
   R5StreamModule,
   R5VideoView,
+  R5PublishType,
   attach, detach
 } from 'react-native-red5pro'
 
@@ -77,6 +80,8 @@ export default class Publisher extends React.Component {
       }
     } = this.props
 
+    this.emitter = Platform.OS == 'ios' ? new NativeEventEmitter(R5StreamModule) : DeviceEventEmitter
+
    // Events.
     this.onMetaData = this.onMetaData.bind(this)
     this.onConfigured = this.onConfigured.bind(this)
@@ -135,10 +140,10 @@ export default class Publisher extends React.Component {
     console.log('Publisher:componentWillMount()')
     AppState.addEventListener('change', this._handleAppStateChange)
 
-    DeviceEventEmitter.addListener('onMetaData', this.onMetaData)
-    DeviceEventEmitter.addListener('onConfigured', this.onConfigured)
-    DeviceEventEmitter.addListener('onPublisherStreamStatus', this.onPublisherStreamStatus)
-    DeviceEventEmitter.addListener('onUnpublishNotification', this.onUnpublishNotification)
+    this.emitter.addListener('onMetaData', this.onMetaData)
+    this.emitter.addListener('onConfigured', this.onConfigured)
+    this.emitter.addListener('onPublisherStreamStatus', this.onPublisherStreamStatus)
+    this.emitter.addListener('onUnpublishNotification', this.onUnpublishNotification)
   }
 
   componentWillUnmount () {
@@ -146,10 +151,10 @@ export default class Publisher extends React.Component {
     AppState.removeEventListener('change', this._handleAppStateChange)
     this.doUnpublish()
 
-    DeviceEventEmitter.removeListener('onMetaData', this.onMetaData)
-    DeviceEventEmitter.removeListener('onConfigured', this.onConfigured)
-    DeviceEventEmitter.removeListener('onPublisherStreamStatus', this.onPublisherStreamStatus)
-    DeviceEventEmitter.removeListener('onUnpublishNotification', this.onUnpublishNotification)  
+    this.emitter.removeListener('onMetaData', this.onMetaData)
+    this.emitter.removeListener('onConfigured', this.onConfigured)
+    this.emitter.removeListener('onPublisherStreamStatus', this.onPublisherStreamStatus)
+    this.emitter.removeListener('onUnpublishNotification', this.onUnpublishNotification)  
   }
 
   componentDidUpdate (prevProps, prevState) {
@@ -278,6 +283,7 @@ export default class Publisher extends React.Component {
   }
 
   onPublisherStreamStatus (event) {
+    console.log(`Publisher:onPublisherStreamStatus :: ${JSON.stringify(event, null, 2)}`)
     const status = event.hasOwnProperty('nativeEvent') ? event.nativeEvent.status : event.status
     console.log(`Publisher:onPublisherStreamStatus :: ${JSON.stringify(status, null, 2)}`)
     let message = isValidStatusMessage(status.message) ? status.message : status.name
@@ -371,7 +377,7 @@ export default class Publisher extends React.Component {
       streamProps
     } = this.props
 
-    R5StreamModule.publish(this.streamId, streamProps)
+    R5StreamModule.publish(this.streamId, R5PublishType.LIVE, streamProps)
       .then(streamId => {
         console.log('R5StreamModule publisher with ' + streamId);
       })
