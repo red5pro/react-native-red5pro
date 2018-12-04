@@ -49,3 +49,11 @@ export const unmuteVideo = (handle) => {
 export const setPlaybackVolume = (handle, value) => {
   UIManager.dispatchViewManagerCommand(handle, UIManager.R5VideoView.Commands.setPlaybackVolume, [value])
 }
+
+export const attach = (handle, streamName) => {
+  UIManager.dispatchViewManagerCommand(handle, UIManager.R5VideoView.Commands.attach, [streamName])
+}
+
+export const detach = (handle, streamName) => {
+  UIManager.dispatchViewManagerCommand(handle, UIManager.R5VideoView.Commands.detach, [streamName])
+}
