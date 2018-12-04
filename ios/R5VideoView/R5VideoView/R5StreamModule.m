@@ -9,6 +9,7 @@
 #import "R5StreamModule.h"
 #import "R5StreamItem.h"
 #import "R5StreamPublisher.h"
+#import "R5StreamSubscriber.h"
 #import <R5Streaming/R5Streaming.h>
 #import <React/RCTLog.h>
 
@@ -50,6 +51,55 @@ RCT_REMAP_METHOD(init,
     
 }
 
+RCT_REMAP_METHOD(subscribe,
+                 streamId:(NSString *)streamId
+                 streamProps:(NSDictionary *)streamProps
+                 resolve:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject) {
+    
+    RCTLogInfo(@"R5StreamModule:subscribe() %@", streamId);
+    R5StreamItem *item = [[R5StreamModule streamMap] objectForKey:streamId];
+    if (item != nil) {
+        R5StreamSubscriber *streamInstance = [[R5StreamSubscriber alloc] initWithDeviceEmitter:self];
+        if (streamInstance != nil) {
+            [item setStreamInstance:(NSObject<R5StreamInstance> *)streamInstance];
+            R5Configuration *config = [item getConfiguration];
+            [(R5StreamSubscriber *)streamInstance subscribe:config andProps:streamProps];
+            resolve(streamId);
+            return;
+        }
+    }
+    
+    NSString *errorStr = [NSString stringWithFormat:@"Stream Configuration with id(%@) does not exist.", streamId];
+    NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : errorStr };
+    NSError *error = [NSError errorWithDomain:[[NSBundle mainBundle] bundleIdentifier] code:NSURLErrorCannotFindHost userInfo:userInfo];
+    reject(@"E_CONFIGURATION_ERROR", errorStr, error);
+    
+}
+
+RCT_REMAP_METHOD(unsubscribe,
+                 streamId:(NSString *)streamId
+                 resolve:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject) {
+    
+    RCTLogInfo(@"R5StreamModule:unsubscribe() %@", streamId);
+    R5StreamItem *item = [[R5StreamModule streamMap] objectForKey:streamId];
+    if (item != nil) {
+        NSObject<R5StreamInstance> *streamInstance = [item getStreamInstance];
+        if (streamInstance != nil) {
+            [(R5StreamSubscriber *)streamInstance unsubscribe];
+            resolve(streamId);
+            return;
+        }
+    }
+    
+    NSString *errorStr = [NSString stringWithFormat:@"Stream Configuration with id(%@) does not exist.", streamId];
+    NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : errorStr };
+    NSError *error = [NSError errorWithDomain:[[NSBundle mainBundle] bundleIdentifier] code:NSURLErrorCannotFindHost userInfo:userInfo];
+    reject(@"E_CONFIGURATION_ERROR", errorStr, error);
+    
+}
+
 RCT_REMAP_METHOD(publish,
                  streamId:(NSString *)streamId
                  streamType:(int) type
@@ -74,12 +124,14 @@ RCT_REMAP_METHOD(publish,
     NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : errorStr };
     NSError *error = [NSError errorWithDomain:[[NSBundle mainBundle] bundleIdentifier] code:NSURLErrorCannotFindHost userInfo:userInfo];
     reject(@"E_CONFIGURATION_ERROR", errorStr, error);
+    
 }
 
 RCT_REMAP_METHOD(unpublish,
                  streamId:(NSString *)streamId
-                 resolve:(RCTPromiseResolveBlock)resolve
-                 rejecter:(RCTPromiseRejectBlock)reject) {
+                 withResolver:(RCTPromiseResolveBlock)resolve
+                 withRejector:(RCTPromiseRejectBlock)reject) {
+    
     RCTLogInfo(@"R5StreamModule:unpublish() %@", streamId);
     R5StreamItem *item = [[R5StreamModule streamMap] objectForKey:streamId];
     if (item != nil) {
@@ -95,6 +147,7 @@ RCT_REMAP_METHOD(unpublish,
     NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : errorStr };
     NSError *error = [NSError errorWithDomain:[[NSBundle mainBundle] bundleIdentifier] code:NSURLErrorCannotFindHost userInfo:userInfo];
     reject(@"E_CONFIGURATION_ERROR", errorStr, error);
+    
 }
 
 +(NSMutableDictionary *)streamMap {

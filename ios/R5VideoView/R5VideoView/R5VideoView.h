@@ -15,8 +15,9 @@
 #import <React/RCTBridgeModule.h>
 #import <R5Streaming/R5Streaming.h>
 #import "R5StreamInstance.h"
+#import "R5LayoutEventEmitter.h"
 
-@interface R5VideoView : RCTView<R5StreamDelegate>
+@interface R5VideoView : RCTView<R5LayoutEventEmitter>
 
 @property R5Stream *stream;
 @property R5Connection *connection;
@@ -71,7 +72,6 @@
 - (BOOL)getSubscribeVideo;
 - (void)setSubscribeVideo:(BOOL)value;
 @property (nonatomic, setter=setSubscribeVideo:, getter=getSubscribeVideo) BOOL subscribeVideo;
-
 
 - (void)setStreamInstance:(NSObject<R5StreamInstance> *)streamInstance;
 - (void)attach;
