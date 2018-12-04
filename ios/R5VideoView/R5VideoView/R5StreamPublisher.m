@@ -90,6 +90,10 @@
     _useAdaptiveBitrateController = NO;
     _audioMode = R5AudioControllerModeStandardIO;
     
+    if (props == nil) {
+        return;
+    }
+    
     _logLevel = [props objectForKey:@"logLevel"] != nil ? [[props objectForKey:@"logLevel"] intValue] : _logLevel;
     _scaleMode = [props objectForKey:@"scaleMode"] != nil ? [[props objectForKey:@"scaleMode"] intValue] : _scaleMode;
     _audioMode = [props objectForKey:@"audioMode"] != nil ? [[props objectForKey:@"audioMode"] intValue] : _audioMode;
@@ -232,6 +236,15 @@
             [self tearDown];
         }
     });
+    
+}
+
+- (void)swapCamera {
+    
+    _useBackfacingCamera = !_useBackfacingCamera;
+    AVCaptureDevice *device = [self getCameraDevice:_useBackfacingCamera];
+    R5Camera *camera = (R5Camera *)[self.stream getVideoSource];
+    [camera setDevice:device];
     
 }
 

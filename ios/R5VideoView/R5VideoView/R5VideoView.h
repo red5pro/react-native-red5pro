@@ -23,7 +23,7 @@
 @property R5Configuration *configuration;
 @property R5VideoViewController *controller;
 
-- (void)loadConfiguration:(R5Configuration *)configuration forKey:(NSString *)key;
+- (void)loadConfiguration:(R5Configuration *)configuration forKey:(NSString *)key andAttach:(BOOL)autoAttach;
 - (void)onDeviceOrientation:(NSNotification *)notification;
 
 # pragma RN Events
@@ -76,6 +76,7 @@
 - (void)setStreamInstance:(NSObject<R5StreamInstance> *)streamInstance;
 - (void)attach;
 - (void)detach;
+- (BOOL)getIsAttached;
 
 @end
 

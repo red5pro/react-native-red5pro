@@ -24,4 +24,6 @@
 - (void)publish:(R5Configuration *)configuration withType:(int)type andProps:(NSDictionary *)props;
 - (void)unpublish;
 
+- (void)swapCamera;
+
 @end
