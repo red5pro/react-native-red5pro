@@ -283,7 +283,6 @@ export default class Publisher extends React.Component {
   }
 
   onPublisherStreamStatus (event) {
-    console.log(`Publisher:onPublisherStreamStatus :: ${JSON.stringify(event, null, 2)}`)
     const status = event.hasOwnProperty('nativeEvent') ? event.nativeEvent.status : event.status
     console.log(`Publisher:onPublisherStreamStatus :: ${JSON.stringify(status, null, 2)}`)
     let message = isValidStatusMessage(status.message) ? status.message : status.name

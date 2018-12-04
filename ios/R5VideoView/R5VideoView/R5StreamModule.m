@@ -150,6 +150,121 @@ RCT_REMAP_METHOD(unpublish,
     
 }
 
+RCT_REMAP_METHOD(swapCamera,
+                 streamId:(NSString *)streamId
+                 withSwapCameraResolver:(RCTPromiseResolveBlock)resolve
+                 withSwapCameraRejector:(RCTPromiseRejectBlock)reject) {
+    
+    RCTLogInfo(@"R5StreamModule:swapCamera() %@", streamId);
+    R5StreamItem *item = [[R5StreamModule streamMap] objectForKey:streamId];
+    if (item != nil) {
+        NSObject<R5StreamInstance> *streamInstance = [item getStreamInstance];
+        if (streamInstance != nil) {
+            [(R5StreamPublisher *)streamInstance swapCamera];
+            resolve(streamId);
+            return;
+        }
+    }
+    
+    NSString *errorStr = [NSString stringWithFormat:@"Stream Configuration with id(%@) does not exist.", streamId];
+    NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : errorStr };
+    NSError *error = [NSError errorWithDomain:[[NSBundle mainBundle] bundleIdentifier] code:NSURLErrorCannotFindHost userInfo:userInfo];
+    reject(@"E_CONFIGURATION_ERROR", errorStr, error);
+    
+}
+
+RCT_REMAP_METHOD(muteAudio,
+                 streamId:(NSString *)streamId
+                 withMuteAudioResolver:(RCTPromiseResolveBlock)resolve
+                 withMuteAudioRejector:(RCTPromiseRejectBlock)reject) {
+    
+    RCTLogInfo(@"R5StreamModule:muteAudio() %@", streamId);
+    R5StreamItem *item = [[R5StreamModule streamMap] objectForKey:streamId];
+    if (item != nil) {
+        NSObject<R5StreamInstance> *streamInstance = [item getStreamInstance];
+        if (streamInstance != nil) {
+            [(R5StreamPublisher *)streamInstance muteAudio];
+            resolve(streamId);
+            return;
+        }
+    }
+    
+    NSString *errorStr = [NSString stringWithFormat:@"Stream Configuration with id(%@) does not exist.", streamId];
+    NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : errorStr };
+    NSError *error = [NSError errorWithDomain:[[NSBundle mainBundle] bundleIdentifier] code:NSURLErrorCannotFindHost userInfo:userInfo];
+    reject(@"E_CONFIGURATION_ERROR", errorStr, error);
+    
+}
+
+RCT_REMAP_METHOD(unmuteAudio,
+                 streamId:(NSString *)streamId
+                 withUnmuteAudioResolver:(RCTPromiseResolveBlock)resolve
+                 withUnmuteAudioRejector:(RCTPromiseRejectBlock)reject) {
+    
+    RCTLogInfo(@"R5StreamModule:unmuteAudio() %@", streamId);
+    R5StreamItem *item = [[R5StreamModule streamMap] objectForKey:streamId];
+    if (item != nil) {
+        NSObject<R5StreamInstance> *streamInstance = [item getStreamInstance];
+        if (streamInstance != nil) {
+            [(R5StreamPublisher *)streamInstance unmuteAudio];
+            resolve(streamId);
+            return;
+        }
+    }
+    
+    NSString *errorStr = [NSString stringWithFormat:@"Stream Configuration with id(%@) does not exist.", streamId];
+    NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : errorStr };
+    NSError *error = [NSError errorWithDomain:[[NSBundle mainBundle] bundleIdentifier] code:NSURLErrorCannotFindHost userInfo:userInfo];
+    reject(@"E_CONFIGURATION_ERROR", errorStr, error);
+    
+}
+
+RCT_REMAP_METHOD(muteVideo,
+                 streamId:(NSString *)streamId
+                 withMuteVideoResolver:(RCTPromiseResolveBlock)resolve
+                 withMuteVideoRejector:(RCTPromiseRejectBlock)reject) {
+    
+    RCTLogInfo(@"R5StreamModule:muteVideo() %@", streamId);
+    R5StreamItem *item = [[R5StreamModule streamMap] objectForKey:streamId];
+    if (item != nil) {
+        NSObject<R5StreamInstance> *streamInstance = [item getStreamInstance];
+        if (streamInstance != nil) {
+            [(R5StreamPublisher *)streamInstance muteVideo];
+            resolve(streamId);
+            return;
+        }
+    }
+    
+    NSString *errorStr = [NSString stringWithFormat:@"Stream Configuration with id(%@) does not exist.", streamId];
+    NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : errorStr };
+    NSError *error = [NSError errorWithDomain:[[NSBundle mainBundle] bundleIdentifier] code:NSURLErrorCannotFindHost userInfo:userInfo];
+    reject(@"E_CONFIGURATION_ERROR", errorStr, error);
+    
+}
+
+RCT_REMAP_METHOD(unmuteVideo,
+                 streamId:(NSString *)streamId
+                 withUnmuteVideoResolver:(RCTPromiseResolveBlock)resolve
+                 withunMuteVideoRejector:(RCTPromiseRejectBlock)reject) {
+    
+    RCTLogInfo(@"R5StreamModule:unmuteVideo() %@", streamId);
+    R5StreamItem *item = [[R5StreamModule streamMap] objectForKey:streamId];
+    if (item != nil) {
+        NSObject<R5StreamInstance> *streamInstance = [item getStreamInstance];
+        if (streamInstance != nil) {
+            [(R5StreamPublisher *)streamInstance unmuteVideo];
+            resolve(streamId);
+            return;
+        }
+    }
+    
+    NSString *errorStr = [NSString stringWithFormat:@"Stream Configuration with id(%@) does not exist.", streamId];
+    NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : errorStr };
+    NSError *error = [NSError errorWithDomain:[[NSBundle mainBundle] bundleIdentifier] code:NSURLErrorCannotFindHost userInfo:userInfo];
+    reject(@"E_CONFIGURATION_ERROR", errorStr, error);
+    
+}
+
 +(NSMutableDictionary *)streamMap {
     if (_streamMap == nil) {
         _streamMap = [[NSMutableDictionary alloc] init];
