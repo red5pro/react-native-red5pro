@@ -126,6 +126,9 @@ public class R5StreamPublisher implements R5StreamInstance,
 
 	protected void unpackProps (R5StreamProps props, R5StreamPublisher target) {
 
+		target.mLogLevel = props.logLevel;
+		target.mScaleMode = props.scaleMode;
+		target.mAudioMode = props.audioMode;
 		target.mShowDebugView = props.showDebugView;
 		target.mUseVideo = props.publishVideo;
 		target.mUseAudio = props.publishAudio;
