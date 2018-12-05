@@ -2,9 +2,7 @@
 import React from 'react'
 import {
   AppState,
-  DeviceEventEmitter,
   NativeEventEmitter,
-  Platform,
   findNodeHandle,
   Button,
   StyleSheet,
@@ -80,7 +78,7 @@ export default class Publisher extends React.Component {
       }
     } = this.props
 
-    this.emitter = Platform.OS == 'ios' ? new NativeEventEmitter(R5StreamModule) : DeviceEventEmitter
+    this.emitter = new NativeEventEmitter(R5StreamModule)
 
    // Events.
     this.onMetaData = this.onMetaData.bind(this)
@@ -150,11 +148,10 @@ export default class Publisher extends React.Component {
     console.log('Publisher:componentWillUnmount()')
     AppState.removeEventListener('change', this._handleAppStateChange)
     this.doUnpublish()
-
-    this.emitter.removeListener('onMetaData', this.onMetaData)
-    this.emitter.removeListener('onConfigured', this.onConfigured)
-    this.emitter.removeListener('onPublisherStreamStatus', this.onPublisherStreamStatus)
-    this.emitter.removeListener('onUnpublishNotification', this.onUnpublishNotification)  
+    this.emitter.removeAllListeners('onMetaData')
+    this.emitter.removeAllListeners('onConfigured')
+    this.emitter.removeAllListeners('onPublisherStreamStatus')
+    this.emitter.removeAllListeners('onUnpublishNotification')
   }
 
   componentDidUpdate (prevProps, prevState) {

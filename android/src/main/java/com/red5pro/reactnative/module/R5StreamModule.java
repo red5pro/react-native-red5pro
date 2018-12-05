@@ -122,11 +122,6 @@ public class R5StreamModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
-	public void publish (String streamId, ReadableMap streamProps, Promise promise) {
-		this.publish(streamId, RecordTypeUtil.intFromNativeType(R5Stream.RecordType.Live), streamProps, promise);
-	}
-
-	@ReactMethod
 	public void publish (String streamId, int streamType, ReadableMap streamProps, Promise promise) {
 		if (streamMap.containsKey(streamId)) {
 			Log.d(TAG, "publish:id(" + streamId + ")");
