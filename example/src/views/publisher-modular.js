@@ -138,7 +138,7 @@ export default class Publisher extends React.Component {
     console.log('Publisher:componentWillMount()')
     AppState.addEventListener('change', this._handleAppStateChange)
 
-    this.emitter.addListener('onMetaData', this.onMetaData)
+    this.emitter.addListener('onMetaDataEvent', this.onMetaData)
     this.emitter.addListener('onConfigured', this.onConfigured)
     this.emitter.addListener('onPublisherStreamStatus', this.onPublisherStreamStatus)
     this.emitter.addListener('onUnpublishNotification', this.onUnpublishNotification)
@@ -148,7 +148,7 @@ export default class Publisher extends React.Component {
     console.log('Publisher:componentWillUnmount()')
     AppState.removeEventListener('change', this._handleAppStateChange)
     this.doUnpublish()
-    this.emitter.removeAllListeners('onMetaData')
+    this.emitter.removeAllListeners('onMetaDataEvent')
     this.emitter.removeAllListeners('onConfigured')
     this.emitter.removeAllListeners('onPublisherStreamStatus')
     this.emitter.removeAllListeners('onUnpublishNotification')
@@ -375,20 +375,20 @@ export default class Publisher extends React.Component {
 
     R5StreamModule.publish(this.streamId, R5PublishType.LIVE, streamProps)
       .then(streamId => {
-        console.log('R5StreamModule publisher with ' + streamId);
+        console.log('R5StreamModule publish with ' + streamId);
       })
       .catch(error => {
-        console.log('Publisher:Stream Subscribe Error - ' + error)
+        console.log('Publisher:Stream Publish Error - ' + error)
       })
   }
 
   doUnpublish () {
     R5StreamModule.unpublish(this.streamId)
       .then(streamId => {
-        console.log('R5StreamModule publisher with ' + streamId);
+        console.log('R5StreamModule unpublished with ' + streamId);
       })
       .catch(error => {
-        console.log('Publisher:Stream Unpublisher Error - ' + error)
+        console.log('Publisher:Stream Unpublished Error - ' + error)
       })
   }
 

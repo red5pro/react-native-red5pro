@@ -2,9 +2,7 @@
 import React from 'react'
 import {
   AppState,
-  DeviceEventEmitter,
   NativeEventEmitter,
-  Platform,
   findNodeHandle,
   Button,
   Image,
@@ -18,6 +16,7 @@ import {
   R5VideoView,
   R5AudioMode,
   R5ScaleMode,
+  // TODO: Add updateScaleMode
   updateScaleMode,
   setPlaybackVolume,
   attach, detach
@@ -87,7 +86,7 @@ export default class Subscriber extends React.Component {
       }
     } = this.props
 
-    this.emitter = Platform.OS == 'ios' ? new NativeEventEmitter(R5StreamModule) : DeviceEventEmitter
+    this.emitter = new NativeEventEmitter(R5StreamModule)
 
     // Events.
     this.onMetaData = this.onMetaData.bind(this)
@@ -122,8 +121,12 @@ export default class Subscriber extends React.Component {
         value: 'waiting...'
       },
       videoProps: {
-        style: styles.videoView
-      }
+        style: styles.videoView,
+        onMetaData: this.onMetaData,
+        onConfigured: this.onConfigured,
+        onSubscriberStreamStatus: this.onSubscriberStreamStatus,
+        onUnsubscribeNotification: this.onUnsubscribeNotification
+     }
     }
 
     const streamIdToUse = [configuration.streamName, Math.floor(Math.random() * 0x10000).toString(16)].join('-')
@@ -131,6 +134,7 @@ export default class Subscriber extends React.Component {
       .then(streamId => {
         console.log('R5StreamModule configuration with ' + streamId)
         this.streamId = streamId
+        //        this.doAttach()
         this.doSubscribe()
       })
       .catch(error => {
@@ -142,10 +146,10 @@ export default class Subscriber extends React.Component {
     console.log('Subscriber:componentWillMount()')
     AppState.addEventListener('change', this._handleAppStateChange)
 
-    this.emitter.addListener('onMetaData', this.onMetaData)
+    this.emitter.addListener('onMetaDataEvent', this.onMetaData)
     this.emitter.addListener('onConfigured', this.onConfigured)
     this.emitter.addListener('onSubscriberStreamStatus', this.onSubscriberStreamStatus)
-    this.emitter.addListener('onUnSubscribeNotification', this.onUnSubscribeNotification)
+    this.emitter.addListener('onUnsubscribeNotification', this.onUnSubscribeNotification)
   }
 
   componentWillUnmount () {
@@ -153,10 +157,10 @@ export default class Subscriber extends React.Component {
     AppState.removeEventListener('change', this._handleAppStateChange)
     this.doUnsubscribe()
 
-    this.emitter.removeListener('onMetaData', this.onMetaData)
-    this.emitter.removeListener('onConfigured', this.onConfigured)
-    this.emitter.removeListener('onSubscriberStreamStatus', this.onSubscriberStreamStatus)
-    this.emitter.removeListener('onUnSubscribeNotification', this.onUnSubscribeNotification)
+    this.emitter.removeAllListeners('onMetaDataEvent')
+    this.emitter.removeAllListeners('onConfigured')
+    this.emitter.removeAllListeners('onSubscriberStreamStatus')
+    this.emitter.removeAllListeners('onUnsubscribeNotification')
   }
 
   componentDidUpdate (prevProps, prevState) {
@@ -221,7 +225,7 @@ export default class Subscriber extends React.Component {
       <View style={styles.container}>
         { !swappedLayout &&
           <R5VideoView
-            style={styles.videoView}
+            {...videoProps}
             ref={assignVideoRef.bind(this)}
           />
         }
@@ -267,7 +271,7 @@ export default class Subscriber extends React.Component {
         />
         { swappedLayout &&
           <R5VideoView
-            style={styles.videoView}
+            {...videoProps}
             ref={assignVideoRef.bind(this)}
           />
         }
