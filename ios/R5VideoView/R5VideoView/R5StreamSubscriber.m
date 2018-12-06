@@ -37,7 +37,6 @@
     
     if ([super init] != nil) {
         _emitter = emitter;
-        hasListeners = YES;
         [self addObservers];
     }
     return self;
@@ -52,11 +51,13 @@
 }
 
 - (void)addObservers {
+    [self startObserving];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onWillResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onEnterForegroundActive:) name:UIApplicationWillEnterForegroundNotification object:nil];
 }
 
 - (void)removeObservers {
+    [self stopObserving];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillResignActiveNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillEnterForegroundNotification object:nil];
 }
@@ -84,6 +85,7 @@
 
 - (void)tearDown {
     
+    RCTLogInfo(@"R5StreamSubscriber:teardown()");
 //    dispatch_async(dispatch_get_main_queue(), ^{
         if (self.stream != nil) {
             [self.stream setDelegate:nil];
@@ -134,7 +136,9 @@
 - (void)unsubscribe {
     
     if (_isStreaming) {
-        [self.stream stop];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.stream stop];
+        });
     }
     else {
         [self emitEvent:@"onUnsubscribeNotification" withBody:@{}];
@@ -159,9 +163,9 @@
     }
     
     if (_isStreaming && self.stream != nil) {
-        dispatch_async(dispatch_get_main_queue(), ^{
+//        dispatch_async(dispatch_get_main_queue(), ^{
 //            [self.controller pauseRender];
-        });
+//        });
     }
     
 }
@@ -173,9 +177,9 @@
     }
     
     if (_isStreaming && self.stream != nil) {
-        dispatch_async(dispatch_get_main_queue(), ^{
+//        dispatch_async(dispatch_get_main_queue(), ^{
 //            [self.controller resumeRender];
-        });
+//        });
     }
     
 }
@@ -269,8 +273,10 @@
     
     if (statusCode == r5_status_disconnected && _isStreaming) {
         [self emitEvent:@"onUnsubscribeNotification" withBody:@{}];
-        [self tearDown];
         _isStreaming = NO;
+    }
+    else if (statusCode == r5_status_connection_close && _isStreaming) {
+        [self tearDown];
     }
     
 }
