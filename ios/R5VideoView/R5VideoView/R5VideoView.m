@@ -140,11 +140,11 @@
 
 - (void)unsubscribe {
   
-    dispatch_async(dispatch_get_main_queue(), ^{
+//    dispatch_async(dispatch_get_main_queue(), ^{
         if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamSubscriber.class]) {
             [(R5StreamSubscriber *)_streamInstance unsubscribe];
         }
-    });
+//    });
   
 }
 
@@ -313,25 +313,6 @@
     CGRect b = self.frame;
     [self.controller setFrame:CGRectMake(0.0, 0.0, b.size.width, b.size.height)];
   }
-  
-}
-
-# pragma R5Stream:client
-- (void)onMetaData:(NSString *)params {
-  
-    // TODO: How to handle orientation?
-  NSArray *paramListing = [params componentsSeparatedByString:@";"];
-  for (id param in paramListing) {
-    NSArray *keyValue = [(NSString *)param componentsSeparatedByString:@"="];
-    NSString *key = (NSString *)[keyValue objectAtIndex:0];
-    if ([key isEqual: @"orientation"]) {
-      [self updateOrientation:[[keyValue objectAtIndex:1] intValue]];
-    }
-  }
-  
-  dispatch_async(dispatch_get_main_queue(), ^{
-    self.onMetaDataEvent(@{@"metadata": params});
-  });
   
 }
 
