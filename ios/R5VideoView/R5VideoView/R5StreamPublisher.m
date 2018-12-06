@@ -48,6 +48,7 @@
     
     if ([super init] != nil) {
         _emitter = emitter;
+        hasListeners = YES;
         [self addObservers];
     }
     return self;
@@ -112,18 +113,18 @@
 
 - (void)tearDown {
     
-    dispatch_async(dispatch_get_main_queue(), ^{
+//    dispatch_async(dispatch_get_main_queue(), ^{
         if (self.stream != nil) {
             [self.stream setDelegate:nil];
             [self.stream setClient:nil];
         }
-        
         _streamName = nil;
         _isStreaming = NO;
         self.stream = nil;
-    });
-    _hasExplicitlyPausedVideo = NO;
-    [self removeObservers];
+    
+        _hasExplicitlyPausedVideo = NO;
+        [self removeObservers];
+//    });
     
 }
 
@@ -226,24 +227,24 @@
 
 - (void)unpublish {
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (_isStreaming) {
-            [self.stream stop];
-        }
-        else {
-            [self emitEvent:@"onUnpublishNotification" withBody:@{}];
-            [self tearDown];
-        }
-    });
+    if (_isStreaming) {
+        [self.stream stop];
+    }
+    else {
+        [self emitEvent:@"onUnpublishNotification" withBody:@{}];
+        [self tearDown];
+    }
     
 }
 
 - (void)swapCamera {
     
-    _useBackfacingCamera = !_useBackfacingCamera;
-    AVCaptureDevice *device = [self getCameraDevice:_useBackfacingCamera];
-    R5Camera *camera = (R5Camera *)[self.stream getVideoSource];
-    [camera setDevice:device];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        _useBackfacingCamera = !_useBackfacingCamera;
+        AVCaptureDevice *device = [self getCameraDevice:_useBackfacingCamera];
+        R5Camera *camera = (R5Camera *)[self.stream getVideoSource];
+        [camera setDevice:device];
+    });
     
 }
 
@@ -415,7 +416,9 @@
         }
     }
     else if (_emitter != nil && hasListeners) {
-        [_emitter sendEventWithName:eventName body:body];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [_emitter sendEventWithName:eventName body:body];
+        });
     }
     
 }
@@ -429,28 +432,29 @@
         _isStreaming = YES;
     }
     
-    NSDictionary *status = @{
-                            @"code": @(statusCode),
-                            @"message": msg,
-                            @"name": @(r5_string_for_status(statusCode)),
-                            @"streamName": tmpStreamName
-                            };
-    [self emitEvent:@"onPublisherStreamStatus" withBody:@{@"status": status}] ;
+//    dispatch_async(dispatch_get_main_queue(), ^{
+        NSDictionary *status = @{
+                                 @"code": @(statusCode),
+                                 @"message": msg,
+                                 @"name": @(r5_string_for_status(statusCode)),
+                                 @"streamName": tmpStreamName
+                                 };
+        [self emitEvent:@"onPublisherStreamStatus" withBody:@{@"status": status}] ;
         
-    if (statusCode == r5_status_disconnected && _isStreaming) {
-        [self emitEvent:@"onUnpublishNotification" withBody:@{}];
-        [self tearDown];
-        _isStreaming = NO;
-    }
+        if (statusCode == r5_status_disconnected && _isStreaming) {
+            [self emitEvent:@"onUnpublishNotification" withBody:@{}];
+            [self tearDown];
+            _isStreaming = NO;
+        }
+//    });
     
 }
 
 # pragma R5Stream:client
 - (void)onMetaData:(NSString *)params {
    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self emitEvent:@"onMetaDataEvent" withBody:@{@"metadata": params}];
-    });
+    
+    [self emitEvent:@"onMetaDataEvent" withBody:@{@"metadata": params}];
     
 }
 

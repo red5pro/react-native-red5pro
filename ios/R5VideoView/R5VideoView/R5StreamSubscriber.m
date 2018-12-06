@@ -9,6 +9,7 @@
 #import <React/RCTEventEmitter.h>
 #import <R5Streaming/R5Streaming.h>
 #import "R5StreamSubscriber.h"
+#import <React/RCTLog.h>
 
 @interface R5StreamSubscriber() {
     
@@ -36,6 +37,7 @@
     
     if ([super init] != nil) {
         _emitter = emitter;
+        hasListeners = YES;
         [self addObservers];
     }
     return self;
@@ -82,7 +84,7 @@
 
 - (void)tearDown {
     
-    dispatch_async(dispatch_get_main_queue(), ^{
+//    dispatch_async(dispatch_get_main_queue(), ^{
         if (self.stream != nil) {
             [self.stream setDelegate:nil];
             [self.stream setClient:nil];
@@ -91,7 +93,7 @@
         _streamName = nil;
         _isStreaming = NO;
         self.stream = nil;
-    });
+//    });
     [self removeObservers];
     
 }
@@ -131,15 +133,13 @@
 
 - (void)unsubscribe {
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (_isStreaming) {
-            [self.stream stop];
-        }
-        else {
-            [self emitEvent:@"onUnsubscribeNotification" withBody:@{}];
-            [self tearDown];
-        }
-    });
+    if (_isStreaming) {
+        [self.stream stop];
+    }
+    else {
+        [self emitEvent:@"onUnsubscribeNotification" withBody:@{}];
+        [self tearDown];
+    }
     
 }
 
@@ -201,7 +201,6 @@
         if (self.stream != nil && _playbackVideo) {
             [view showDebugInfo:_showDebugInfo];
             [view attachStream:self.stream];
-            [self.stream updateStreamMeta];
         }
     });
     
@@ -227,22 +226,25 @@
 
 - (void)emitEvent:(NSString *)eventName withBody:(NSDictionary *)body {
     
+    RCTLogInfo(@"R5StreamSubscriber:emitEvent(%@).", eventName);
     if (self.viewEmitter != nil) {
+        RCTLogInfo(@"R5StreamSubscriber:send event on view...");
         if ([eventName isEqualToString:@"onMetaDataEvent"]) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.viewEmitter.onMetaDataEvent(body);
             });
-        } else if([eventName isEqualToString:@"onPublisherStreamStatus"]) {
+        } else if([eventName isEqualToString:@"onSubscriberStreamStatus"]) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                self.viewEmitter.onPublisherStreamStatus(body);
+                self.viewEmitter.onSubscriberStreamStatus(body);
             });
-        } else if([eventName isEqualToString:@"onUnpublishNotification"]) {
+        } else if([eventName isEqualToString:@"onUnsubscribeNotification"]) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                self.viewEmitter.onUnpublishNotification(body);
+                self.viewEmitter.onUnsubscribeNotification(body);
             });
         }
     }
     else if (_emitter != nil && hasListeners) {
+        RCTLogInfo(@"R5StreamSubscriber:send event on module...");
         [_emitter sendEventWithName:eventName body:body];
     }
     

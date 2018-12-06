@@ -190,7 +190,9 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamPublisher.class]) {
             [(R5StreamPublisher *)_streamInstance unpublish];
+            [_streamInstance setEmitter:nil];
         }
+        [self setStreamInstance:nil];
     });
   
 }
@@ -457,7 +459,6 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         _streamInstance = streamInstance;
         if (_streamInstance != nil) {
-            // TODO: setEmitterId?
             [_streamInstance setEmitter:self];
         }
     });
