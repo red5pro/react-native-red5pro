@@ -16,14 +16,27 @@
 static NSMutableDictionary *_streamMap;
 
 @implementation R5StreamModule
+{
+    bool hasListeners;
+}
 
 RCT_EXPORT_MODULE();
 
 - (NSArray<NSString *> *)supportedEvents {
     return @[@"onConfigured",
-             @"onMetaData",
+             @"onMetaDataEvent",
+             @"onSubscriberStreamStatus",
+             @"onUnsubscribeNotification",
              @"onPublisherStreamStatus",
              @"onUnpublishNotification"];
+}
+
+-(void)startObserving {
+    hasListeners = YES;
+}
+
+-(void)stopObserving {
+    hasListeners = NO;
 }
 
 RCT_REMAP_METHOD(init,
@@ -88,6 +101,7 @@ RCT_REMAP_METHOD(unsubscribe,
         NSObject<R5StreamInstance> *streamInstance = [item getStreamInstance];
         if (streamInstance != nil) {
             [(R5StreamSubscriber *)streamInstance unsubscribe];
+            [[R5StreamModule streamMap] removeObjectForKey:streamId];
             resolve(streamId);
             return;
         }
@@ -138,6 +152,7 @@ RCT_REMAP_METHOD(unpublish,
         NSObject<R5StreamInstance> *streamInstance = [item getStreamInstance];
         if (streamInstance != nil) {
             [(R5StreamPublisher *)streamInstance unpublish];
+            [[R5StreamModule streamMap] removeObjectForKey:streamId];
             resolve(streamId);
             return;
         }
@@ -245,7 +260,7 @@ RCT_REMAP_METHOD(muteVideo,
 RCT_REMAP_METHOD(unmuteVideo,
                  streamId:(NSString *)streamId
                  withUnmuteVideoResolver:(RCTPromiseResolveBlock)resolve
-                 withunMuteVideoRejector:(RCTPromiseRejectBlock)reject) {
+                 withUnuteVideoRejector:(RCTPromiseRejectBlock)reject) {
     
     RCTLogInfo(@"R5StreamModule:unmuteVideo() %@", streamId);
     R5StreamItem *item = [[R5StreamModule streamMap] objectForKey:streamId];
@@ -253,6 +268,30 @@ RCT_REMAP_METHOD(unmuteVideo,
         NSObject<R5StreamInstance> *streamInstance = [item getStreamInstance];
         if (streamInstance != nil) {
             [(R5StreamPublisher *)streamInstance unmuteVideo];
+            resolve(streamId);
+            return;
+        }
+    }
+    
+    NSString *errorStr = [NSString stringWithFormat:@"Stream Configuration with id(%@) does not exist.", streamId];
+    NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : errorStr };
+    NSError *error = [NSError errorWithDomain:[[NSBundle mainBundle] bundleIdentifier] code:NSURLErrorCannotFindHost userInfo:userInfo];
+    reject(@"E_CONFIGURATION_ERROR", errorStr, error);
+    
+}
+
+RCT_REMAP_METHOD(setPlaybackVolume,
+                 streamId:(NSString *)streamId
+                 withVolume:(int)value
+                 withVolumeResolver:(RCTPromiseResolveBlock)resolve
+                 withVolumeRejector:(RCTPromiseRejectBlock)reject) {
+    
+    RCTLogInfo(@"R5StreamModule:setPlaybackVolume() %@", streamId);
+    R5StreamItem *item = [[R5StreamModule streamMap] objectForKey:streamId];
+    if (item != nil) {
+        NSObject<R5StreamInstance> *streamInstance = [item getStreamInstance];
+        if (streamInstance != nil) {
+            [(R5StreamSubscriber *)streamInstance setPlaybackVolume:value];
             resolve(streamId);
             return;
         }

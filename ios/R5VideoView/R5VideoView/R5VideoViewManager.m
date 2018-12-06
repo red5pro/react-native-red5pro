@@ -70,9 +70,10 @@ RCT_EXPORT_METHOD(unsubscribe:(nonnull NSNumber *)reactTag) {
             if (item != nil) {
                 [(R5StreamSubscriber *)item unsubscribe];
                 [item setEmitter:nil];
-                [view unsubscribe];
                 [view setStreamInstance:nil];
                 [[R5VideoViewManager streamMap] removeObjectForKey:streamName];
+            } else {
+                [view unsubscribe];
             }
         }
     }];
@@ -118,9 +119,10 @@ RCT_EXPORT_METHOD(unpublish:(nonnull NSNumber *)reactTag) {
             if (item != nil) {
                 [(R5StreamPublisher *)item unpublish];
                 [item setEmitter:nil];
-                [view unpublish];
                 [view setStreamInstance:nil];
                 [[R5VideoViewManager streamMap] removeObjectForKey:streamName];
+            } else {
+                [view unpublish];
             }
         }
     }];
