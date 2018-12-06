@@ -134,7 +134,7 @@ export default class Publisher extends React.Component {
       })
   }
 
-  UNSAFE_componentWillMount () {
+  componentDidMount () {
     console.log('Publisher:componentWillMount()')
     AppState.addEventListener('change', this._handleAppStateChange)
 
