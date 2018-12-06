@@ -142,7 +142,7 @@ export default class Subscriber extends React.Component {
       })
   }
 
-  UNSAFE_componentWillMount () {
+  componentDidMount () {
     console.log('Subscriber:componentWillMount()')
     AppState.addEventListener('change', this._handleAppStateChange)
 
