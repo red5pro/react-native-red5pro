@@ -23,6 +23,12 @@ static NSMutableDictionary *_streamMap;
 
 RCT_EXPORT_MODULE()
 
+// TODO:
+//+ (BOOL)requiresMainQueueSetup
+//{
+//    return NO;
+//}
+
 # pragma RN Events
 RCT_EXPORT_VIEW_PROPERTY(onConfigured, RCTBubblingEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onMetaDataEvent, RCTBubblingEventBlock)

@@ -125,12 +125,11 @@ export default class Publisher extends React.Component {
     }
 
     const streamIdToUse = [configuration.streamName, Math.floor(Math.random() * 0x10000).toString(16)].join('-')
+    this.streamId = streamIdToUse
     R5StreamModule.init(streamIdToUse, configuration)
       .then(streamId => {
         console.log('R5StreamModule configuration with ' + streamId)
         this.streamId = streamId
-        // We need to call attach in order to kick off the A/V codec.
-        this.doAttach()
         this.doPublish()
       })
       .catch(error => {
@@ -141,6 +140,10 @@ export default class Publisher extends React.Component {
   componentDidMount () {
     console.log('Publisher:componentWillMount()')
     AppState.addEventListener('change', this._handleAppStateChange)
+
+    if (this.state.attached) {
+        this.doAttach()
+    }
 
     this.emitter.addListener('onMetaDataEvent', this.onMetaData)
     this.emitter.addListener('onConfigured', this.onConfigured)
@@ -163,14 +166,14 @@ export default class Publisher extends React.Component {
       if (this.state.attached) {
         this.doAttach()
       } else {
-        this.doDetach()
+        // this.doDetach()
+        // Not detaching here, as we need a view reference to do detachment.
+        // As such, the act of detaching is in the original method that changed state.
       }
     }
     if (prevState.swappedLayout !== this.state.swappedLayout) {
       if (this.state.attached) {
         this.doAttach()
-      } else {
-        this.doDetach()
       }
     }
   }
@@ -264,11 +267,13 @@ export default class Publisher extends React.Component {
           title='Swap Camera'
           accessibilityLabel='Swap Camera'
         />
-        <Button
-          {...buttonProps}
-          onPress={this.onToggleDetach}
-          title='Detach'
-        />
+        { attached &&
+          <Button
+            {...buttonProps}
+            onPress={this.onToggleDetach}
+            title='Detach'
+          />
+        }
         <Button
           {...buttonProps}
           onPress={this.onSwapLayout}
@@ -319,6 +324,10 @@ export default class Publisher extends React.Component {
     const {
       attached
     } = this.state
+    const toAttach = !attached
+    if (!toAttach) {
+      this.doDetach()
+    }
     this.setState({
       attached: !attached
     })
@@ -327,9 +336,12 @@ export default class Publisher extends React.Component {
   onSwapLayout () {
     console.log('Subscriber:onSwapLayout()')
     const {
+      attached,
       swappedLayout
     } = this.state
-    this.doDetach()
+    if (attached) {
+      this.doDetach()
+    }
     this.setState({
       swappedLayout: !swappedLayout
     })

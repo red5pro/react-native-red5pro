@@ -431,6 +431,7 @@
                                  @"name": @(r5_string_for_status(statusCode)),
                                  @"streamName": tmpStreamName
                                  };
+        
         [self emitEvent:@"onPublisherStreamStatus" withBody:@{@"status": status}] ;
         
         if (statusCode == r5_status_disconnected && _isStreaming) {
