@@ -76,12 +76,6 @@ export default class Publisher extends React.Component {
   constructor (props) {
     super(props)
 
-    const {
-      streamProps: {
-        configuration
-      }
-    } = this.props
-
     this.emitter = new NativeEventEmitter(R5StreamModule)
 
    // Events.
@@ -124,26 +118,31 @@ export default class Publisher extends React.Component {
       }
     }
 
-    const streamIdToUse = [configuration.streamName, Math.floor(Math.random() * 0x10000).toString(16)].join('-')
-    this.streamId = streamIdToUse
-    R5StreamModule.init(streamIdToUse, configuration)
-      .then(streamId => {
-        console.log('R5StreamModule configuration with ' + streamId)
-        this.streamId = streamId
-        this.doPublish()
-      })
-      .catch(error => {
-        console.log('Subscriber:Stream Setup Error - ' + error)
-      })
   }
 
   componentDidMount () {
     console.log('Publisher:componentWillMount()')
     AppState.addEventListener('change', this._handleAppStateChange)
 
-    if (this.state.attached) {
-        this.doAttach()
-    }
+    const {
+      streamProps: {
+        configuration
+      }
+    } = this.props
+    const streamIdToUse = [configuration.streamName, Math.floor(Math.random() * 0x10000).toString(16)].join('-')
+    this.streamId = streamIdToUse
+    R5StreamModule.init(streamIdToUse, configuration)
+      .then(streamId => {
+        console.log('R5StreamModule configuration with ' + streamId)
+        this.streamId = streamId
+        if (this.state.attached) {
+          this.doAttach()
+        }
+        this.doPublish()
+      })
+      .catch(error => {
+        console.log('Subscriber:Stream Setup Error - ' + error)
+      })
 
     this.emitter.addListener('onMetaDataEvent', this.onMetaData)
     this.emitter.addListener('onConfigured', this.onConfigured)

@@ -300,9 +300,15 @@ public class R5StreamPublisher implements R5StreamInstance,
 
 		Camera updatedCamera;
 
-		// NOTE: Some devices will throw errors if you have a camera open when you attempt to open another
-		mCamera.getCamera().stopPreview();
-		mCamera.getCamera().release();
+		if (mCamera == null) {
+			return;
+		}
+
+		if (mCamera.getCamera() != null) {
+			// NOTE: Some devices will throw errors if you have a camera open when you attempt to open another
+			mCamera.getCamera().stopPreview();
+			mCamera.getCamera().release();
+		}
 
 		// NOTE: The front facing camera needs to be 180 degrees further rotated than the back facing camera
 		int rotate = 0;
