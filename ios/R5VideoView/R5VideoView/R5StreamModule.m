@@ -20,6 +20,12 @@ static NSMutableDictionary *_streamMap;
     bool hasListeners;
 }
 
+// TODO:
+//+ (BOOL)requiresMainQueueSetup
+//{
+//    return NO;
+//}
+
 RCT_EXPORT_MODULE();
 
 - (NSArray<NSString *> *)supportedEvents {
