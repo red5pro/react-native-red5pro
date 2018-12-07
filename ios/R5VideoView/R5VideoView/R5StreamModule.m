@@ -102,6 +102,7 @@ RCT_REMAP_METHOD(unsubscribe,
         if (streamInstance != nil) {
             [(R5StreamSubscriber *)streamInstance unsubscribe];
             [[R5StreamModule streamMap] removeObjectForKey:streamId];
+            [item clear];
             resolve(streamId);
             return;
         }

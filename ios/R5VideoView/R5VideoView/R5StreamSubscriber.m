@@ -86,16 +86,16 @@
 - (void)tearDown {
     
     RCTLogInfo(@"R5StreamSubscriber:teardown()");
-//    dispatch_async(dispatch_get_main_queue(), ^{
-        if (self.stream != nil) {
-            [self.stream setDelegate:nil];
-            [self.stream setClient:nil];
-        }
-        
-        _streamName = nil;
-        _isStreaming = NO;
-        self.stream = nil;
-//    });
+    if (self.stream != nil) {
+        [self.stream setDelegate:nil];
+        [self.stream setClient:nil];
+    }
+    
+    _streamName = nil;
+    _isStreaming = NO;
+    self.stream = nil;
+    self.connection = nil;
+    self.configuration = nil;
     [self removeObservers];
     
 }
@@ -215,9 +215,6 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         if (self.stream != nil) {
             [view showDebugInfo:NO];
-            [view.view removeFromSuperview];
-            [view removeFromParentViewController];
-            [self.stream updateStreamMeta];
         }
     });
     
@@ -234,17 +231,11 @@
     if (self.viewEmitter != nil) {
         RCTLogInfo(@"R5StreamSubscriber:send event on view...");
         if ([eventName isEqualToString:@"onMetaDataEvent"]) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.viewEmitter.onMetaDataEvent(body);
-            });
+            self.viewEmitter.onMetaDataEvent(body);
         } else if([eventName isEqualToString:@"onSubscriberStreamStatus"]) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.viewEmitter.onSubscriberStreamStatus(body);
-            });
+            self.viewEmitter.onSubscriberStreamStatus(body);
         } else if([eventName isEqualToString:@"onUnsubscribeNotification"]) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.viewEmitter.onUnsubscribeNotification(body);
-            });
+            self.viewEmitter.onUnsubscribeNotification(body);
         }
     }
     else if (_emitter != nil && hasListeners) {
@@ -263,21 +254,23 @@
         _isStreaming = YES;
     }
     
-    NSDictionary *status = @{
-                             @"code": @(statusCode),
-                             @"message": msg,
-                             @"name": @(r5_string_for_status(statusCode)),
-                             @"streamName": tmpStreamName
-                             };
-    [self emitEvent:@"onSubscriberStreamStatus" withBody:@{@"status": status}] ;
-    
-    if (statusCode == r5_status_disconnected && _isStreaming) {
-        [self emitEvent:@"onUnsubscribeNotification" withBody:@{}];
-        _isStreaming = NO;
-    }
-    else if (statusCode == r5_status_connection_close && _isStreaming) {
-        [self tearDown];
-    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSDictionary *status = @{
+                                 @"code": @(statusCode),
+                                 @"message": msg,
+                                 @"name": @(r5_string_for_status(statusCode)),
+                                 @"streamName": tmpStreamName
+                                 };
+        [self emitEvent:@"onSubscriberStreamStatus" withBody:@{@"status": status}] ;
+        
+        if (statusCode == r5_status_disconnected && _isStreaming) {
+            [self emitEvent:@"onUnsubscribeNotification" withBody:@{}];
+            _isStreaming = NO;
+        }
+        else if (statusCode == r5_status_connection_close) {
+            [self tearDown];
+        }
+    });
     
 }
 

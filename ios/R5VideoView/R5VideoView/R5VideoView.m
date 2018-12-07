@@ -140,11 +140,10 @@
 
 - (void)unsubscribe {
   
-//    dispatch_async(dispatch_get_main_queue(), ^{
-        if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamSubscriber.class]) {
-            [(R5StreamSubscriber *)_streamInstance unsubscribe];
-        }
-//    });
+    if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamSubscriber.class]) {
+        [(R5StreamSubscriber *)_streamInstance unsubscribe];
+    }
+    [self detach];
   
 }
 
@@ -187,13 +186,14 @@
 
 - (void)unpublish {
 
-    dispatch_async(dispatch_get_main_queue(), ^{
+//    dispatch_async(dispatch_get_main_queue(), ^{
         if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamPublisher.class]) {
             [(R5StreamPublisher *)_streamInstance unpublish];
-            [_streamInstance setEmitter:nil];
+//            [_streamInstance setEmitter:nil];
         }
-        [self setStreamInstance:nil];
-    });
+//        [self setStreamInstance:nil];
+        [self detach];
+//    });
   
 }
 
@@ -437,12 +437,14 @@
 
 - (void)setStreamInstance:(NSObject<R5StreamInstance> *)streamInstance {
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        _streamInstance = streamInstance;
-        if (_streamInstance != nil) {
-            [_streamInstance setEmitter:self];
-        }
-    });
+//    if (_streamInstance != nil && streamInstance == nil) {
+//        [_streamInstance setEmitter:nil];
+//    }
+    _streamInstance = streamInstance;
+    if (_streamInstance != nil) {
+        [_streamInstance setEmitter:self];
+    }
+    
 }
 
 - (R5VideoViewController *)getOrCreateVideoView {
@@ -460,14 +462,14 @@
     
     dispatch_async(dispatch_get_main_queue(), ^{
         if (_streamInstance != nil) {
-            _attached = YES;
             self.controller = [self getOrCreateVideoView];
             [self.controller showDebugInfo:_showDebugInfo];
             [self.controller setScaleMode:_scaleMode];
             [_streamInstance setVideoView:self.controller];
+            _attached = YES;
         }
     });
-    
+
 }
 
 - (void)detach {
@@ -475,8 +477,11 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         _attached = NO;
         if (_streamInstance != nil) {
+            [self.controller.view removeFromSuperview];
+            [self.controller removeFromParentViewController];
             [_streamInstance removeVideoView:self.controller];
             self.controller = nil;
+            [self setStreamInstance:nil];
         }
     });
     

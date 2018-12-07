@@ -20,6 +20,11 @@
 
 @implementation R5StreamItem
 
+- (void)clear {
+    _configuration = nil;
+    _streamInstance = nil;
+}
+
 - (id)initWithConfiguration:(R5Configuration *)configuration {
     
     if (self = [super init]) {
