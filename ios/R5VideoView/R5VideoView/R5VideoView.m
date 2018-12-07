@@ -460,30 +460,34 @@
 
 - (void)attach {
     
-    dispatch_async(dispatch_get_main_queue(), ^{
+//    dispatch_async(dispatch_get_main_queue(), ^{
         if (_streamInstance != nil) {
             self.controller = [self getOrCreateVideoView];
             [self.controller showDebugInfo:_showDebugInfo];
             [self.controller setScaleMode:_scaleMode];
+//            [self.controller resetContext];
             [_streamInstance setVideoView:self.controller];
             _attached = YES;
         }
-    });
+//    });
 
 }
 
 - (void)detach {
     
-    dispatch_async(dispatch_get_main_queue(), ^{
+//    dispatch_async(dispatch_get_main_queue(), ^{
         _attached = NO;
         if (_streamInstance != nil) {
-            [self.controller.view removeFromSuperview];
-            [self.controller removeFromParentViewController];
             [_streamInstance removeVideoView:self.controller];
-            self.controller = nil;
             [self setStreamInstance:nil];
         }
-    });
+    if (self.controller != nil) {
+        [self.controller pauseRender];
+        [self.controller.view removeFromSuperview];
+        [self.controller removeFromParentViewController];
+        self.controller = nil;
+    }
+//    });
     
 }
 

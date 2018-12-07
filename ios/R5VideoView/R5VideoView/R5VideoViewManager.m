@@ -273,7 +273,6 @@ RCT_EXPORT_METHOD(attach:(nonnull NSNumber *)reactTag withId:(NSString* )streamI
 RCT_EXPORT_METHOD(detach:(nonnull NSNumber *)reactTag withId:(NSString* )streamId) {
     NSMutableDictionary *map = [R5StreamModule streamMap];
     if ([map objectForKey:streamId] != nil) {
-        R5StreamItem *item = [map objectForKey:streamId];
         [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
             R5VideoView *view = viewRegistry[reactTag];
             if (![view isKindOfClass:[R5VideoView class]]) {

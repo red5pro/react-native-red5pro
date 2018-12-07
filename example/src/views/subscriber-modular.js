@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
   videoView: {
     flex: 1,
     flexDirection: 'row',
-    backgroundColor: 'red'
+    backgroundColor: 'black'
   },
   imageContainer: {
     flex: 1,
@@ -142,12 +142,12 @@ export default class Subscriber extends React.Component {
     this.streamId = streamIdToUse
     R5StreamModule.init(streamIdToUse, configuration)
       .then(streamId => {
-        console.log('R5StreamModule configuration with ' + streamId)
+        console.log('Subscriber configuration with ' + streamId)
         this.streamId = streamId
+        this.doSubscribe()
         if (this.state.attached) {
           this.doAttach()
         }
-        this.doSubscribe()
       })
       .catch(error => {
         console.log('Subscriber:Stream Setup Error - ' + error)
@@ -407,7 +407,7 @@ export default class Subscriber extends React.Component {
   doDetach () {
     const nodeHandle = findNodeHandle(this.red5pro_video_subscriber)
     if (nodeHandle) {
-      console.log(`[R5StreamModule:doDetach]: found view...`)
+      console.log(`[Subscriber:doDetach]: found view...`)
       detach(nodeHandle, this.streamId)
     }
   }
@@ -415,7 +415,7 @@ export default class Subscriber extends React.Component {
   doAttach () {
     const nodeHandle = findNodeHandle(this.red5pro_video_subscriber)
     if (nodeHandle) {
-      console.log(`[R5StreamModule:doAttach]: found view...`)
+      console.log(`[Subscriber:doAttach]: found view...`)
       attach(nodeHandle, this.streamId)
     }
   }
