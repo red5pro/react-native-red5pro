@@ -73,6 +73,10 @@ const styles = StyleSheet.create({
   },
   muteIconToggled: {
     backgroundColor: '#2089dc'
+  },
+  attachButton: {
+    flexDirection: 'row',
+    justifyContent: 'center'
   }
 })
 
@@ -203,7 +207,8 @@ export default class Subscriber extends React.Component {
       toastProps,
       buttonProps,
       audioMuted,
-      swappedLayout
+      swappedLayout,
+      attached
     } = this.state
 
     const {
@@ -223,7 +228,16 @@ export default class Subscriber extends React.Component {
 
     return (
       <View style={styles.container}>
-        { !swappedLayout &&
+        { !attached &&
+          <View style={styles.container}>
+            <Button
+              styles={[styles.button, styles.attachButton]}
+              onPress={this.onToggleDetach}
+              title='Attach'
+            />
+          </View>
+        }
+        { attached && !swappedLayout &&
           <R5VideoView
             {...videoProps}
             ref={assignVideoRef.bind(this)}
@@ -259,17 +273,19 @@ export default class Subscriber extends React.Component {
           title='Swap Scale'
           accessibilityLabel='Swap Scale'
         />
-        <Button
-          {...buttonProps}
-          onPress={this.onToggleDetach}
-          title='Toggle Detach'
-        />
+        { attached &&
+          <Button
+            {...buttonProps}
+            onPress={this.onToggleDetach}
+            title='Detach'
+          />
+        }
         <Button
           {...buttonProps}
           onPress={this.onSwapLayout}
           title='Swap Layout'
         />
-        { swappedLayout &&
+        { attached && swappedLayout &&
           <R5VideoView
             {...videoProps}
             ref={assignVideoRef.bind(this)}

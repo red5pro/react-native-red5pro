@@ -61,6 +61,10 @@ const styles = StyleSheet.create({
   },
   muteIconToggled: {
     backgroundColor: '#2089dc'
+  },
+  attachButton: {
+    flexDirection: 'row',
+    justifyContent: 'center'
   }
 })
 
@@ -195,6 +199,7 @@ export default class Publisher extends React.Component {
       videoProps,
       audioMuted,
       videoMuted,
+      attached,
       swappedLayout
     } = this.state
 
@@ -211,7 +216,16 @@ export default class Publisher extends React.Component {
     const assignToastRef = (toast) => { this.toast_field = toast }
     return (
       <View style={styles.container}>
-        { !swappedLayout &&
+        { !attached &&
+          <View style={styles.container}>
+            <Button
+              styles={[styles.button, styles.attachButton]}
+              onPress={this.onToggleDetach}
+              title='Attach'
+            />
+          </View>
+        }
+        { attached && !swappedLayout &&
           <R5VideoView
             {...videoProps}
             ref={assignVideoRef.bind(this)}
@@ -253,14 +267,14 @@ export default class Publisher extends React.Component {
         <Button
           {...buttonProps}
           onPress={this.onToggleDetach}
-          title='Toggle Detach'
+          title='Detach'
         />
         <Button
           {...buttonProps}
           onPress={this.onSwapLayout}
           title='Swap Layout'
         />
-        { swappedLayout &&
+        { attached && swappedLayout &&
           <R5VideoView
             {...videoProps}
             ref={assignVideoRef.bind(this)}
