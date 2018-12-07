@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
   videoView: {
     flex: 1,
     flexDirection: 'row',
-    backgroundColor: 'black'
+    backgroundColor: 'red'
   },
   imageContainer: {
     flex: 1,
@@ -84,12 +84,6 @@ export default class Subscriber extends React.Component {
   constructor (props) {
     super(props)
 
-    const {
-      streamProps: {
-        configuration
-      }
-    } = this.props
-
     this.emitter = new NativeEventEmitter(R5StreamModule)
 
     // Events.
@@ -115,7 +109,7 @@ export default class Subscriber extends React.Component {
       isInErrorState: false,
       isConnecting: false,
       isDisconnected: true,
-      attached: false,
+      attached: true,
       swappedLayout: false,
       buttonProps: {
         style: styles.button
@@ -133,26 +127,31 @@ export default class Subscriber extends React.Component {
      }
     }
 
-    const streamIdToUse = [configuration.streamName, Math.floor(Math.random() * 0x10000).toString(16)].join('-')
-    this.streamId = streamIdToUse
-    R5StreamModule.init(streamIdToUse, configuration)
-      .then(streamId => {
-        console.log('R5StreamModule configuration with ' + streamId)
-        this.streamId = streamId
-        this.doSubscribe()
-      })
-      .catch(error => {
-        console.log('Subscriber:Stream Setup Error - ' + error)
-      })
   }
 
   componentDidMount () {
     console.log('Subscriber:componentWillMount()')
     AppState.addEventListener('change', this._handleAppStateChange)
 
-    if (this.state.attached) {
-        this.doAttach()
-    }
+    const {
+      streamProps: {
+        configuration
+      }
+    } = this.props
+    const streamIdToUse = [configuration.streamName, Math.floor(Math.random() * 0x10000).toString(16)].join('-')
+    this.streamId = streamIdToUse
+    R5StreamModule.init(streamIdToUse, configuration)
+      .then(streamId => {
+        console.log('R5StreamModule configuration with ' + streamId)
+        this.streamId = streamId
+        if (this.state.attached) {
+          this.doAttach()
+        }
+        this.doSubscribe()
+      })
+      .catch(error => {
+        console.log('Subscriber:Stream Setup Error - ' + error)
+      })
 
     this.emitter.addListener('onMetaDataEvent', this.onMetaData)
     this.emitter.addListener('onConfigured', this.onConfigured)
@@ -373,17 +372,20 @@ export default class Subscriber extends React.Component {
 
   onScaleMode () {
     console.log('Subscriber:onScaleMode()')
+    const nodeHandle = findNodeHandle(this.red5pro_video_subscriber)
     const {
       scaleMode
     } = this.state
-    let scale = scaleMode + 1
-    if (scale > 2) {
-      scale = 0
+    if (nodeHandle) {
+      let scale = scaleMode + 1
+      if (scale > 2) {
+        scale = 0
+      }
+      updateScaleMode(nodeHandle, scale)
+      this.setState({
+        scaleMode: scale
+      })
     }
-    updateScaleMode(findNodeHandle(this.red5pro_video_subscriber), scale)
-    this.setState({
-      scaleMode: scale
-    })
   }
 
   onToggleAudioMute () {
