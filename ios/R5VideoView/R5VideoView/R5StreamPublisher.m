@@ -114,18 +114,18 @@
 
 - (void)tearDown {
     
-//    dispatch_async(dispatch_get_main_queue(), ^{
-        if (self.stream != nil) {
-            [self.stream setDelegate:nil];
-            [self.stream setClient:nil];
-        }
-        _streamName = nil;
-        _isStreaming = NO;
-        self.stream = nil;
-    
-        _hasExplicitlyPausedVideo = NO;
-        [self removeObservers];
-//    });
+    if (self.stream != nil) {
+        [self.stream setDelegate:nil];
+        [self.stream setClient:nil];
+    }
+    _streamName = nil;
+    _isStreaming = NO;
+    self.stream = nil;
+
+    _hasExplicitlyPausedVideo = NO;
+    [self removeObservers];
+    [self setEmitter:nil];
+    self.viewEmitter = nil;
     
 }
 
@@ -371,26 +371,25 @@
 
 - (void) setVideoView:(R5VideoViewController *)view {
     
-    dispatch_async(dispatch_get_main_queue(), ^{
+//    dispatch_async(dispatch_get_main_queue(), ^{
         if (self.stream != nil && _useVideo) {
             [view showDebugInfo:_showDebugInfo];
             [view attachStream:self.stream];
             [self.stream updateStreamMeta];
         }
-    });
+//    });
     
 }
 
 - (void) removeVideoView:(R5VideoViewController *)view {
     
-    dispatch_async(dispatch_get_main_queue(), ^{
+//    dispatch_async(dispatch_get_main_queue(), ^{
         if (self.stream != nil) {
             [view showDebugInfo:NO];
-            [view.view removeFromSuperview];
-            [view removeFromParentViewController];
+//            [view attachStream:nil];
             [self.stream updateStreamMeta];
         }
-    });
+//    });
     
 }
 
@@ -403,23 +402,15 @@
 
     if (self.viewEmitter != nil) {
         if ([eventName isEqualToString:@"onMetaDataEvent"]) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.viewEmitter.onMetaDataEvent(body);
-            });
+            self.viewEmitter.onMetaDataEvent(body);
         } else if([eventName isEqualToString:@"onPublisherStreamStatus"]) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.viewEmitter.onPublisherStreamStatus(body);
-            });
+            self.viewEmitter.onPublisherStreamStatus(body);
         } else if([eventName isEqualToString:@"onUnpublishNotification"]) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.viewEmitter.onUnpublishNotification(body);
-            });
+            self.viewEmitter.onUnpublishNotification(body);
         }
     }
     else if (_emitter != nil && hasListeners) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [_emitter sendEventWithName:eventName body:body];
-        });
+        [_emitter sendEventWithName:eventName body:body];
     }
     
 }
@@ -433,7 +424,7 @@
         _isStreaming = YES;
     }
     
-//    dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
         NSDictionary *status = @{
                                  @"code": @(statusCode),
                                  @"message": msg,
@@ -447,15 +438,16 @@
             [self tearDown];
             _isStreaming = NO;
         }
-//    });
+    });
     
 }
 
 # pragma R5Stream:client
 - (void)onMetaData:(NSString *)params {
    
-    
-    [self emitEvent:@"onMetaDataEvent" withBody:@{@"metadata": params}];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self emitEvent:@"onMetaDataEvent" withBody:@{@"metadata": params}];
+    });
     
 }
 

@@ -11,6 +11,7 @@
 
 @interface R5StreamItem : NSObject
 
+- (void)clear;
 - (id)initWithConfiguration:(R5Configuration *)configuration;
 
 - (R5Configuration *)getConfiguration;

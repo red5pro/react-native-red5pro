@@ -34,20 +34,23 @@ RCT_EXPORT_VIEW_PROPERTY(onUnsubscribeNotification, RCTBubblingEventBlock)
 RCT_EXPORT_METHOD(subscribe:(nonnull NSNumber *)reactTag streamName:(nonnull NSString *)streamName) {
     
     RCTLogInfo(@"R5VideoViewManager:subscribe(%@)", streamName);
+    NSMutableDictionary *map = [R5StreamModule streamMap];
     [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
         R5VideoView *view = viewRegistry[reactTag];
         if (![view isKindOfClass:[R5VideoView class]]) {
             RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
         } else {
-            NSObject<R5StreamInstance> *item = [[R5VideoViewManager streamMap] objectForKey:streamName];
-            if (item == nil) {
+            R5StreamItem *item = [map objectForKey:streamName];
+            if (item == nil || [item getStreamInstance] == nil) {
                 RCTLog(@"Creating new subscriber instance for %@", streamName);
+                R5StreamItem *newItem = [[R5StreamItem alloc] initWithConfiguration:[view configuration]];
                 R5StreamSubscriber *subscriber = [[R5StreamSubscriber alloc] init];
-                [[R5VideoViewManager streamMap] setObject:subscriber forKey:streamName];
+                [newItem setStreamInstance:subscriber];
+                [map setObject:newItem forKey:streamName];
                 [view setStreamInstance:(NSObject<R5StreamInstance> *)subscriber];
                 [view subscribe:streamName];
             } else {
-                [view setStreamInstance:item];
+                [view setStreamInstance:[item getStreamInstance]];
                 if ([view getIsAttached]) {
                     [view attach];
                 }
@@ -60,18 +63,18 @@ RCT_EXPORT_METHOD(subscribe:(nonnull NSNumber *)reactTag streamName:(nonnull NSS
 RCT_EXPORT_METHOD(unsubscribe:(nonnull NSNumber *)reactTag) {
     
     RCTLogInfo(@"R5VideoViewManager:unsubscribe()");
+    NSMutableDictionary *map = [R5StreamModule streamMap];
     [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
         R5VideoView *view = viewRegistry[reactTag];
         if (![view isKindOfClass:[R5VideoView class]]) {
             RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
         } else {
             NSString *streamName = [view.configuration streamName];
-            NSObject<R5StreamInstance> *item = [[R5VideoViewManager streamMap] objectForKey:streamName];
+            R5StreamItem *item = [map objectForKey:streamName];
             if (item != nil) {
-                [(R5StreamSubscriber *)item unsubscribe];
-                [item setEmitter:nil];
-                [view setStreamInstance:nil];
-                [[R5VideoViewManager streamMap] removeObjectForKey:streamName];
+                [view unsubscribe];
+                [item clear];
+                [map removeObjectForKey:streamName];
             } else {
                 [view unsubscribe];
             }
@@ -83,20 +86,24 @@ RCT_EXPORT_METHOD(unsubscribe:(nonnull NSNumber *)reactTag) {
 RCT_EXPORT_METHOD(publish:(nonnull NSNumber *)reactTag streamName:(nonnull NSString *)streamName withMode:(int)publishMode) {
     
     RCTLogInfo(@"R5VideoViewManager:publish(%@)", streamName);
+    NSMutableDictionary *map = [R5StreamModule streamMap];
     [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
         R5VideoView *view = viewRegistry[reactTag];
         if (![view isKindOfClass:[R5VideoView class]]) {
             RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
         } else {
-            NSObject<R5StreamInstance> *item = [[R5VideoViewManager streamMap] objectForKey:streamName];
-            if (item == nil) {
+            R5StreamItem *item = [map objectForKey:streamName];
+            if (item == nil || [item getStreamInstance] == nil) {
                 RCTLog(@"Creating new publisher instance for %@", streamName);
+                R5StreamItem *newItem = [[R5StreamItem alloc] initWithConfiguration:[view configuration]];
                 R5StreamPublisher *publisher = [[R5StreamPublisher alloc] init];
-                [[R5VideoViewManager streamMap] setObject:publisher forKey:streamName];
+                [item setStreamInstance:publisher];
+                [map setObject:newItem forKey:streamName];
                 [view setStreamInstance:(NSObject<R5StreamInstance> *)publisher];
                 [view publish:streamName withMode:publishMode];
             } else {
-                [view setStreamInstance:item];
+                NSObject<R5StreamInstance> *stream = [item getStreamInstance];
+                [view setStreamInstance:stream];
                 if ([view getIsAttached]) {
                     [view attach];
                 }
@@ -109,18 +116,25 @@ RCT_EXPORT_METHOD(publish:(nonnull NSNumber *)reactTag streamName:(nonnull NSStr
 RCT_EXPORT_METHOD(unpublish:(nonnull NSNumber *)reactTag) {
     
     RCTLogInfo(@"R5VideoViewManager:unpublish()");
+    NSMutableDictionary *map = [R5StreamModule streamMap];
     [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, R5VideoView *> *viewRegistry) {
         R5VideoView *view = viewRegistry[reactTag];
         if (![view isKindOfClass:[R5VideoView class]]) {
             RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
         } else {
-            NSString *streamName = [view.configuration streamName];
-            NSObject<R5StreamInstance> *item = [[R5VideoViewManager streamMap] objectForKey:streamName];
+            R5Configuration *configuration = [view configuration];
+            NSString *streamName = [configuration streamName];
+            R5StreamItem *item = [map objectForKey:streamName];
             if (item != nil) {
-                [(R5StreamPublisher *)item unpublish];
-                [item setEmitter:nil];
-                [view setStreamInstance:nil];
-                [[R5VideoViewManager streamMap] removeObjectForKey:streamName];
+//                NSObject<R5StreamInstance> *stream = [item getStreamInstance];
+//                if (stream != nil) {
+//                    [(R5StreamPublisher *)stream unpublish];
+//                    [stream setEmitter:nil];
+//                }
+                [view unpublish];
+                [item clear];
+//                [item setStreamInstance:nil];
+                [map removeObjectForKey:streamName];
             } else {
                 [view unpublish];
             }
@@ -242,7 +256,7 @@ RCT_EXPORT_METHOD(attach:(nonnull NSNumber *)reactTag withId:(NSString* )streamI
             if (![view isKindOfClass:[R5VideoView class]]) {
                 RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
             } else {
-                RCTLog(@"Found view for instance %@.", streamId);
+                RCTLog(@"Found view for instance attach(%@).", streamId);
                 [view setStreamInstance:[item getStreamInstance]];
                 [view attach];
             }
@@ -259,8 +273,8 @@ RCT_EXPORT_METHOD(detach:(nonnull NSNumber *)reactTag withId:(NSString* )streamI
             if (![view isKindOfClass:[R5VideoView class]]) {
                 RCTLogError(@"Invalid view returned from registry, expecting R5VideoView, got: %@", view);
             } else {
+                RCTLog(@"Found view for instance detach(%@).", streamId);
                 [view detach];
-                [view setStreamInstance:nil];
             }
         }];
     }
@@ -312,13 +326,6 @@ RCT_CUSTOM_VIEW_PROPERTY(configuration, R5Configuration, R5VideoView) {
 - (UIView *)view {
   R5VideoView *r5View = [[R5VideoView alloc] init];
   return r5View;
-}
-
-+(NSMutableDictionary *)streamMap {
-    if (_streamMap == nil) {
-        _streamMap = [[NSMutableDictionary alloc] init];
-    }
-    return _streamMap;
 }
 
 @end
