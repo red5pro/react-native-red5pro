@@ -215,6 +215,7 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         if (self.stream != nil) {
             [view showDebugInfo:NO];
+            [view attachStream:nil];
         }
     });
     

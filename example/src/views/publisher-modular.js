@@ -133,7 +133,7 @@ export default class Publisher extends React.Component {
     this.streamId = streamIdToUse
     R5StreamModule.init(streamIdToUse, configuration)
       .then(streamId => {
-        console.log('R5StreamModule configuration with ' + streamId)
+        console.log('Publisher configuration with ' + streamId)
         this.streamId = streamId
         if (this.state.attached) {
           this.doAttach()
@@ -380,7 +380,7 @@ export default class Publisher extends React.Component {
   doDetach () {
     const nodeHandle = findNodeHandle(this.red5pro_video_publisher)
     if (nodeHandle) {
-      console.log(`[R5StreamModule:doDetach]: found view...`)
+      console.log(`[Publisher:doDetach]: found view...`)
       detach(nodeHandle, this.streamId)
     }
   }
@@ -388,7 +388,7 @@ export default class Publisher extends React.Component {
   doAttach () {
     const nodeHandle = findNodeHandle(this.red5pro_video_publisher)
     if (nodeHandle) {
-      console.log(`[R5StreamModule:doAttach]: found view...`)
+      console.log(`[Publisher:doAttach]: found view...`)
      attach(nodeHandle, this.streamId)
     }
   }
