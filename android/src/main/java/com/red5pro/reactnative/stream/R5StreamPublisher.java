@@ -469,11 +469,14 @@ public class R5StreamPublisher implements R5StreamInstance,
 	public void reorient() {
 
 		if (mCamera != null) {
+
 			int rotate = mUseBackfacingCamera ? 0 : 180;
 			int displayOrientation = (mDisplayOrientation + rotate) % 360;
 			mCamera.setOrientation(mCameraOrientation);
 			mCamera.getCamera().setDisplayOrientation(displayOrientation);
 			mStream.updateStreamMeta();
+			Log.d(TAG, "Reorient: rotate(" + rotate + "), displayOrientation(" + displayOrientation + ")");
+
 		}
 		mOrientationDirty = false;
 
@@ -496,6 +499,7 @@ public class R5StreamPublisher implements R5StreamInstance,
 		if (mUseBackfacingCamera && (rotation % 2 != 0)) {
 			mCameraOrientation += 180;
 		}
+		Log.d(TAG, "Reorient: camera(" + mCameraOrientation + "), rotation(" + rotation + ")");
 		mOrientationDirty = true;
 
 	}
@@ -532,7 +536,7 @@ public class R5StreamPublisher implements R5StreamInstance,
 
 		mCameraOrientation += degrees;
 		mCameraOrientation = mCameraOrientation % 360;
-		mOrigCamOrientation = 90;
+		mOrigCamOrientation = 270;
 
 	}
 
