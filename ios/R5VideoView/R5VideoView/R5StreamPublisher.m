@@ -53,6 +53,15 @@
     return self;
 }
 
+- (id)init {
+
+    if ([super init] != nil) {
+        [self addObservers];
+    }
+    return self;
+    
+}
+
 -(void)startObserving {
     hasListeners = YES;
 }
@@ -320,7 +329,22 @@
         else {
             [camera setOrientation: 90];
         }
+        
+        // Because there is no way to attach the view controller as a sub view controller... do it manually.
+        UIInterfaceOrientation statusBarOrientation = [UIApplication sharedApplication].statusBarOrientation;
+        AVCaptureVideoPreviewLayer *preview = [self.stream getPreviewLayer];
+        if(statusBarOrientation == UIInterfaceOrientationPortrait){
+            [[preview connection] setVideoOrientation:AVCaptureVideoOrientationPortrait];
+        } else if (statusBarOrientation == UIInterfaceOrientationPortraitUpsideDown){
+            [[preview connection] setVideoOrientation:AVCaptureVideoOrientationPortraitUpsideDown];
+        } else if (statusBarOrientation == UIInterfaceOrientationLandscapeLeft){
+            [[preview connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeLeft];
+        } else if (statusBarOrientation == UIInterfaceOrientationLandscapeRight){
+            [[preview connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeRight];
+        }
+        
         [self.stream updateStreamMeta];
+        
     });
     
 }
