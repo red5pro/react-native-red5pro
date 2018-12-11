@@ -22,6 +22,7 @@
 - (void)publish:(R5Configuration *)configuration withType:(int)type andProps:(NSDictionary *)props;
 - (void)unpublish;
 
+- (void)onDeviceOrientation:(NSNotification *)notification;
 - (void)swapCamera;
 - (void)muteAudio;
 - (void)unmuteAudio;

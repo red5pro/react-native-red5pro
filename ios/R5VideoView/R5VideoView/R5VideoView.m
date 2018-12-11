@@ -78,22 +78,23 @@
 - (void)onEnterForegroundActive:(NSNotification *)notification {
     [self bringToForeground];
 }
-//- (void)onDeviceOrientation:(NSNotification *)notification {
-//  if (r5View != nil) {
-//      [r5View onDeviceOrientation:notification];
-//  }
-//}
+
+- (void)onDeviceOrientation:(NSNotification *)notification {
+    if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamPublisher.class]) {
+        [(R5StreamPublisher *)_streamInstance onDeviceOrientation:notification];
+    }
+}
 
 - (void)addObservers {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onWillResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onEnterForegroundActive:) name:UIApplicationWillEnterForegroundNotification object:nil];
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onDeviceOrientation:) name:UIDeviceOrientationDidChangeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onDeviceOrientation:) name:UIDeviceOrientationDidChangeNotification object:nil];
 }
 
 - (void)removeObservers {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillResignActiveNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillEnterForegroundNotification object:nil];
-//  [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
+  [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
 }
 
 - (void)loadConfiguration:(R5Configuration *)configuration forKey:(NSString *)key andAttach:(BOOL)autoAttach {
@@ -460,7 +461,7 @@
 
 - (void)attach {
     
-//    dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
         if (_streamInstance != nil) {
             self.controller = [self getOrCreateVideoView];
             [self.controller showDebugInfo:_showDebugInfo];
@@ -469,25 +470,25 @@
             [_streamInstance setVideoView:self.controller];
             _attached = YES;
         }
-//    });
+    });
 
 }
 
 - (void)detach {
     
-//    dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
         _attached = NO;
         if (_streamInstance != nil) {
             [_streamInstance removeVideoView:self.controller];
             [self setStreamInstance:nil];
         }
-    if (self.controller != nil) {
-        [self.controller pauseRender];
-        [self.controller.view removeFromSuperview];
-        [self.controller removeFromParentViewController];
-        self.controller = nil;
-    }
-//    });
+        if (self.controller != nil) {
+            [self.controller pauseRender];
+            [self.controller.view removeFromSuperview];
+            [self.controller removeFromParentViewController];
+            self.controller = nil;
+        }
+    });
     
 }
 
