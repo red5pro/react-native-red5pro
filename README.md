@@ -19,8 +19,10 @@ React Native Red5 Pro Publisher & Subscriber.
 * [Project Libraries](#project-libraries)
   * [R5StreamModule](#r5streammodule)
   * [R5VideoView](#r5videoview)
-* [Module Usage](#module-usage)
-* [Component Usage](#component-usage)
+* [R5StreamModule Usage](#r5streammodule-usage)
+  * [Methods](#module-methods)
+  * [Known Issues](#known-issues)
+* [R5VideoView Usage](#r5videoview-usage)
   * [Properties](#component-properties)
   * [Methods](#component-methods)
   * [Event Callbacks](#component-event-callbacks)
@@ -338,7 +340,26 @@ Included in the `react-native-red5pro` project are two libraries that can be use
 
 The `R5StreamModule` is a Native Module.
 
-The `R5StreamModule` is used to establish a streaming session without requiring a correspnding view - i.e., displaying and rendering the stream in your App on a UI View.
+The `R5StreamModule` is used to establish a streaming session without requiring a correspnding view to display and render the stream in your App on a UI View. This can be useful when the App only requires playing back the audio of a stream, or not requiring a publisher preview view, along with other feature scenarios.
+
+The original reason for developing and including the `R5StreamModule` was to allow a previously established stream to be detached and reattached to `R5VideoView` instance when the UI state of the App requires a change in your project. By using the `R5StreamModule` you can maintain the previously established publisher or subscriber session while updating the view state - all while not interrupting the stream.
+
+To initialize a stream session, from which you can start a publisher or subscriber stream, you initilize/register the configuration using the `R5StreamModule.init` method which returns a `Promise`:
+
+```
+this.stream = undefined // will be defined in success and utilized in lifecycle API.
+R5StreamModule.init('<uniquestreamid>', configuration)
+  .then(streamId => {
+    this.streamId = streamId
+  })
+  .catch(error => {
+    // error occurred in initialization.
+  })
+```
+
+For publishers, the `<uniquestreamid>` can be the stream name you will publish with. For subscriber, the `<uniquestreamid>` will be a unique subscriper id.
+
+> To Learn more about the `R5StreamModule` Usage, see [Module Usage](#module-usage)
 
 ## R5VideoView
 
@@ -365,11 +386,35 @@ render () {
 
 > To Learn more about the `R5VideoView` Usage, see [Component Usage](#component-usage)
 
-# Module Usage
+# R5StreamModule Usage
 
-# Component Usage
+The following describe the API available for the `react-native-red5pro` Native Module library, `R5StreamModule`.
 
-The following describe the API available for the `react-native-red5pro` Native Component library.
+## Module Methods
+
+The methods available on the `R5StreamModule` require the retention of a `stream id` established during initialization in order to access the associated stream instance to interact with.
+
+| Name | Arguments | Description | Publisher | Subscriber |
+| :-- | :-- | :-- | :--: | :--: |
+| init | `<stream-id>`, `configuration` | Request to intialize a configuration for a stream with an associated, unique stream id. | x | x |
+| publish | `<stream-id>`, `streamType`, `streamProps` | Request to start broadcasting stream with unique name and type (0: `live`, 1: `record`, `2`: append) and additional properties to use in broadcast. _See [Module Stream Properties](#module-stream-properties)._ | x | |
+| unpublish | `<stream-id>` | Request to stop broadcast. | x | |
+| subscribe | `<stream-id>`, `streamProps` | Request to start playback of stream with additional properties to use in playback. _See [Module Stream Properties](#module-stream-properties)._ | | x |
+| unsubscribe | `<stream-id>` | Request to stop playback. | | x |
+| swapCamera | `<stream-id>` | Request to swap camera on device, from front-facing to back-facing and vice-versa. | x | |
+| muteAudio | `<stream-id>` | Request to not send audio on broadcast during a publish session. | x | |
+| unmuteAudio | `<stream-id>` | Request to send audio on broadcast during a publish session. | x | |
+| muteVideo | `<stream-id>` | Request to not send video on broadcast during a publish session. | x | |
+| unmuteVideo | `<stream-id>` | Request to send video on broadcast during a publish session. | x | |
+| setPlaybackVolume | `<stream-id>` | Request to set playback volume. _From `0` to `100`._ | | | x |
+
+## Module Stream Properties
+
+## Known Issues
+
+# R5VideoView Usage
+
+The following describe the API available for the `react-native-red5pro` Native Component library, `R5VideoView`.
 
 ## Component Properties
 
@@ -394,7 +439,7 @@ The following describe the API available for the `react-native-red5pro` Native C
 | enableBackgroundStreaming | boolean | false | Turns on ability to continue to publish or subscribe to audio while app is in the background. | x | x |
 | zOrderOnTop | boolean | false | Setting of layout order of stream view. _Android only._ | x | x |
 | zOrderMediaOverlay | boolean | false | Setting of layout order of stream view. _Android only._ | x | x |
-| configuration | shape | `REQUIRED` | [Refer to Configuration Properties](#configuration-properties). | x | x |
+| configuration | shape | `REQUIRED` | [Refer to Configuration Properties](#component-configuration-properties). | x | x |
 
 ## Component Configuration Properties
 
@@ -465,10 +510,10 @@ import { subscribe,
 | unmuteAudio | `<ref>` | Request to send audio on broadcast during a publish session. | x | |
 | muteVideo | `<ref>` | Request to not send video on broadcast during a publish session. | x | |
 | unmuteVideo | `<ref>` | Request to send video on broadcast during a publish session. | x | |
-| attach | `<ref>`, `streamName` | Request to attach a stream to the view. | x | x |
-| detach | `<ref>`, `streamName` | Request to detach a stream from the view. | x | x |
+| attach | `<ref>`, `stream-id` | Request to attach a stream to the view. | x | x |
+| detach | `<ref>`, `stream-id` | Request to detach a stream from the view. | x | x |
 
-> In the case of the `attach` and `detach` methods, a previously established stream will need to be available in the app which is associated with the `streamName`. As such, a previous call to `subscribe` or `publish` is required to register the stream for a Subscriber or Publisher client, respectively.
+> In the case of the `attach` and `detach` methods, a previously established stream will need to be available in the app which is associated with the `stream id`. As such, a previous call to `subscribe` or `publish` is required to register the stream for a Subscriber or Publisher client, respectively.
 
 ## Component Event Callbacks
 
