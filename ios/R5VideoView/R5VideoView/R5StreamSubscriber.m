@@ -203,8 +203,8 @@
 //    dispatch_async(dispatch_get_main_queue(), ^{
         if (self.stream != nil) {
             [view showDebugInfo:NO];
-            [view removeStream];
-//            [view attachStream:nil];
+            //            [view removeStream]; // NOTE: Requires iOS SDK 5.3.0 or higher.
+            [view attachStream:nil];
         }
 //    });
     
