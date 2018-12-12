@@ -78,7 +78,7 @@ export default class Publisher extends React.Component {
 
     this.emitter = new NativeEventEmitter(R5StreamModule)
 
-   // Events.
+    // Events.
     this.onMetaData = this.onMetaData.bind(this)
     this.onConfigured = this.onConfigured.bind(this)
     this.onPublisherStreamStatus = this.onPublisherStreamStatus.bind(this)

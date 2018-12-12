@@ -8,9 +8,12 @@ Examples in using the `react-native-red5pro` React Native component library.
 # Menu
 
 * [Installing](#installing)
-* [Running](#running)
-  * [iOS](#ios)
-  * [Android](#android)
+* [Running Module Examples](#running-module-examples)
+  * [iOS](#ios-module-example)
+  * [Android](#android-module-example)
+* [Running Component Examples](#running-component-examples)
+  * [iOS](#ios-compoent-example)
+  * [Android](#android-component-example)
 * [Notes](#notes)
 
 ## Examples
@@ -35,23 +38,55 @@ You will need to install the required dependencies prior to running the examples
 $ npm install
 ```
 
-# Running
+## Two Examples
 
-You can launch these examples onto your target device(s) doing the following:
+After installation, there are two examples that can be run, and utilize the provided React Native libraries for this project:
 
-## iOS
+* `R5StreamModule`
+* `R5VideoView`
+
+> To read more about the React Native libraries provided in this parent project and their APIs and Usage, please refer to the parent [README](../README.md)
+
+# Running Module Examples
+
+You can launch these Red5 Pro Native Module examples onto your target device(s) doing the following:
+
+## iOS Module Example
 
 It is recommended to launch the [ios/Red5ProVideoViewExample.xcoeproj](ios/Red5ProVideoViewExample.xcoeproj) in Xcode, and deploying to a connected device.
 
-## Android
+To target the Native Module example, you will also need to update the [./ios/Red5ProVideoViewExample/AppDelegate.m](./ios/Red5ProVideoViewExample/AppDelegate.m) file and be sure the target bundle is specified as `index-modular.ios`
+
+> See the `preios:module` npm script in [package.json](package.json)
+
+## Android Module Example
 
 Be sure you have a device tethered, then issue the following:
 
 ```sh
-$ npm run android
+$ npm run android:module
+```
+
+# Running Component Examples
+
+You can launch these Red5 Pro Native Component examples onto your target device(s) doing the following:
+
+## iOS Component Example
+
+It is recommended to launch the [ios/Red5ProVideoViewExample.xcoeproj](ios/Red5ProVideoViewExample.xcoeproj) in Xcode, and deploying to a connected device.
+
+To target the Native Module example, you will also need to update the [./ios/Red5ProVideoViewExample/AppDelegate.m](./ios/Red5ProVideoViewExample/AppDelegate.m) file and be sure the target bundle is specified as `index.ios`
+
+> See the `preios:component` npm script in [package.json](package.json)
+
+## Android Component Example
+
+Be sure you have a device tethered, then issue the following:
+
+```sh
+$ npm run android:component
 ```
 
 # Notes
 
 > This project was bootstrapped with [Create React Native App](https://github.com/react-community/create-react-native-app).
-
