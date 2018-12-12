@@ -25,7 +25,6 @@
 @property R5VideoViewController *controller;
 
 - (void)loadConfiguration:(R5Configuration *)configuration forKey:(NSString *)key andAttach:(BOOL)autoAttach;
-- (void)onDeviceOrientation:(NSNotification *)notification;
 
 # pragma RN Events
 @property (nonatomic, copy) RCTBubblingEventBlock onConfigured;

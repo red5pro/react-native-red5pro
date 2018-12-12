@@ -162,24 +162,12 @@
         return;
     }
     
-    if (_isStreaming && self.stream != nil) {
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            [self.controller pauseRender];
-//        });
-    }
-    
 }
 
 - (void)bringToForeground {
     
     if (!_enableBackgroundStreaming) {
         return;
-    }
-    
-    if (_isStreaming && self.stream != nil) {
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            [self.controller resumeRender];
-//        });
     }
     
 }
@@ -201,23 +189,24 @@
 
 - (void) setVideoView:(R5VideoViewController *)view {
     
-    dispatch_async(dispatch_get_main_queue(), ^{
+//    dispatch_async(dispatch_get_main_queue(), ^{
         if (self.stream != nil && _playbackVideo) {
             [view showDebugInfo:_showDebugInfo];
             [view attachStream:self.stream];
         }
-    });
-    
+//    });
+
 }
 
 - (void) removeVideoView:(R5VideoViewController *)view {
     
-    dispatch_async(dispatch_get_main_queue(), ^{
+//    dispatch_async(dispatch_get_main_queue(), ^{
         if (self.stream != nil) {
             [view showDebugInfo:NO];
-            [view attachStream:nil];
+            [view removeStream];
+//            [view attachStream:nil];
         }
-    });
+//    });
     
 }
 
