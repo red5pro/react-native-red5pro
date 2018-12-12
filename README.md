@@ -481,7 +481,9 @@ this.emitter.removeAllListeners('onMetaDataEvent')
 
 ## Known Issues
 
+### Issue 1.0 - Android Publisher
 
+The Android SDK requires reading data from the camera previous display in order to send video data to the server. As such, when there is no associated "attached" `R5VideoView` to the publisher stream, no video data will be delivered to subscribers.
 
 # R5VideoView Usage
 
