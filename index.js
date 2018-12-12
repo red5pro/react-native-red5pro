@@ -17,7 +17,7 @@ import {
   setPlaybackVolume,
   muteAudio, unmuteAudio,
   muteVideo, unmuteVideo,
-  subscribeViewless, attach, detach
+  attach, detach
 } from './src/commands/R5VideoView.commands'
 
 module.exports = {
@@ -25,7 +25,7 @@ module.exports = {
   subscribe, unsubscribe, preview, publish, unpublish, swapCamera,
   updateScaleMode, updateScaleSize, setPlaybackVolume,
   muteAudio, unmuteAudio, muteVideo, unmuteVideo,
-  subscribeViewless, attach, detach,
+  attach, detach,
   R5AudioMode, R5LogLevel, R5PublishType, R5ScaleMode
 }
 
