@@ -21,6 +21,8 @@ React Native Red5 Pro Publisher & Subscriber.
   * [R5VideoView](#r5videoview)
 * [R5StreamModule Usage](#r5streammodule-usage)
   * [Methods](#module-methods)
+  * [Stream Properies](#module-stream-properties)
+  * [Events](#module-events)
   * [Known Issues](#known-issues)
 * [R5VideoView Usage](#r5videoview-usage)
   * [Properties](#component-properties)
@@ -406,11 +408,80 @@ The methods available on the `R5StreamModule` require the retention of a `stream
 | unmuteAudio | `<stream-id>` | Request to send audio on broadcast during a publish session. | x | |
 | muteVideo | `<stream-id>` | Request to not send video on broadcast during a publish session. | x | |
 | unmuteVideo | `<stream-id>` | Request to send video on broadcast during a publish session. | x | |
-| setPlaybackVolume | `<stream-id>` | Request to set playback volume. _From `0` to `100`._ | | | x |
+| setPlaybackVolume | `<stream-id>` | Request to set playback volume. _From `0` to `100`._ | | x |
+
+It should be noted that the following methods return a `Promise` object:
+
+* `init`
+* `publish`
+* `unpublish`
+* `subscribe`
+* `unsubscribe`
 
 ## Module Stream Properties
 
+The following stream properties are available for a `R5StreamModule`:
+
+| Key | Type | Default | Description | Publisher | Subscriber |
+| :-- | :-- | :-- | :-- | :--: | :--: |
+| showDebugView | boolean | false | Displays the debug information for a broadcast and playback stream. | x | x |
+| logLevel | int | 3 | Enumerated value of [R5LogLevel](src/enum/R5VideoView.loglevel.js). | x | x |
+| scaleMode | int | 0 | Enumerated value of [R5ScaleMode](src/enum/R5VideoView.scalemode.js). | x | x |
+| publishVideo | boolean | true | Flag to include video in broadcast. | x | |
+| publishAudio | boolean | true | Flag to include audio in broadcast. | x | |
+| subscribeVideo | boolean | true | Flag to include video in subscription. | x | |
+| cameraWidth | int | 640 | Width dimension of Camera to use in broadcast. | x | |
+| cameraHeight | int | 360 | Height dimension of Camera to use in broadcast. | x | |
+| bitrate | int | 750 | The video bitrate to broadcast at. | x | |
+| framerate | int | 15 | The video framerate to broadcast at. | x | |
+| audioBitrate | int | 32 | The audio bitrate to broadcast at (kb/s). | x | |
+| audioSampleRate | int | iOS: `16000`, Android: `44100` | The audio sample rate to broadcast at (hz).  | x | |
+| useAdaptiveBitrateController | boolean | false | Use of adaptive bitrate streaming for broadcasting.  | x | |
+| useBackfacingCamera | boolean | false | Use the backfacing camera of the device to start broadcasting. | x | |
+| audioMode | int | 0 | Enumerated value of [R5AudioMode](src/enum/R5VideoView.audiomode.js). | x | x |
+| enableBackgroundStreaming | boolean | false | Turns on ability to continue to publish or subscribe to audio while app is in the background. | x | x |
+
+These properties represent the settings for a Publisher and Subscriber session that do not necessarily rely on a corresponding UI view (such as the `R5VideoView` component).
+
+## Module Events
+
+In addition to the `Promise` objects returned on the `init`, `publish`, `unpublish`, `subscribe` and `unsubscribe` methods, there are events on the `R5StreamModule` that can listened to using the `NativeEventEmitter` from React Native.
+
+The following events are available:
+
+| Name | Event Object | Description | Publisher | Subscriber |
+| :-- | :-- | :-- | :--: | :--: |
+| onConfigured | {`key`: `<configuration.key provided>`} | Notification of configuration being completed. | x | x |
+| onMetaDataEvent | {`metadata`: `<server provided info about stream>`} | Notification of stream metadata. | | x |
+| onPublisherStreamStatus | {`status`: [refer to status section](#status-callback-objects)} | Notification of stream status for a Publisher. | x | |
+| onSubscriberStreamStatus | {`status`: [refer to status section](#status-callback-objects)} | Notification of stream status for a Subscriber. | | x |
+| onUnsubscribeNotification | none | Notification of stop of playback. | | x |
+| onUnpublishNotification | none | Notification of stop of broadcast. | x | |
+
+To establish a listener for these events, you must first establish a `NativeEventEmiiter` instance using the `R5StreamModule`:
+
+```js
+import { NativeEventEmiiter } from 'react-native'
+import { R5StreamModule } from 'react-native-red5pro'
+...
+this.emitter = new NativeEventEmiiter(R5StreamModule)
+```
+
+Once an emitter is established, use the `addListener` method, e.g,:
+
+```js
+this.emitter.addListener('onMetaDataEvent', this.onMetaData)
+```
+
+To remove event listeners:
+
+```js
+this.emitter.removeAllListeners('onMetaDataEvent')
+```
+
 ## Known Issues
+
+
 
 # R5VideoView Usage
 
@@ -435,7 +506,7 @@ The following describe the API available for the `react-native-red5pro` Native C
 | audioSampleRate | int | iOS: `16000`, Android: `44100` | The audio sample rate to broadcast at (hz).  | x | |
 | useAdaptiveBitrateController | boolean | false | Use of adaptive bitrate streaming for broadcasting.  | x | |
 | useBackfacingCamera | boolean | false | Use the backfacing camera of the device to start broadcasting. | x | |
-| audioMode | int | 0 | Enumerated value of [R5AudioMode](src/enum/R5VideoView.audiomode.js). | | x |
+| audioMode | int | 0 | Enumerated value of [R5AudioMode](src/enum/R5VideoView.audiomode.js). | x | x |
 | enableBackgroundStreaming | boolean | false | Turns on ability to continue to publish or subscribe to audio while app is in the background. | x | x |
 | zOrderOnTop | boolean | false | Setting of layout order of stream view. _Android only._ | x | x |
 | zOrderMediaOverlay | boolean | false | Setting of layout order of stream view. _Android only._ | x | x |
