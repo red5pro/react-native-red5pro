@@ -220,6 +220,8 @@ export default class Subscriber extends React.Component {
     } = this.props
 
     const setup = Object.assign({}, streamProps, videoProps)
+    // Remove the configuration from the setup for views. We just want props.
+    delete setup.configuration
 
     const displayVideo = setup.subscribeVideo
 
@@ -242,7 +244,7 @@ export default class Subscriber extends React.Component {
         }
         { attached && !swappedLayout &&
           <R5VideoView
-            {...videoProps}
+            {...setup}
             ref={assignVideoRef.bind(this)}
           />
         }
@@ -290,7 +292,7 @@ export default class Subscriber extends React.Component {
         />
         { attached && swappedLayout &&
           <R5VideoView
-            {...videoProps}
+            {...setup}
             ref={assignVideoRef.bind(this)}
           />
         }
