@@ -660,7 +660,7 @@ public class R5StreamPublisher implements R5StreamInstance,
 
 	protected void sendToBackground () {
 
-		Log.d(TAG, "sendToBackground()");
+		Log.d(TAG, "sendToBackground(" + mEnableBackgroundStreaming + ")");
 		if (!mEnableBackgroundStreaming) {
 			Log.d(TAG, "sendToBackground:shutdown");
 			this.unpublish();
@@ -668,7 +668,7 @@ public class R5StreamPublisher implements R5StreamInstance,
 		}
 
 		if (mEnableBackgroundStreaming) {
-			Log.d(TAG, "sendToBackground:publiserPause");
+			Log.d(TAG, "sendToBackground:publisherPause");
 			this.setPublisherDisplayOn(false, true);
 		}
 

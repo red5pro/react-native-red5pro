@@ -207,7 +207,12 @@ export default class Publisher extends React.Component {
 
     const {
       onStop,
+      streamProps
     } = this.props
+
+    const setup = Object.assign({}, streamProps, videoProps)
+    // Remove the configuration from the setup for views. We just want props.
+    delete setup.configuration
 
     const audioIconColor = audioMuted ? '#fff' : '#000'
     const videoIconColor = videoMuted ? '#fff' : '#000'
@@ -229,7 +234,7 @@ export default class Publisher extends React.Component {
         }
         { attached && !swappedLayout &&
           <R5VideoView
-            {...videoProps}
+            {...setup}
             ref={assignVideoRef.bind(this)}
           />
         }
@@ -280,7 +285,7 @@ export default class Publisher extends React.Component {
         />
         { attached && swappedLayout &&
           <R5VideoView
-            {...videoProps}
+            {...setup}
             ref={assignVideoRef.bind(this)}
           />
         }
