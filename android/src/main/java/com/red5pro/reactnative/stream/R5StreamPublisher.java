@@ -113,7 +113,9 @@ public class R5StreamPublisher implements R5StreamInstance,
 	}
 
 	public R5StreamPublisher(ThemedReactContext context) {
+		Log.d(TAG, "new()");
 		this.mContext = context;
+		this.mContext.addLifecycleEventListener(this);
 		this.deviceEventEmitter = mContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
 	}
 
@@ -660,13 +662,13 @@ public class R5StreamPublisher implements R5StreamInstance,
 
 		Log.d(TAG, "sendToBackground()");
 		if (!mEnableBackgroundStreaming) {
-			Log.d("R5VideoViewLayout", "sendToBackground:shutdown");
+			Log.d(TAG, "sendToBackground:shutdown");
 			this.unpublish();
 			return;
 		}
 
 		if (mEnableBackgroundStreaming) {
-			Log.d("R5VideoViewLayout", "sendToBackground:publiserPause");
+			Log.d(TAG, "sendToBackground:publiserPause");
 			this.setPublisherDisplayOn(false, true);
 		}
 
