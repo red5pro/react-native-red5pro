@@ -89,7 +89,9 @@ public class R5StreamSubscriber implements R5StreamInstance,
 	}
 
 	public R5StreamSubscriber (ThemedReactContext context) {
+		Log.d(TAG, "new()");
 		this.mContext = context;
+		this.mContext.addLifecycleEventListener(this);
 		this.deviceEventEmitter = mContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
 	}
 
