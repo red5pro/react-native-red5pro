@@ -349,7 +349,7 @@ The original reason for developing and including the `R5StreamModule` was to all
 To initialize a stream session, from which you can start a publisher or subscriber stream, you initilize/register the configuration using the `R5StreamModule.init` method which returns a `Promise`:
 
 ```
-this.stream = undefined // will be defined in success and utilized in lifecycle API.
+this.streamId = undefined // will be defined in success and utilized in lifecycle API.
 R5StreamModule.init('<uniquestreamid>', configuration)
   .then(streamId => {
     this.streamId = streamId
@@ -361,7 +361,7 @@ R5StreamModule.init('<uniquestreamid>', configuration)
 
 For publishers, the `<uniquestreamid>` can be the stream name you will publish with. For subscriber, the `<uniquestreamid>` will be a unique subscriper id.
 
-> To Learn more about the `R5StreamModule` Usage, see [Module Usage](#module-usage)
+> To Learn more about the `R5StreamModule` Usage, see [Module Usage](#r5streammodule-usage)
 
 ## R5VideoView
 
