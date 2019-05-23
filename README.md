@@ -4,7 +4,9 @@
 
 ---
 
-# react-native-red5pro BETA
+# react-native-red5pro
+
+> This project is in **BETA**.
 
 React Native Red5 Pro Publisher & Subscriber.
 
@@ -14,13 +16,21 @@ React Native Red5 Pro Publisher & Subscriber.
 * [Project Setup](#project-setup)
   * [iOS](#ios-project-setup)
   * [Android](#android-project-setup)
-* [Usage](#usage)
-  * [Properties](#properties)
-  * [Methods](#methods)
-  * [Event Callbacks](#event-callbacks)
-  * [Publisher Example](#publisher-example)
-  * [Subscriber Example](#subscriber-example)
-* [Red5 Pro Quickstart](#red5-pro)
+* [Project Libraries](#project-libraries)
+  * [R5StreamModule](#r5streammodule)
+  * [R5VideoView](#r5videoview)
+* [R5StreamModule Usage](#r5streammodule-usage)
+  * [Methods](#module-methods)
+  * [Stream Properies](#module-stream-properties)
+  * [Events](#module-events)
+  * [Known Issues](#known-issues)
+* [R5VideoView Usage](#r5videoview-usage)
+  * [Properties](#component-properties)
+  * [Methods](#component-methods)
+  * [Event Callbacks](#component-event-callbacks)
+  * [Publisher Example](#component-publisher-example)
+  * [Subscriber Example](#component-subscriber-example)
+* [Red5 Pro Quickstart](https://www.red5pro.com/docs/#overview)
 
 > You will need a Red5 Pro SDK License and a Red5 Pro Server in order to use this component.  
 [Sign up for a free trial!](https://account.red5pro.com/register)
@@ -171,7 +181,7 @@ The `react-native-red5pro` library is not shipped with the *Red5 Pro SDK*. As su
 The *Red5 Pro iOS SDK* requires a few additional dependencies in order to properly broadcast and consume live streams. Add the following libraries and frameworks to your project under the *General > Linked Frameworks and Libraries* panel:
 
 ```
-libstdc++.6.0.9.tbd
+libc++.1.tbd
 libiconv.2.4.0.tbd
 libbz2.1.0.tbd
 libz.tbd
@@ -185,6 +195,8 @@ VideoToolbox
 
 ### Define Permissions
 
+#### Camera & Microphone Access
+
 If you intend to use the `react-native-red5pro` to broadcast live streams, you will need to add Privacy permissions for Camera and Microphone access on the device. To do so:
 
 1. Locate the `Info.plist` file for your project in Xcode.
@@ -193,6 +205,16 @@ If you intend to use the `react-native-red5pro` to broadcast live streams, you w
 4. Add a similar entry and String value for `Privacy - Microphone Usage Description`.
 
 Your app should now be available for broadcasting and subscribing to live streams!
+
+#### Background Services
+
+If you intend to use the `react-native-red5pro` to continue broadcasting and/or playback while the app is in the background, you will additionally need to define the ability to do so:
+
+1. Locate the `Info.plist` file for your project in Xcode.
+2. Click to Add an entry (using the `+` icon), and add a `Required background modes` entry.
+3. In the generated `Item 0` entry, add a String value of `App plays audio or streams audio/video using AirPlay`.
+
+Now you can use the `enableBackgroundStreaming` of the library to enable background streaming!
 
 ### Additional Notes
 
@@ -271,6 +293,8 @@ private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
 
 ### Define Permissions
 
+#### Camera, Microphone and Network
+
 If you intend to use the `react-native-red5pro` to broadcast live streams, you will need to add Privacy permissions for Camera and Microphone access on the device. To do so:
 
 1. Open the `AndroidManifest.xml` file and add the following to the `uses-permissions`:
@@ -298,11 +322,174 @@ If you intend to use the `react-native-red5pro` to broadcast live streams, you w
 
 Your app should now be available for broadcasting and subscribing to live streams!
 
-# Usage
+#### Background Services
 
-The following describe the API available for the `react-native-red5pro` component library.
+The librayr provides background services for broadcasting and/or playback of stream while the app is in the background. You will need to add the following to your `AndroidManifest.xml` file in order to enable these services:
 
-## Properties
+```
+<service android:name="com.red5pro.reactnative.view.PublishService" />
+<service android:name="com.red5pro.reactnative.view.SubscribeService" />
+```
+
+# Available Libraries
+
+Included in the `react-native-red5pro` project are two libraries that can be used (together, no less!) in your React Native App:
+
+* `R5StreamModule`
+* `R5VideoView`
+
+## R5StreamModule
+
+The `R5StreamModule` is a Native Module.
+
+The `R5StreamModule` is used to establish a streaming session without requiring a correspnding view to display and render the stream in your App on a UI View. This can be useful when the App only requires playing back the audio of a stream, or not requiring a publisher preview view, along with other feature scenarios.
+
+The original reason for developing and including the `R5StreamModule` was to allow a previously established stream to be detached and reattached to `R5VideoView` instance when the UI state of the App requires a change in your project. By using the `R5StreamModule` you can maintain the previously established publisher or subscriber session while updating the view state - all while not interrupting the stream.
+
+To initialize a stream session, from which you can start a publisher or subscriber stream, you initilize/register the configuration using the `R5StreamModule.init` method which returns a `Promise`:
+
+```
+this.streamId = undefined // will be defined in success and utilized in lifecycle API.
+R5StreamModule.init('<uniquestreamid>', configuration)
+  .then(streamId => {
+    this.streamId = streamId
+  })
+  .catch(error => {
+    // error occurred in initialization.
+  })
+```
+
+For publishers, the `<uniquestreamid>` can be the stream name you will publish with. For subscriber, the `<uniquestreamid>` will be a unique subscriper id.
+
+> To Learn more about the `R5StreamModule` Usage, see [Module Usage](#r5streammodule-usage)
+
+## R5VideoView
+
+The `R5VideoView` is a Native Component.
+
+The `R5VideoView` is used to declare a UI view instance that a stream will be shown - either the Publisher preview or the Subscriber stream playback.
+
+The `R5VideoView` is declared similar to the following and is recommended to retain a reference for other node handling and interaction:
+
+```js
+render () {
+  const { videoProps } = this.props
+  const assignVideoRef = (video) => { this.red5pro_video_publisher = video }
+  return (
+    <View>
+      <R5VideoView
+        {...videoProps}
+        ref={assignVideoRef.bind(this)}
+      />
+    </View>
+  )
+}
+```
+
+> To Learn more about the `R5VideoView` Usage, see [Component Usage](#component-usage)
+
+# R5StreamModule Usage
+
+The following describe the API available for the `react-native-red5pro` Native Module library, `R5StreamModule`.
+
+## Module Methods
+
+The methods available on the `R5StreamModule` require the retention of a `stream id` established during initialization in order to access the associated stream instance to interact with.
+
+| Name | Arguments | Description | Publisher | Subscriber |
+| :-- | :-- | :-- | :--: | :--: |
+| init | `<stream-id>`, `configuration` | Request to intialize a configuration for a stream with an associated, unique stream id. | x | x |
+| publish | `<stream-id>`, `streamType`, `streamProps` | Request to start broadcasting stream with unique name and type (0: `live`, 1: `record`, `2`: append) and additional properties to use in broadcast. _See [Module Stream Properties](#module-stream-properties)._ | x | |
+| unpublish | `<stream-id>` | Request to stop broadcast. | x | |
+| subscribe | `<stream-id>`, `streamProps` | Request to start playback of stream with additional properties to use in playback. _See [Module Stream Properties](#module-stream-properties)._ | | x |
+| unsubscribe | `<stream-id>` | Request to stop playback. | | x |
+| swapCamera | `<stream-id>` | Request to swap camera on device, from front-facing to back-facing and vice-versa. | x | |
+| muteAudio | `<stream-id>` | Request to not send audio on broadcast during a publish session. | x | |
+| unmuteAudio | `<stream-id>` | Request to send audio on broadcast during a publish session. | x | |
+| muteVideo | `<stream-id>` | Request to not send video on broadcast during a publish session. | x | |
+| unmuteVideo | `<stream-id>` | Request to send video on broadcast during a publish session. | x | |
+| setPlaybackVolume | `<stream-id>` | Request to set playback volume. _From `0` to `100`._ | | x |
+
+It should be noted that the following methods return a `Promise` object:
+
+* `init`
+* `publish`
+* `unpublish`
+* `subscribe`
+* `unsubscribe`
+
+## Module Stream Properties
+
+The following stream properties are available for a `R5StreamModule`:
+
+| Key | Type | Default | Description | Publisher | Subscriber |
+| :-- | :-- | :-- | :-- | :--: | :--: |
+| showDebugView | boolean | false | Displays the debug information for a broadcast and playback stream. | x | x |
+| logLevel | int | 3 | Enumerated value of [R5LogLevel](src/enum/R5VideoView.loglevel.js). | x | x |
+| scaleMode | int | 0 | Enumerated value of [R5ScaleMode](src/enum/R5VideoView.scalemode.js). | x | x |
+| publishVideo | boolean | true | Flag to include video in broadcast. | x | |
+| publishAudio | boolean | true | Flag to include audio in broadcast. | x | |
+| subscribeVideo | boolean | true | Flag to include video in subscription. | x | |
+| cameraWidth | int | 640 | Width dimension of Camera to use in broadcast. | x | |
+| cameraHeight | int | 360 | Height dimension of Camera to use in broadcast. | x | |
+| bitrate | int | 750 | The video bitrate to broadcast at. | x | |
+| framerate | int | 15 | The video framerate to broadcast at. | x | |
+| audioBitrate | int | 32 | The audio bitrate to broadcast at (kb/s). | x | |
+| audioSampleRate | int | iOS: `16000`, Android: `44100` | The audio sample rate to broadcast at (hz).  | x | |
+| useAdaptiveBitrateController | boolean | false | Use of adaptive bitrate streaming for broadcasting.  | x | |
+| useBackfacingCamera | boolean | false | Use the backfacing camera of the device to start broadcasting. | x | |
+| audioMode | int | 0 | Enumerated value of [R5AudioMode](src/enum/R5VideoView.audiomode.js). | x | x |
+| enableBackgroundStreaming | boolean | false | Turns on ability to continue to publish or subscribe to audio while app is in the background. | x | x |
+
+These properties represent the settings for a Publisher and Subscriber session that do not necessarily rely on a corresponding UI view (such as the `R5VideoView` component).
+
+## Module Events
+
+In addition to the `Promise` objects returned on the `init`, `publish`, `unpublish`, `subscribe` and `unsubscribe` methods, there are events on the `R5StreamModule` that can listened to using the `NativeEventEmitter` from React Native.
+
+The following events are available:
+
+| Name | Event Object | Description | Publisher | Subscriber |
+| :-- | :-- | :-- | :--: | :--: |
+| onConfigured | {`key`: `<configuration.key provided>`} | Notification of configuration being completed. | x | x |
+| onMetaDataEvent | {`metadata`: `<server provided info about stream>`} | Notification of stream metadata. | | x |
+| onPublisherStreamStatus | {`status`: [refer to status section](#status-callback-objects)} | Notification of stream status for a Publisher. | x | |
+| onSubscriberStreamStatus | {`status`: [refer to status section](#status-callback-objects)} | Notification of stream status for a Subscriber. | | x |
+| onUnsubscribeNotification | none | Notification of stop of playback. | | x |
+| onUnpublishNotification | none | Notification of stop of broadcast. | x | |
+
+To establish a listener for these events, you must first establish a `NativeEventEmiiter` instance using the `R5StreamModule`:
+
+```js
+import { NativeEventEmiiter } from 'react-native'
+import { R5StreamModule } from 'react-native-red5pro'
+...
+this.emitter = new NativeEventEmiiter(R5StreamModule)
+```
+
+Once an emitter is established, use the `addListener` method, e.g,:
+
+```js
+this.emitter.addListener('onMetaDataEvent', this.onMetaData)
+```
+
+To remove event listeners:
+
+```js
+this.emitter.removeAllListeners('onMetaDataEvent')
+```
+
+## Known Issues
+
+### Issue 1.0 - Android Publisher
+
+The Android SDK requires reading data from the camera previous display in order to send video data to the server. As such, when there is no associated "attached" `R5VideoView` to the publisher stream, no video data will be delivered to subscribers.
+
+# R5VideoView Usage
+
+The following describe the API available for the `react-native-red5pro` Native Component library, `R5VideoView`.
+
+## Component Properties
 
 | Key | Type | Default | Description | Publisher | Subscriber |
 | :-- | :-- | :-- | :-- | :--: | :--: |
@@ -321,13 +508,13 @@ The following describe the API available for the `react-native-red5pro` componen
 | audioSampleRate | int | iOS: `16000`, Android: `44100` | The audio sample rate to broadcast at (hz).  | x | |
 | useAdaptiveBitrateController | boolean | false | Use of adaptive bitrate streaming for broadcasting.  | x | |
 | useBackfacingCamera | boolean | false | Use the backfacing camera of the device to start broadcasting. | x | |
-| audioMode | int | 0 | Enumerated value of [R5AudioMode](src/enum/R5VideoView.audiomode.js). | | x |
+| audioMode | int | 0 | Enumerated value of [R5AudioMode](src/enum/R5VideoView.audiomode.js). | x | x |
 | enableBackgroundStreaming | boolean | false | Turns on ability to continue to publish or subscribe to audio while app is in the background. | x | x |
 | zOrderOnTop | boolean | false | Setting of layout order of stream view. _Android only._ | x | x |
 | zOrderMediaOverlay | boolean | false | Setting of layout order of stream view. _Android only._ | x | x |
-| configuration | shape | `REQUIRED` | [Refer to Configuration Properties](#configuration-properties). | x | x |
+| configuration | shape | `REQUIRED` | [Refer to Configuration Properties](#component-configuration-properties). | x | x |
 
-## Configuration Properties
+## Component Configuration Properties
 
 The following are the `configuration` properties of the Properties of the `react-native-red5pro` library. This is required to properly setup a broadcasting or playback session of a stream on the *Red5 Pro Server*.
 
@@ -344,9 +531,10 @@ These properties are required for **both** Publishers and Subscribers.
 | bufferTime | number | 0.5 | Default buffer. |
 | streamBufferTime | number | 4 | Default buffer for subscribers to allow on the server in sending packets. |
 | parameters | string | none | Optional connection parameters. Often used for authentication. ***[See Note Below](#parameters-configuration-property)** |
+| autoAttachView | boolean | `true` | A flag to also attach the view component to a stream upon setup. |
 | key | string | `REQUIRED` | Unique key to be used internally to access the configuration object. |
 
-### Parameters Configuration Property
+### Component Parameters Configuration Property
 
 The `parameters` configuration provides the ability to pass in additional properties to be used by the target application accepting the RTSP connection from a publisher or subscriber.
 
@@ -361,7 +549,7 @@ let auth = 'username=foo;password=bar;'
 > See [iOS Example](https://github.com/red5pro/streaming-ios/blob/master/R5ProTestbed/Tests/PublishAuth/PublishAuthTest.swift) and [Android Example](https://github.com/red5pro/streaming-android/blob/master/app/src/main/java/red5pro/org/testandroidproject/tests/PublishAuthTest/PublishAuthTest.java).
 
 
-## Methods
+## Component Methods
 
 The following methods are available:
 
@@ -376,7 +564,9 @@ import { subscribe,
          muteAudio,
          unmuteAudio,
          muteVideo,
-         unmuteVideo
+         unmuteVideo,
+         attach,
+         detach
 } from 'react-native-red5pro'
 ```
 
@@ -393,8 +583,12 @@ import { subscribe,
 | unmuteAudio | `<ref>` | Request to send audio on broadcast during a publish session. | x | |
 | muteVideo | `<ref>` | Request to not send video on broadcast during a publish session. | x | |
 | unmuteVideo | `<ref>` | Request to send video on broadcast during a publish session. | x | |
+| attach | `<ref>`, `stream-id` | Request to attach a stream to the view. | x | x |
+| detach | `<ref>`, `stream-id` | Request to detach a stream from the view. | x | x |
 
-## Event Callbacks
+> In the case of the `attach` and `detach` methods, a previously established stream will need to be available in the app which is associated with the `stream id`. As such, a previous call to `subscribe` or `publish` is required to register the stream for a Subscriber or Publisher client, respectively.
+
+## Component Event Callbacks
 
 The following callbacks are available:
 
@@ -407,7 +601,7 @@ The following callbacks are available:
 | onUnsubscribeNotification | none | Notification of stop of playback. | | x |
 | onUnpublishNotification | none | Notification of stop of broadcast. | x | |
 
-### Status Callback Objects
+### Component Status Callback Objects
 
 The Publishers and Subscribers receive status events during the lifecycle of broadcasting and consuming a stream, respectively. The following properties are available in the status object:
 
@@ -421,7 +615,7 @@ The Publishers and Subscribers receive status events during the lifecycle of bro
 * The enumerated list of statuses on iOS [https://www.red5pro.com/docs/static/ios-streaming/protocol_r5_stream_delegate-p.html](https://www.red5pro.com/docs/static/ios-streaming/protocol_r5_stream_delegate-p.html)
 * The enumerated list of statuses on Android [https://www.red5pro.com/docs/static/android-streaming/enumcom_1_1red5pro_1_1streaming_1_1event_1_1_r5_connection_event.html](https://www.red5pro.com/docs/static/android-streaming/enumcom_1_1red5pro_1_1streaming_1_1event_1_1_r5_connection_event.html)
 
-## Publisher Example
+## Component Publisher Example
 
 You will need to have a Red5 Pro SDK license and access to a reployed Red5 Pro Server in order to use the following example.
 
@@ -535,7 +729,7 @@ const styles = StyleSheet.create({
 })
 ```
 
-## Subscriber Example
+## Component Subscriber Example
 
 You will need to have a Red5 Pro SDK license and access to a reployed Red5 Pro Server in order to use the following example.
 
@@ -656,4 +850,6 @@ const styles = StyleSheet.create({
   }
 })
 ```
+
+> For more in-depth examples, please refer to the [examples](examples) included in this repository.
 

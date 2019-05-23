@@ -14,16 +14,17 @@
 #import <React/RCTComponent.h>
 #import <React/RCTBridgeModule.h>
 #import <R5Streaming/R5Streaming.h>
+#import "R5StreamInstance.h"
+#import "R5LayoutEventEmitter.h"
 
-@interface R5VideoView : RCTView<R5StreamDelegate>
+@interface R5VideoView : RCTView<R5LayoutEventEmitter>
 
 @property R5Stream *stream;
 @property R5Connection *connection;
 @property R5Configuration *configuration;
 @property R5VideoViewController *controller;
 
-- (void)loadConfiguration:(R5Configuration *)configuration forKey:(NSString *)key;
-- (void)onDeviceOrientation:(NSNotification *)notification;
+- (void)loadConfiguration:(R5Configuration *)configuration forKey:(NSString *)key andAttach:(BOOL)autoAttach;
 
 # pragma RN Events
 @property (nonatomic, copy) RCTBubblingEventBlock onConfigured;
@@ -70,6 +71,11 @@
 - (BOOL)getSubscribeVideo;
 - (void)setSubscribeVideo:(BOOL)value;
 @property (nonatomic, setter=setSubscribeVideo:, getter=getSubscribeVideo) BOOL subscribeVideo;
+
+- (void)setStreamInstance:(NSObject<R5StreamInstance> *)streamInstance;
+- (void)attach;
+- (void)detach;
+- (BOOL)getIsAttached;
 
 @end
 

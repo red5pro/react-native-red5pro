@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React from 'react'
 import {
   AppState,
@@ -115,7 +116,7 @@ export default class Subscriber extends React.Component {
     }
   }
 
-  componentWillMount () {
+  componentDidMount () {
     console.log('Subscriber:componentWillMount()')
     AppState.addEventListener('change', this._handleAppStateChange)
   }
@@ -255,7 +256,7 @@ export default class Subscriber extends React.Component {
     })
   }
 
-  onScaleMode (event) {
+  onScaleMode () {
     console.log('Subscriber:onScaleMode()')
     const {
       scaleMode

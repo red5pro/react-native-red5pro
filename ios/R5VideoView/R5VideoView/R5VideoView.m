@@ -7,17 +7,20 @@
 //
 
 #import "R5VideoView.h"
+#import "R5StreamPublisher.h"
+#import "R5StreamSubscriber.h"
 
 @interface R5VideoView() {
   
+    BOOL _attached;
+    NSObject<R5StreamInstance> *_streamInstance;
+    
     int _scaleMode;
     int _logLevel;
     int _audioMode;
     BOOL _showDebugInfo;
     NSString *_streamName;  // required.
   
-    BOOL _isStreaming;
-    BOOL _isPublisher;      // determined.
     BOOL _useVideo;
     BOOL _useAudio;
     BOOL _playbackVideo;
@@ -43,6 +46,8 @@
   
   if (self = [super init]) {
     
+      _attached = NO;
+      
       _scaleMode = 0;
       _logLevel = 3;
       _showDebugInfo = NO;
@@ -73,29 +78,23 @@
 - (void)onEnterForegroundActive:(NSNotification *)notification {
     [self bringToForeground];
 }
-//- (void)onDeviceOrientation:(NSNotification *)notification {
-//  if (r5View != nil) {
-//      [r5View onDeviceOrientation:notification];
-//  }
-//}
 
 - (void)addObservers {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onWillResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onEnterForegroundActive:) name:UIApplicationWillEnterForegroundNotification object:nil];
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onDeviceOrientation:) name:UIDeviceOrientationDidChangeNotification object:nil];
 }
 
 - (void)removeObservers {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillResignActiveNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillEnterForegroundNotification object:nil];
-//  [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
 }
 
-- (void)loadConfiguration:(R5Configuration *)configuration forKey:(NSString *)key {
+- (void)loadConfiguration:(R5Configuration *)configuration forKey:(NSString *)key andAttach:(BOOL)autoAttach {
   
     dispatch_async(dispatch_get_main_queue(), ^{
         
-        [self establishConnection:configuration];
+        _attached = autoAttach;
+        self.configuration = configuration;
         if (self.onConfigured) {
             self.onConfigured(@{@"key": key});
         }
@@ -104,147 +103,75 @@
   
 }
 
-- (void)establishConnection:(R5Configuration *)configuration {
-    R5Connection *connection = [[R5Connection alloc] initWithConfig:configuration];
-    R5Stream *stream = [[R5Stream alloc] initWithConnection:connection];
-    [stream setDelegate:self];
-    [stream setClient:self];
-    
-    self.stream = stream;
-    self.connection = connection;
-    self.configuration = configuration;
-}
-
-- (AVCaptureDevice *)getCameraDevice:(BOOL)backfacing {
-  
-  NSArray *list = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
-  AVCaptureDevice *frontCamera;
-  AVCaptureDevice *backCamera;
-  for (AVCaptureDevice *device in list) {
-    if (device.position == AVCaptureDevicePositionFront) {
-      frontCamera = device;
-    }
-    else if (device.position == AVCaptureDevicePositionBack) {
-      backCamera = device;
-    }
-  }
-  
-  if (backfacing && backCamera != NULL) {
-    return backCamera;
-  }
-  return frontCamera;
-  
+- (NSDictionary *)getSubscriberProps {
+    return @{
+             @"logLevel": @(_logLevel),
+             @"scaleMode": @(_scaleMode),
+             @"audioMode": @(_audioMode),
+             @"showDebugView": @(_showDebugInfo),
+             @"subscribeVideo": @(_playbackVideo),
+             @"enableBackgroundStreaming": @(_enableBackgroundStreaming)
+             };
 }
 
 - (void)subscribe:(NSString *)streamName {
   
     dispatch_async(dispatch_get_main_queue(), ^{
         
-        _isPublisher = NO;
-        _streamName = streamName;
+        if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamSubscriber.class]) {
+            [self.configuration setStreamName:streamName];
+            NSDictionary *props = [self getSubscriberProps];
+            [(R5StreamSubscriber *)_streamInstance subscribe:self.configuration andProps:props];
+            if (_attached) {
+                [self attach];
+            }
+        }
         
-        if (self.stream == nil) {
-            [self establishConnection:self.configuration];
-        }
- 
-        if (_playbackVideo) {
-            
-            R5VideoViewController *ctrl = [[R5VideoViewController alloc] init];
-            UIView *view = [[UIView alloc] initWithFrame:self.frame];
-            [ctrl setView:view];
-            [self addSubview:view];
-            
-            self.controller = ctrl;
-            
-            [self.controller showPreview:YES];
-            [self.controller attachStream:self.stream];
-                
-            UIViewController *rootVc = [UIApplication sharedApplication].delegate.window.rootViewController;
-            [self.controller setFrame:rootVc.view.frame];
-            [self.controller showDebugInfo:_showDebugInfo];
-            [self.controller setScaleMode:_scaleMode];
-            
-        }
-
-        [self.stream setAudioController:[[R5AudioController alloc] initWithMode:_audioMode]];
-  
-        [self.stream play:streamName];
     });
   
 }
 
 - (void)unsubscribe {
   
-  dispatch_async(dispatch_get_main_queue(), ^{
-    if (_isStreaming) {
-      [self.stream stop];
+    if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamSubscriber.class]) {
+        [(R5StreamSubscriber *)_streamInstance unsubscribe];
     }
-    else {
-      self.onUnsubscribeNotification(@{});
-      [self tearDown];
-    }
-  });
+    [self detach];
   
 }
 
-- (R5Camera *)setUpCamera {
-    AVCaptureDevice *video = [self getCameraDevice:_useBackfacingCamera];
-    R5Camera *camera = [[R5Camera alloc] initWithDevice:video andBitRate:_bitrate];
-    [camera setWidth:_cameraWidth];
-    [camera setHeight:_cameraHeight];
-    [camera setOrientation:90];
-    [camera setFps:_framerate];
-    return camera;
-}
-
-- (R5Microphone *)setUpMicrophone {
-    AVCaptureDevice *audio = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio];
-    R5Microphone *microphone = [[R5Microphone alloc] initWithDevice:audio];
-    microphone.bitrate = _audioBitrate;
-    microphone.sampleRate = _audioSampleRate;
-    return microphone;
+- (NSDictionary *)getPublisherProps {
+    return @{
+             @"logLevel": @(_logLevel),
+             @"scaleMode": @(_scaleMode),
+             @"audioMode": @(_audioMode),
+             @"showDebugView": @(_showDebugInfo),
+             @"publishVideo": @(_useVideo),
+             @"publishAudio": @(_useAudio),
+             @"bitrate": @(_bitrate),
+             @"framerate": @(_framerate),
+             @"audioBitrate": @(_audioBitrate),
+             @"audioSampleRate": @(_audioSampleRate),
+             @"cameraWidth": @(_cameraWidth),
+             @"cameraHeight": @(_cameraHeight),
+             @"useBackfacingCamera": @(_useBackfacingCamera),
+             @"enableBackgroundStreaming": @(_enableBackgroundStreaming),
+             @"useAdaptiveBitrateController": @(_useAdaptiveBitrateController)
+             };
 }
 
 - (void)publish:(NSString *)streamName withMode:(int)publishMode {
   
     dispatch_async(dispatch_get_main_queue(), ^{
         
-        _isPublisher = YES;
-        _streamName = streamName;
-        
-        if (self.stream == nil) {
-            [self establishConnection:self.configuration];
+        if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamPublisher.class]) {
+            [self.configuration setStreamName:streamName];
+            NSDictionary *props = [self getPublisherProps];
+            [(R5StreamPublisher *)_streamInstance publish:self.configuration withType:publishMode andProps:props];
+            if (_attached) {
+                [self attach];
+            }
         }
-        
-        if (_useAdaptiveBitrateController) {
-            R5AdaptiveBitrateController *abrController = [[R5AdaptiveBitrateController alloc] init];
-            [abrController attachToStream:self.stream];
-            [abrController setRequiresVideo:_useVideo];
-        }
-        
-        if (_useAudio) {
-            R5Microphone *microphone = [self setUpMicrophone];
-            [self.stream attachAudio:microphone];
-        }
-  
-        if (_useVideo) {
-            R5Camera *camera = [self setUpCamera];
-            
-            self.controller = [[R5VideoViewController alloc] init];
-            UIView *view = [[UIView alloc] initWithFrame:self.frame];
-            [self.controller setView:view];
-            [self addSubview:view];
-            
-            [self.controller showPreview:YES];
-            [self.controller showDebugInfo:_showDebugInfo];
-            
-            [self.controller attachStream:self.stream];
-            [self.stream attachVideo:camera];
-        }
-  
-        [self.stream publish:streamName type:publishMode];
-        [self onDeviceOrientation:NULL];
-        [self.stream updateStreamMeta];
         
     });
   
@@ -252,35 +179,36 @@
 
 - (void)unpublish {
 
-  dispatch_async(dispatch_get_main_queue(), ^{
-    if (_isStreaming) {
-      [self.stream stop];
-    }
-    else {
-      self.onUnpublishNotification(@{});
-      [self tearDown];
-    }
-  });
-  
-}
-
-- (void)swapCamera {
-  
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (_isPublisher) {
-            _useBackfacingCamera = !_useBackfacingCamera;
-            AVCaptureDevice *device = [self getCameraDevice:_useBackfacingCamera];
-            R5Camera *camera = (R5Camera *)[self.stream getVideoSource];
-            [camera setDevice:device];
+//    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamPublisher.class]) {
+            [(R5StreamPublisher *)_streamInstance unpublish];
+//            [_streamInstance setEmitter:nil];
         }
-    });
+//        [self setStreamInstance:nil];
+        [self detach];
+//    });
   
 }
 
 - (void)updateScaleMode:(int)mode {
     
-    [self setScaleMode:mode];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        _scaleMode = mode;
+        if (self.controller != nil) {
+            [self.controller setScaleMode:mode];
+        }
+    });
     
+}
+
+- (void)swapCamera {
+  
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamPublisher.class]) {
+            [(R5StreamPublisher *)_streamInstance swapCamera];
+        }
+    });
+  
 }
 
 - (void)updateScaleSize:(int)width withHeight:(int)height withScreenWidth:(int)screenWidth withScreenHeight:(int)screenHeight {
@@ -300,99 +228,63 @@
 
 - (void)muteAudio {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (_isPublisher && _isStreaming) {
-            [self.stream setPauseAudio:YES];
+        if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamPublisher.class]) {
+            [(R5StreamPublisher *)_streamInstance muteAudio];
         }
     });
 }
 - (void)unmuteAudio {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (_isPublisher && _isStreaming) {
-            [self.stream setPauseAudio:NO];
+        if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamPublisher.class]) {
+            [(R5StreamPublisher *)_streamInstance unmuteAudio];
         }
     });
 }
 - (void)muteVideo {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (_isPublisher && _isStreaming) {
-            _hasExplicitlyPausedVideo = YES;
-            [self.stream setPauseVideo:YES];
+        if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamPublisher.class]) {
+            [(R5StreamPublisher *)_streamInstance muteVideo];
         }
     });
 }
 - (void)unmuteVideo {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (_isPublisher && _isStreaming) {
-            _hasExplicitlyPausedVideo = NO;
-            [self.stream setPauseVideo:NO];
+        if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamPublisher.class]) {
+            [(R5StreamPublisher *)_streamInstance unmuteVideo];
         }
     });
 }
 
 - (void)setPlaybackVolume:(int)value {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (_isStreaming) {
-            [[self.stream audioController] setVolume:(value/100)] ;
+        if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamSubscriber.class]) {
+            [(R5StreamSubscriber *)_streamInstance setPlaybackVolume:value];
         }
     });
 }
 
 - (void)sendToBackground {
-    
-    if (!_enableBackgroundStreaming) {
-        if (_isPublisher) {
-            [self unpublish];
-        } else {
-            [self unsubscribe];
+
+    if (_enableBackgroundStreaming && self.controller != nil) {
+        if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamSubscriber.class]) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.controller pauseRender];
+            });
         }
-        return;
-    }
-    
-    if (_isStreaming && !_isPublisher && self.controller != nil) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.controller pauseRender];
-        });
-    } else if (_isStreaming && _isPublisher && self.stream != nil) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.stream setPauseVideo:YES];
-        });
     }
     
 }
 
 - (void)bringToForeground {
-    
-    if (!_enableBackgroundStreaming) {
-        return;
-    }
-    
-    if (_isStreaming && !_isPublisher && self.controller != nil) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.controller resumeRender];
-        });
-    } else if (_isStreaming && _isPublisher && self.stream != nil) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.stream setPauseVideo:_hasExplicitlyPausedVideo];
-        });
-    }
-    
-}
-
-- (void)tearDown {
-  
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (self.stream != nil) {
-            [self.stream setDelegate:nil];
-            [self.stream setClient:nil];
+   
+    if (_enableBackgroundStreaming && self.controller != nil) {
+        if (_streamInstance != nil && [_streamInstance isKindOfClass:R5StreamSubscriber.class]) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.controller resumeRender];
+            });
         }
-  
-        _streamName = nil;
-        _isStreaming = NO;
-        self.stream = nil;
-    });
-    _hasExplicitlyPausedVideo = NO;
-    [self removeObservers];
-
+    }
+    
 }
 
 - (void)updateOrientation:(int)value {
@@ -407,43 +299,6 @@
   
 }
 
-- (void)onDeviceOrientation:(NSNotification *)notification {
-  
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (_isPublisher) {
-            R5Camera *camera = (R5Camera *)[self.stream getVideoSource];
-            UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
-  
-            if (orientation == UIDeviceOrientationPortraitUpsideDown) {
-                [camera setOrientation: 270];
-            }
-            else if (orientation == UIDeviceOrientationLandscapeLeft) {
-                if (_useBackfacingCamera) {
-                    [camera setOrientation: 0];
-                }
-                else {
-                    [camera setOrientation: 180];
-                }
-            }
-            else if (orientation == UIDeviceOrientationLandscapeRight) {
-                if (_useBackfacingCamera) {
-                    [camera setOrientation: 180];
-                }
-                else {
-                    [camera setOrientation: 0];
-                }
-            }
-            else {
-                [camera setOrientation: 90];
-            }
-            [self.controller showPreview:YES];
-            [self.stream updateStreamMeta];
-    
-        }
-    });
-
-}
-
 - (void)layoutSubviews {
   
   [super layoutSubviews];
@@ -454,82 +309,14 @@
   
 }
 
-# pragma R5StreamDelegate
--(void)onR5StreamStatus:(R5Stream *)stream withStatus:(int) statusCode withMessage:(NSString*)msg {
-  
-  NSString *tmpStreamName = _streamName;
-  
-  if (statusCode == r5_status_start_streaming) {
-    _isStreaming = YES;
-  }
-  
-  dispatch_async(dispatch_get_main_queue(), ^{
-    
-    if (_isPublisher) {
-      self.onPublisherStreamStatus(@{
-                                     @"status": @{
-                                         @"code": @(statusCode),
-                                         @"message": msg,
-                                         @"name": @(r5_string_for_status(statusCode)),
-                                         @"streamName": tmpStreamName
-                                         }
-                                     });
-    }
-    else {
-      self.onSubscriberStreamStatus(@{
-                                      @"status": @{
-                                          @"code": @(statusCode),
-                                          @"message": msg,
-                                          @"name": @(r5_string_for_status(statusCode)),
-                                          @"streamName": tmpStreamName
-                                          }
-                                      });
-    }
-    
-    if (statusCode == r5_status_disconnected && _isStreaming) {
-      if (!_isPublisher) {
-        self.onUnsubscribeNotification(@{});
-      }
-      else if (_isPublisher) {
-        self.onUnpublishNotification(@{});
-      }
-      [self tearDown];
-      _isStreaming = NO;
-    }
-    
-  });
-  
-}
-
-# pragma R5Stream:client
-- (void)onMetaData:(NSString *)params {
-  
-  NSArray *paramListing = [params componentsSeparatedByString:@";"];
-  for (id param in paramListing) {
-    NSArray *keyValue = [(NSString *)param componentsSeparatedByString:@"="];
-    NSString *key = (NSString *)[keyValue objectAtIndex:0];
-    if ([key  isEqual: @"streamingMode"]) {
-      NSString *streamMode = (NSString *)[keyValue objectAtIndex:1];
-    }
-    else if ([key isEqual: @"orientation"]) {
-      [self updateOrientation:[[keyValue objectAtIndex:1] intValue]];
-    }
-  }
-  
-  dispatch_async(dispatch_get_main_queue(), ^{
-    self.onMetaDataEvent(@{@"metadata": params});
-  });
-  
-}
-
 - (int)getScaleMode {
-  return _scaleMode;
+    return _scaleMode;
 }
 - (void)setScaleMode:(int)mode {
-  _scaleMode = mode;
-  if (_playbackVideo) {
-    [self.controller setScaleMode:_scaleMode];
-  }
+    _scaleMode = mode;
+    if (self.controller != nil) {
+        [self.controller setScaleMode:_scaleMode];
+    }
 }
 
 - (BOOL)getShowDebugInfo {
@@ -639,6 +426,65 @@
 }
 - (void)setEnableBackgroundStreaming:(BOOL)value {
     _enableBackgroundStreaming = value;
+}
+
+- (void)setStreamInstance:(NSObject<R5StreamInstance> *)streamInstance {
+    
+//    if (_streamInstance != nil && streamInstance == nil) {
+//        [_streamInstance setEmitter:nil];
+//    }
+    _streamInstance = streamInstance;
+    if (_streamInstance != nil) {
+        [_streamInstance setEmitter:self];
+    }
+    
+}
+
+- (R5VideoViewController *)getOrCreateVideoView {
+    R5VideoViewController *ctrl = self.controller;
+    if (ctrl == nil) {
+        ctrl = [[R5VideoViewController alloc] init];
+        UIView *view = [[UIView alloc] initWithFrame:self.frame];
+        [ctrl setView:view];
+        [self addSubview:ctrl.view];
+    }
+    return ctrl;
+}
+
+- (void)attach {
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_streamInstance != nil) {
+            self.controller = [self getOrCreateVideoView];
+            [self.controller showDebugInfo:_showDebugInfo];
+            [self.controller setScaleMode:_scaleMode];
+            [_streamInstance setVideoView:self.controller];
+            _attached = YES;
+        }
+    });
+
+}
+
+- (void)detach {
+    
+    _attached = NO;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_streamInstance != nil) {
+            [_streamInstance removeVideoView:self.controller];
+            [self setStreamInstance:nil];
+        }
+        if (self.controller != nil) {
+            [self.controller.view removeFromSuperview];
+            [self.controller setView:nil];
+            [self.controller removeFromParentViewController];
+            self.controller = nil;
+        }
+    });
+    
+}
+
+- (BOOL)getIsAttached {
+    return _attached;
 }
 
 @end

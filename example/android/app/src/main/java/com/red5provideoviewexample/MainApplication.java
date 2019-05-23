@@ -26,14 +26,14 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-            new VectorIconsPackage(),
+              new VectorIconsPackage(),
           new R5Package()
       );
     }
 
     @Override
     protected String getJSMainModuleName() {
-      return "index.android";
+      return "index-modular.android";
     }
   };
 

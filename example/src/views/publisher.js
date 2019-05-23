@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React from 'react'
 import {
   AppState,
@@ -104,7 +105,7 @@ export default class Publisher extends React.Component {
     }
   }
 
-  componentWillMount () {
+  componentDidMount () {
     console.log('Publisher:componentWillMount()')
     AppState.addEventListener('change', this._handleAppStateChange)
   }
@@ -246,7 +247,7 @@ export default class Publisher extends React.Component {
     })
   }
 
-  onSwapCamera (event) {
+  onSwapCamera () {
     console.log('Publisher:onSwapCamera()')
     swapCamera(findNodeHandle(this.red5pro_video_publisher))
   }
