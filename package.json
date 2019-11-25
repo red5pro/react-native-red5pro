@@ -37,7 +37,7 @@
       "email": "kkellogg@infrared5.com"
     }
   ],
-  "license": "Apache-2.0",
+  "license": "LICENSE",
   "bugs": {
     "url": "https://github.com/infrared5/react-native-red5pro/issues"
   },
