@@ -93,6 +93,7 @@ export default class Subscriber extends React.Component {
 
     this.state = {
       appState: AppState.currentState,
+      edgeAddress: undefined,
       scaleMode: R5ScaleMode.SCALE_TO_FILL,
       audioMuted: false,
       isInErrorState: false,
@@ -118,6 +119,38 @@ export default class Subscriber extends React.Component {
   componentWillMount () {
     console.log('Subscriber:componentWillMount()')
     AppState.addEventListener('change', this._handleAppStateChange)
+    const {
+      edgeAddress
+    } = this.state
+    const {
+      streamProps
+    } = this.props
+    const config = streamProps.configuration
+    if (!edgeAddress) {
+      const url = `https://${config.host}/streammanager/api/3.1/event/${config.contextName}/${config.streamName}?action=subscribe`
+      fetch(url)
+        .then(response => {
+          if (response.headers.get("content-type") &&
+              response.headers.get("content-type").toLowerCase().indexOf("application/json") >= 0) {
+                return response.json();
+            }
+            else {
+              // handle error
+            }
+        })
+        .then(data => {
+          if (data.errorMessage) {
+            // handle error
+          } else {
+            this.setState({
+              edgeAddress: data.serverAddress
+            })
+          }
+        })
+        .catch(error => {
+          // handle error
+        })
+    }
   }
 
   componentWillUnmount () {
@@ -150,7 +183,8 @@ export default class Subscriber extends React.Component {
       toastProps,
       buttonProps,
       audioMuted,
-      isDisconnected
+      isDisconnected,
+      edgeAddress
     } = this.state
 
     const {
@@ -168,6 +202,15 @@ export default class Subscriber extends React.Component {
     const assignVideoRef = (video) => { this.red5pro_video_subscriber = video }
     const assignToastRef = (toast) => { this.toast_field = toast }
 
+    if (!edgeAddress) {
+      return (
+        <View style={styles.container}>
+          <Text>Loading...</Text>
+        </View>
+      )
+    } else {
+      setup.configuration.host = edgeAddress
+    }
     return (
       <View style={styles.container}>
         <R5VideoView

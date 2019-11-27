@@ -82,8 +82,13 @@ export default class Publisher extends React.Component {
     this.onToggleAudioMute = this.onToggleAudioMute.bind(this)
     this.onToggleVideoMute = this.onToggleVideoMute.bind(this)
 
+    const {
+      streamProps
+    } = this.props
+
     this.state = {
       appState: AppState.currentState,
+      originAddress: undefined,
       audioMuted: false,
       isInErrorState: false,
       videoMuted: false,
@@ -107,6 +112,38 @@ export default class Publisher extends React.Component {
   componentWillMount () {
     console.log('Publisher:componentWillMount()')
     AppState.addEventListener('change', this._handleAppStateChange)
+    const {
+      originAddress
+    } = this.state
+    const {
+      streamProps
+    } = this.props
+    const config = streamProps.configuration
+    if (!originAddress) {
+      const url = `https://${config.host}/streammanager/api/3.1/event/${config.contextName}/${config.streamName}?action=broadcast`
+      fetch(url)
+        .then(response => {
+          if (response.headers.get("content-type") &&
+              response.headers.get("content-type").toLowerCase().indexOf("application/json") >= 0) {
+                return response.json();
+            }
+            else {
+              // handle error
+            }
+        })
+        .then(data => {
+          if (data.errorMessage) {
+            // handle error
+          } else {
+            this.setState({
+              origin: data.serverAddress
+            })
+          }
+        })
+        .catch(error => {
+          // handle error
+        })
+    }
   }
 
   componentWillUnmount () {
@@ -149,7 +186,8 @@ export default class Publisher extends React.Component {
       toastProps,
       buttonProps,
       audioMuted,
-      videoMuted
+      videoMuted,
+      originAddress
     } = this.state
 
     const {
@@ -166,6 +204,15 @@ export default class Publisher extends React.Component {
 
     const assignVideoRef = (video) => { this.red5pro_video_publisher = video }
     const assignToastRef = (toast) => { this.toast_field = toast }
+    if (!originAddress) {
+      return (
+        <View style={styles.container}>
+          <Text>Loading...</Text>
+        </View>
+      )
+    } else {
+      setup.configuration.host = originAddress
+    }
     return (
       <View style={styles.container}>
         <R5VideoView
