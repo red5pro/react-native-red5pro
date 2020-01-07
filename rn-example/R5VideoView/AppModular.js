@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React from 'react'
 import {
   Button,
@@ -9,13 +10,13 @@ import {
 import {
   CheckBox
 } from 'react-native-elements'
-import { check, PERMISSIONS } from 'react-native-permissions'
+import Permissions from 'react-native-permissions'
 import { 
-  R5LogLevel,
+  R5LogLevel
 } from 'react-native-red5pro'
 
-import Publisher from './src/views/publisher'
-import Subscriber from './src/views/subscriber'
+import Publisher from './src/views/publisher-modular'
+import Subscriber from './src/views/subscriber-modular'
 
 export default class App extends React.Component {
   constructor (props) {
@@ -85,16 +86,17 @@ export default class App extends React.Component {
       streamProps: {
         collapsable: false,
         configuration: {
-          host: '',
-          licenseKey: '',
-          streamName: '',
+          host: 'ipv6west.red5.org',
+          licenseKey: 'ACGE-4UMR-UHM4-RVJR',
+          streamName: 'stream1',
           port: 8554,
           contextName: 'live',
           bufferTime: 0.5,
           streamBufferTime: 2.0,
           bundleID: 'com.red5pro.reactnative',
           parameters: '',
-          key: Math.floor(Math.random() * 0x10000).toString(16)
+          key: Math.floor(Math.random() * 0x10000).toString(16),
+          autoAttachView: false
         },
         subscribeVideo: true,
         showDebugView: true,
@@ -107,9 +109,7 @@ export default class App extends React.Component {
   }
 
   componentDidMount () {
-    Promise.all(
-        check(PERMISSIONS.IOS.CAMERA),
-        check(PERMISSIONS.IOS.MICROPHONE))
+    Permissions.checkMultiple(['camera', 'microphone'])
       .then((response) => {
         const isAuthorized = /authorized/
         const hasCamera = isAuthorized.test(response.camera)
@@ -279,7 +279,7 @@ export default class App extends React.Component {
     }
   }
 
-  onSubscribe (event) {
+  onSubscribe () {
     const stateUpdate = this.getStateFromProps()
     this.setState({
       ...stateUpdate,
@@ -288,7 +288,7 @@ export default class App extends React.Component {
     })
   }
 
-  onPublish (event) {
+  onPublish () {
     const stateUpdate = this.getStateFromProps()
     this.setState({
       ...stateUpdate,
@@ -353,7 +353,7 @@ export default class App extends React.Component {
     })
   }
 
-  onStop (event) {
+  onStop () {
     console.log('App:onStop()')
     this.setState({
       hasStarted: false,
