@@ -9,7 +9,11 @@ import {
 import {
   CheckBox
 } from 'react-native-elements'
-import { check, PERMISSIONS } from 'react-native-permissions'
+import { 
+  check, 
+  request, 
+  PERMISSIONS 
+} from 'react-native-permissions'
 import { 
   R5LogLevel,
 } from 'react-native-red5pro'
@@ -111,16 +115,18 @@ export default class App extends React.Component {
         check(PERMISSIONS.IOS.CAMERA),
         check(PERMISSIONS.IOS.MICROPHONE))
       .then((response) => {
-        const isAuthorized = /authorized/
+        const isAuthorized = /granted/
         const hasCamera = isAuthorized.test(response.camera)
         const hasMic = isAuthorized.test(response.microphone)
 
         if (!hasCamera || !hasMic) {
+          console.log('NO PERMISSIONS')
           this.requestPermissions()
           this.setState({
             hasPermissions: false
           })
         } else {
+          console.log('HAS PERMISSIONS!')
           this.setState({
             hasPermissions: true
           })
@@ -235,18 +241,20 @@ export default class App extends React.Component {
   }
 
   requestPermissions () {
-    const isAuthorized = /authorized/
+    const isAuthorized = /granted/
     let camPermission = false
     let micPermission = false
 
-    Permissions.request('camera')
+    request(PERMISSIONS.IOS.CAMERA)
       .then((camResponse) => {
         camPermission = isAuthorized.test(camResponse)
-
-        Permissions.request('microphone')
+        console.log('GOT CAMERA')
+        request(PERMISSIONS.IOS.MICROPHONE)
           .then((micResponse) => {
+            console.log('GOT MIC')
             micPermission = isAuthorized.test(micResponse)
 
+            console.log('AUTH? ' + camResponse + ', ' + micResponse)
             this.setState({
               hasPermissions: camPermission && micPermission
             })
