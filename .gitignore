@@ -32,3 +32,8 @@ build
 #
 node_modules
 npm-debug.log
+
+# project
+example/Red5ProVideoViewExample/ios/Red5ProVideoViewExample/Frameworks
+rn-example
+example-old
