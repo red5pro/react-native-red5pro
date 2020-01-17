@@ -14,7 +14,8 @@ import {
 import { 
   check, 
   request, 
-  PERMISSIONS 
+  PERMISSIONS,
+  RESULTS
 } from 'react-native-permissions'
 import { 
   R5LogLevel
@@ -124,9 +125,8 @@ export default class App extends React.Component {
           ios: PERMISSIONS.IOS.MICROPHONE,
         })))
       .then((response) => {
-        const isAuthorized = /authorized/
-        const hasCamera = isAuthorized.test(response.camera)
-        const hasMic = isAuthorized.test(response.microphone)
+        const hasCamera = response.camera === RESULTS.GRANTED
+        const hasMic = response.microphone === RESULTS.GRANTED
 
         if (!hasCamera || !hasMic) {
           this.requestPermissions()
@@ -248,7 +248,6 @@ export default class App extends React.Component {
   }
 
   requestPermissions () {
-    const isAuthorized = /authorized/
     let camPermission = false
     let micPermission = false
 
@@ -257,14 +256,14 @@ export default class App extends React.Component {
         ios: PERMISSIONS.IOS.CAMERA,
       }))
       .then((camResponse) => {
-        camPermission = isAuthorized.test(camResponse)
+        camPermission = camResponse === RESULTS.GRANTED
 
         request(Platform.select({
             android: PERMISSIONS.ANDROID.RECORD_AUDIO,
             ios: PERMISSIONS.IOS.MICROPHONE,
           }))
           .then((micResponse) => {
-            micPermission = isAuthorized.test(micResponse)
+            micPermission = micResponse === RESULTS.GRANTED 
 
             this.setState({
               hasPermissions: camPermission && micPermission
