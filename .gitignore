@@ -35,5 +35,7 @@ npm-debug.log
 
 # project
 example/Red5ProVideoViewExample/ios/Red5ProVideoViewExample/Frameworks
+example/Red5ProVideoViewExample/android/app/libs
+example/Red5ProVideoViewExample/android/app/src/main/jniLibs
 rn-example
 example-old

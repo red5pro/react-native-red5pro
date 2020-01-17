@@ -2,6 +2,7 @@
 import React from 'react'
 import {
   Button,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -10,7 +11,11 @@ import {
 import {
   CheckBox
 } from 'react-native-elements'
-import Permissions from 'react-native-permissions'
+import { 
+  check, 
+  request, 
+  PERMISSIONS 
+} from 'react-native-permissions'
 import { 
   R5LogLevel
 } from 'react-native-red5pro'
@@ -109,7 +114,15 @@ export default class App extends React.Component {
   }
 
   componentDidMount () {
-    Permissions.checkMultiple(['camera', 'microphone'])
+    Promise.all(
+        check(Platform.select({
+          android: PERMISSIONS.ANDROID.CAMERA,
+          ios: PERMISSIONS.IOS.CAMERA,
+        })),
+        check(Platform.select({
+          android: PERMISSIONS.ANDROID.RECORD_AUDIO,
+          ios: PERMISSIONS.IOS.MICROPHONE,
+        })))
       .then((response) => {
         const isAuthorized = /authorized/
         const hasCamera = isAuthorized.test(response.camera)
@@ -239,11 +252,17 @@ export default class App extends React.Component {
     let camPermission = false
     let micPermission = false
 
-    Permissions.request('camera')
+    request(Platform.select({
+        android: PERMISSIONS.ANDROID.CAMERA,
+        ios: PERMISSIONS.IOS.CAMERA,
+      }))
       .then((camResponse) => {
         camPermission = isAuthorized.test(camResponse)
 
-        Permissions.request('microphone')
+        request(Platform.select({
+            android: PERMISSIONS.ANDROID.RECORD_AUDIO,
+            ios: PERMISSIONS.IOS.MICROPHONE,
+          }))
           .then((micResponse) => {
             micPermission = isAuthorized.test(micResponse)
 

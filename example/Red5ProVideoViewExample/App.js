@@ -1,6 +1,7 @@
 import React from 'react'
 import {
   Button,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -112,8 +113,14 @@ export default class App extends React.Component {
 
   componentDidMount () {
     Promise.all(
-        check(PERMISSIONS.IOS.CAMERA),
-        check(PERMISSIONS.IOS.MICROPHONE))
+        check(Platform.select({
+          android: PERMISSIONS.ANDROID.CAMERA,
+          ios: PERMISSIONS.IOS.CAMERA,
+        })),
+        check(Platform.select({
+          android: PERMISSIONS.ANDROID.RECORD_AUDIO,
+          ios: PERMISSIONS.IOS.MICROPHONE,
+        })))
       .then((response) => {
         const isAuthorized = /granted/
         const hasCamera = isAuthorized.test(response.camera)
@@ -243,10 +250,16 @@ export default class App extends React.Component {
     let camPermission = false
     let micPermission = false
 
-    request(PERMISSIONS.IOS.CAMERA)
+    request(Platform.select({
+        android: PERMISSIONS.ANDROID.CAMERA,
+        ios: PERMISSIONS.IOS.CAMERA,
+      }))
       .then((camResponse) => {
         camPermission = isAuthorized.test(camResponse)
-        request(PERMISSIONS.IOS.MICROPHONE)
+        request(Platform.select({
+            android: PERMISSIONS.ANDROID.RECORD_AUDIO,
+            ios: PERMISSIONS.IOS.MICROPHONE,
+          }))
           .then((micResponse) => {
             micPermission = isAuthorized.test(micResponse)
 

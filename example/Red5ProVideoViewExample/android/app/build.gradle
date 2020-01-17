@@ -179,8 +179,12 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation fileTree(dir: "libs", include: ["*.jar"], excludes: ["red5streaming.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
+
+    implementation project(':react-native-permissions')
+    implementation project(':react-native-vector-icons')
+    implementation project(':react-native-red5pro')
 
     if (enableHermes) {
         def hermesPath = "../../node_modules/hermes-engine/android/";
