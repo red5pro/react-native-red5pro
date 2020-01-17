@@ -86,9 +86,9 @@ export default class App extends React.Component {
       streamProps: {
         collapsable: false,
         configuration: {
-          host: 'ipv6west.red5.org',
-          licenseKey: 'ACGE-4UMR-UHM4-RVJR',
-          streamName: 'stream1',
+          host: '',
+          licenseKey: '',
+          streamName: '',
           port: 8554,
           contextName: 'live',
           bufferTime: 0.5,
