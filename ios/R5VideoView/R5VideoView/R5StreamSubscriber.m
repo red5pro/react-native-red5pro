@@ -23,6 +23,7 @@
     BOOL _showDebugInfo;
     BOOL _playbackVideo;
     BOOL _enableBackgroundStreaming;
+    BOOL _hardwareAccelerated;
     NSString *_streamName;  // required.
     
 }
@@ -68,6 +69,7 @@
     _logLevel = 3;
     _showDebugInfo = NO;
     _playbackVideo = YES;
+    _hardwareAccelerated = YES;
     _enableBackgroundStreaming = NO;
     
     if (props == nil) {
@@ -79,6 +81,7 @@
     _audioMode = [props objectForKey:@"audioMode"] != nil ? [[props objectForKey:@"audioMode"] intValue] : _audioMode;
     _showDebugInfo = [props objectForKey:@"showDebugView"] != nil ? [[props objectForKey:@"showDebugView"] boolValue] : _showDebugInfo;
     _playbackVideo = [props objectForKey:@"subscribeVideo"] != nil ? [[props objectForKey:@"subscribeVideo"] boolValue] : _playbackVideo;
+    _hardwareAccelerated = [props objectForKey:@"hardwareAccelerated"] != nil ? [[props objectForKey:@"hardwareAccelerated"] boolValue] : _hardwareAccelerated;
     _enableBackgroundStreaming = [props objectForKey:@"enableBackgroundStreaming"] != nil ? [[props objectForKey:@"enableBackgroundStreaming"] boolValue] : _enableBackgroundStreaming;
     
 }
@@ -126,8 +129,8 @@
             [self establishConnection:configuration];
         }
         
-        [self.stream setAudioController:[[R5AudioController alloc] initWithMode:_audioMode]];
-        [self.stream play:_streamName];
+        [self.stream setAudioController:[[R5AudioController alloc] initWithMode:self->_audioMode]];
+        [self.stream play:self->_streamName withHardwareAcceleration:self->_hardwareAccelerated];
         
     });
     
@@ -149,7 +152,7 @@
 
 - (void)setPlaybackVolume:(int)value {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (_isStreaming) {
+        if (self->_isStreaming) {
             [[self.stream audioController] setVolume:(value/100)] ;
         }
     });
@@ -253,9 +256,9 @@
                                  };
         [self emitEvent:@"onSubscriberStreamStatus" withBody:@{@"status": status}] ;
         
-        if (statusCode == r5_status_disconnected && _isStreaming) {
+        if (statusCode == r5_status_disconnected && self->_isStreaming) {
             [self emitEvent:@"onUnsubscribeNotification" withBody:@{}];
-            _isStreaming = NO;
+            self->_isStreaming = NO;
         }
         else if (statusCode == r5_status_connection_close) {
             [self tearDown];

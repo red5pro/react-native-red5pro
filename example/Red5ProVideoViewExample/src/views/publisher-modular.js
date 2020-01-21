@@ -294,7 +294,8 @@ export default class Publisher extends React.Component {
   }
 
   onMetaData (event) {
-    console.log(`Publisher:onMetadata :: ${event.nativeEvent.metadata}`)
+    const metadata = event.hasOwnProperty('nativeEvent') ? event.nativeEvent.metadata : event.metadata
+    console.log(`Publisher:onMetadata :: ${metadata}`)  
   }
 
   onConfigured (event) {

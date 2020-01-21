@@ -309,7 +309,7 @@ RCT_CUSTOM_VIEW_PROPERTY(showDebugView, BOOL, R5VideoView) {
 RCT_CUSTOM_VIEW_PROPERTY(configuration, R5Configuration, R5VideoView) {
   
     R5Configuration *configuration = [[R5Configuration alloc] init];
-    configuration.protocol = 1;
+    configuration.protocol = r5_rtsp;
     configuration.host = json[@"host"];
     configuration.port = [json[@"port"] intValue];
     configuration.contextName = json[@"contextName"];

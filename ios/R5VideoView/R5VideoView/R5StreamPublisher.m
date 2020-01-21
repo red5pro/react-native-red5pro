@@ -34,6 +34,7 @@
     int _audioSampleRate;
     BOOL _useAdaptiveBitrateController;
     BOOL _useBackfacingCamera;
+    BOOL _useEncryption;
     BOOL _enableBackgroundStreaming;
     
 }
@@ -98,6 +99,7 @@
     _cameraHeight = 360;
     _audioSampleRate = 16000;
     _useBackfacingCamera = NO;
+    _useEncryption = NO;
     _enableBackgroundStreaming = NO;
     _useAdaptiveBitrateController = NO;
     _audioMode = R5AudioControllerModeStandardIO;
@@ -119,6 +121,7 @@
     _audioBitrate = [props objectForKey:@"audioBitrate"] != nil ? [[props objectForKey:@"audioBitrate"] intValue] : _audioBitrate;
     _audioSampleRate = [props objectForKey:@"audioSampleRate"] != nil ? [[props objectForKey:@"audioSampleRate"] intValue] : _audioSampleRate;
     _useBackfacingCamera = [props objectForKey:@"useBackfacingCamera"] != nil ? [[props objectForKey:@"useBackfacingCamera"] boolValue] : _useBackfacingCamera;
+    _useEncryption = [props objectForKey:@"useEncryption"] != nil ? [[props objectForKey:@"useEncryption"] boolValue] : _useEncryption;
     _enableBackgroundStreaming = [props objectForKey:@"enableBackgroundStreaming"] != nil ? [[props objectForKey:@"enableBackgroundStreaming"] boolValue] : _enableBackgroundStreaming;
     _useAdaptiveBitrateController = [props objectForKey:@"useAdaptiveBitrateController"] != nil ? [[props objectForKey:@"useAdaptiveBitrateController"] boolValue] : _useAdaptiveBitrateController;
 }
@@ -213,23 +216,23 @@
             [self establishConnection:configuration];
         }
         
-        if (_useAdaptiveBitrateController) {
+        if (self->_useAdaptiveBitrateController) {
             R5AdaptiveBitrateController *abrController = [[R5AdaptiveBitrateController alloc] init];
             [abrController attachToStream:self.stream];
-            [abrController setRequiresVideo:_useVideo];
+            [abrController setRequiresVideo:self->_useVideo];
         }
         
-        if (_useAudio) {
+        if (self->_useAudio) {
             R5Microphone *microphone = [self setUpMicrophone];
             [self.stream attachAudio:microphone];
         }
         
-        if (_useVideo) {
+        if (self->_useVideo) {
             R5Camera *camera = [self setUpCamera];
             [self.stream attachVideo:camera];
         }
         
-        [self.stream publish:[self.configuration streamName] type:_recordType];
+        [self.stream publish:[self.configuration streamName] type:self->_recordType];
         [self onDeviceOrientation:NULL];
         [self.stream updateStreamMeta];
         
@@ -252,8 +255,8 @@
 - (void)swapCamera {
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        _useBackfacingCamera = !_useBackfacingCamera;
-        AVCaptureDevice *device = [self getCameraDevice:_useBackfacingCamera];
+        self->_useBackfacingCamera = !self->_useBackfacingCamera;
+        AVCaptureDevice *device = [self getCameraDevice:self->_useBackfacingCamera];
         R5Camera *camera = (R5Camera *)[self.stream getVideoSource];
         [camera setDevice:device];
     });
@@ -263,7 +266,7 @@
 - (void)muteAudio {
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (_isStreaming) {
+        if (self->_isStreaming) {
             [self.stream setPauseAudio:YES];
         }
     });
@@ -273,7 +276,7 @@
 - (void)unmuteAudio {
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (_isStreaming) {
+        if (self->_isStreaming) {
             [self.stream setPauseAudio:NO];
         }
     });
@@ -283,8 +286,8 @@
 - (void)muteVideo {
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (_isStreaming) {
-            _hasExplicitlyPausedVideo = YES;
+        if (self->_isStreaming) {
+            self->_hasExplicitlyPausedVideo = YES;
             [self.stream setPauseVideo:YES];
         }
     });
@@ -294,8 +297,8 @@
 - (void)unmuteVideo {
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (_isStreaming) {
-            _hasExplicitlyPausedVideo = NO;
+        if (self->_isStreaming) {
+            self->_hasExplicitlyPausedVideo = NO;
             [self.stream setPauseVideo:NO];
         }
     });
@@ -313,7 +316,7 @@
             [camera setOrientation: 270];
         }
         else if (orientation == UIDeviceOrientationLandscapeLeft) {
-            if (_useBackfacingCamera) {
+            if (self->_useBackfacingCamera) {
                 [camera setOrientation: 0];
             }
             else {
@@ -321,7 +324,7 @@
             }
         }
         else if (orientation == UIDeviceOrientationLandscapeRight) {
-            if (_useBackfacingCamera) {
+            if (self->_useBackfacingCamera) {
                 [camera setOrientation: 180];
             }
             else {
@@ -374,7 +377,7 @@
     
     if (_isStreaming && self.stream != nil) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self.stream setPauseVideo:_hasExplicitlyPausedVideo];
+            [self.stream setPauseVideo:self->_hasExplicitlyPausedVideo];
         });
     }
     
@@ -460,10 +463,10 @@
         
         [self emitEvent:@"onPublisherStreamStatus" withBody:@{@"status": status}] ;
         
-        if (statusCode == r5_status_disconnected && _isStreaming) {
+        if (statusCode == r5_status_disconnected && self->_isStreaming) {
             [self emitEvent:@"onUnpublishNotification" withBody:@{}];
             [self tearDown];
-            _isStreaming = NO;
+            self->_isStreaming = NO;
         }
     });
     
