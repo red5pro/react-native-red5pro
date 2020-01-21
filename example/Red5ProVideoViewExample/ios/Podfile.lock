@@ -339,7 +339,7 @@ SPEC CHECKSUMS:
   glog: 1f3da668190260b06b429bb211bfbee5cd790c28
   Permission-Camera: b0fec577b27488314a885f9c74433e02f3585b9b
   Permission-Microphone: c46ef776bd65d251d3bcb544bedaf7160c1afe06
-  R5VideoView: 732da0d4b5fac6bcb505d0427efcbcbdcd28cfcc
+  R5VideoView: 0304a56fe2c083deead6dbf2abdc145fdb946283
   RCTRequired: b153add4da6e7dbc44aebf93f3cf4fcae392ddf1
   RCTTypeSafety: 9aa1b91d7f9310fc6eadc3cf95126ffe818af320
   React: b6a59ef847b2b40bb6e0180a97d0ca716969ac78
