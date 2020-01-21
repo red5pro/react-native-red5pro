@@ -10,6 +10,7 @@
 
 React Native Red5 Pro Publisher & Subscriber.
 
+* [Version Support](#support)
 * [Install](#install)
   * [iOS](#ios)
   * [Android](#android)
@@ -34,6 +35,13 @@ React Native Red5 Pro Publisher & Subscriber.
 
 > You will need a Red5 Pro SDK License and a Red5 Pro Server in order to use this component.  
 [Sign up for a free trial!](https://account.red5pro.com/register)
+
+# Version Support
+
+This repo and the [examples](examples) have been built and tested against the following:
+
+* React Native `v0.61.5`
+* Red5 Pro Mobile SDKs `v6.0.0`
 
 # Install
 
