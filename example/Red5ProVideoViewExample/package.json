@@ -23,7 +23,7 @@
     "metro-react-native-babel-preset": "^0.56.0",
     "react-native-elements": "^1.2.7",
     "react-native-permissions": "^2.0.9",
-    "react-native-red5pro": "https://github.com/infrared5/react-native-red5pro/archive/v4.0.0-RC.tar.gz",
+    "react-native-red5pro": "https://github.com/infrared5/react-native-red5pro/archive/v6.0.0-RC.tar.gz",
     "react-native-vector-icons": "^6.6.0",
     "react-test-renderer": "16.9.0"
   },
