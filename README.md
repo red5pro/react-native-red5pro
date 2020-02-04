@@ -827,5 +827,5 @@ const styles = StyleSheet.create({
 })
 ```
 
-> For more in-depth examples, please refer to the [examples](examples) included in this repository.
+> For more in-depth examples, please refer to the [example](example) included in this repository.
 
