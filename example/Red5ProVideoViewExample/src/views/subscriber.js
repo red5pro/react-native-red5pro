@@ -5,6 +5,7 @@ import {
   findNodeHandle,
   Button,
   Image,
+  StatusBar,
   StyleSheet,
   Text,
   View
@@ -60,7 +61,7 @@ const styles = StyleSheet.create({
   },
   muteIcon: {
     position: 'absolute',
-    top: 10,
+    top: 30,
     right: 10,
     padding: 6,
     paddingLeft: 10,

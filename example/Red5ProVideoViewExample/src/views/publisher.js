@@ -4,8 +4,10 @@ import {
   AppState,
   findNodeHandle,
   Button,
+  SafeAreaView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View
 } from 'react-native'
 import { Icon } from 'react-native-elements'
@@ -24,32 +26,59 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     justifyContent: 'center'
   },
-  videoView: {
+  subcontainer: {
     flex: 1,
-    flexDirection: 'row',
-    backgroundColor: 'black'
   },
-  button: {
+  videoView: {
     position: 'absolute',
+    backgroundColor: 'black',
+    top: 0,
+    right: 0,
+    bottom: 140,
+    left: 0
+  },
+  iconContainer: {
+    position: 'absolute',
+    top: 12,
+    right: 0,
+    alignItems: 'flex-start',
+    backgroundColor: 'transparent',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  buttonContainer: {
+    position: 'absolute',
+    backgroundColor: 'black',
+    bottom: 0,
     left: 0,
     right: 0,
-    bottom: 0,
-    height: 40,
-    backgroundColor: 'blue',
-    color: 'white'
+    flex: 1,
+    flexDirection: 'column',
+    height: 140
+  },
+  button: {
+    backgroundColor: '#2089dc',
+    height: 46,
+    marginTop: 2,
+    alignContent: 'center'
+  },
+  buttonLabel: {
+    color: 'white',
+    fontSize: 20,
+    padding: 8,
+    textAlign: 'center'
   },
   toast: {
+    flex: 1,
     color: 'white',
     left: 0,
     right: 0,
     bottom: 0,
-    padding: 10,
+    padding: 14,
     textAlign: 'center',
     backgroundColor: 'rgba(0, 0, 0, 1.0)'
   },
   muteIcon: {
-    position: 'absolute',
-    top: 10,
     padding: 6,
     borderRadius: 40,
     backgroundColor: 'white'
@@ -58,7 +87,7 @@ const styles = StyleSheet.create({
     right: 10
   },
   muteIconRight: {
-    right: 70
+    right: 30
   },
   muteIconToggled: {
     backgroundColor: '#2089dc'
@@ -170,45 +199,49 @@ export default class Publisher extends React.Component {
     const assignVideoRef = (video) => { this.red5pro_video_publisher = video }
     const assignToastRef = (toast) => { this.toast_field = toast }
     return (
-      <View style={styles.container}>
-        <R5VideoView
-          {...setup}
-          ref={assignVideoRef.bind(this)}
-        />
-        <Icon
-          name={audioMuted ? 'mic-off' : 'mic'}
-          type='feathericon'
-          size={36}
-          color={audioIconColor}
-          hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
-          onPress={this.onToggleAudioMute}
-          containerStyle={audioIconStyle}
-        />
-        <Icon
-          name={videoMuted ? 'videocam-off' : 'videocam'}
-          type='feathericon'
-          size={36}
-          color={videoIconColor}
-          hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
-          onPress={this.onToggleVideoMute}
-          containerStyle={videoIconStyle}
-        />
-        <Text
-          ref={assignToastRef.bind(this)}
-          {...toastProps}>{toastProps.value}</Text>
-        <Button
-          {...buttonProps}
-          onPress={onStop}
-          title='Stop'
-          accessibilityLabel='Stop'
-        />
-        <Button
-          {...this.state.buttonProps}
-          onPress={this.onSwapCamera}
-          title='Swap Camera'
-          accessibilityLabel='Swap Camera'
-        />
-      </View>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.subcontainer}>
+          <R5VideoView
+            {...setup}
+            ref={assignVideoRef.bind(this)}
+          />
+          <View style={styles.iconContainer}>
+            <Icon
+              name={audioMuted ? 'mic-off' : 'mic'}
+              type='feathericon'
+              size={36}
+              color={audioIconColor}
+              hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
+              onPress={this.onToggleAudioMute}
+              containerStyle={audioIconStyle}
+            />
+            <Icon
+              name={videoMuted ? 'videocam-off' : 'videocam'}
+              type='feathericon'
+              size={36}
+              color={videoIconColor}
+              hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
+              onPress={this.onToggleVideoMute}
+              containerStyle={videoIconStyle}
+            />
+          </View>
+          <View style={styles.buttonContainer}>
+            <Text
+              ref={assignToastRef.bind(this)}
+              {...toastProps}>{toastProps.value}</Text>
+            <TouchableOpacity {...buttonProps}
+              onPress={onStop}
+              accessibilityLabel='Stop'>
+              <Text style={styles.buttonLabel}>Stop</Text>
+            </TouchableOpacity>
+            <TouchableOpacity {...buttonProps}
+              onPress={this.onSwapCamera}
+              accessibilityLabel='Swap Camera'>
+              <Text style={styles.buttonLabel}>Swap Camera</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </SafeAreaView>
     )
   }
 
