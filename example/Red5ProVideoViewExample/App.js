@@ -51,7 +51,7 @@ export default class App extends React.Component {
         placeholder: 'Host',
         autoCorrect: false,
         underlineColorAndroid: '#00000000',
-        clearTextOnFocus: true,
+        clearTextOnFocus: false,
         style: styles.inputField,
         value: ''
       },
@@ -59,7 +59,7 @@ export default class App extends React.Component {
         placeholder: 'License Key',
         autoCorrect: false,
         underlineColorAndroid: '#00000000',
-        clearTextOnFocus: true,
+        clearTextOnFocus: false,
         style: styles.inputField,
         value: ''
       },
@@ -67,7 +67,7 @@ export default class App extends React.Component {
         placeholder: 'Stream Name',
         autoCorrect: false,
         underlineColorAndroid: '#00000000',
-        clearTextOnFocus: true,
+        clearTextOnFocus: false,
         style: styles.inputField,
         value: ''
       },
