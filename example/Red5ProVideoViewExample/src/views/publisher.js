@@ -129,6 +129,7 @@ export default class Publisher extends React.Component {
   _handleAppStateChange = (nextAppState) => {
     console.log(`Publisher:AppState - ${nextAppState}`)
     const { streamProps: { enableBackgroundStreaming } } = this.props
+    const { onStop } = this.props
     const nodeHandle = findNodeHandle(this.red5pro_video_publisher)
     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
       console.log('Publisher:AppState - App has come to the foreground.')
@@ -136,7 +137,8 @@ export default class Publisher extends React.Component {
       console.log('Publisher:AppState - App has gone to the background.')
       if (!enableBackgroundStreaming) {
         console.log('Publisher:AppState - unpublish()')
-        unpublish(nodeHandle)
+        // unpublish(nodeHandle)
+        onStop()
       }
     }
     this.setState({

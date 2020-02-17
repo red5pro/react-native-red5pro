@@ -131,13 +131,15 @@ export default class Subscriber extends React.Component {
   _handleAppStateChange = (nextAppState) => {
     console.log(`Subscriber:AppState - ${nextAppState}`)
     const { streamProps: { enableBackgroundStreaming } } = this.props
+    const { onStop } = this.props
     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
       console.log('Subscriber:AppState - App has come to the foreground.')
     } else if (nextAppState === 'inactive') {
       console.log('Subscriber:AppState - App has gone to the background.')
       if (!enableBackgroundStreaming) {
-        console.log('Subscriber:AppState - unpublish()')
-        this.doUnsubscribe()
+        console.log('Subscriber:AppState - unsubscribe()')
+        //        this.doUnsubscribe()
+        onStop()
       }
     }
     this.setState({
