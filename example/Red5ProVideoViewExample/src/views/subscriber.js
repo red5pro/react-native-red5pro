@@ -5,9 +5,10 @@ import {
   findNodeHandle,
   Button,
   Image,
-  StatusBar,
+  SafeAreaView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View
 } from 'react-native'
 import { Icon } from 'react-native-elements'
@@ -30,10 +31,35 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     justifyContent: 'center'
   },
-  videoView: {
+  subcontainer: {
     flex: 1,
+  },
+  videoView: {
+    position: 'absolute',
+    backgroundColor: 'black',
+    top: 0,
+    right: 0,
+    bottom: 140,
+    left: 0
+  },
+  iconContainer: {
+    position: 'absolute',
+    top: 12,
+    right: 0,
+    alignItems: 'flex-start',
+    backgroundColor: 'transparent',
     flexDirection: 'row',
-    backgroundColor: 'black'
+    justifyContent: 'flex-end',
+  },
+  buttonContainer: {
+    position: 'absolute',
+    backgroundColor: 'white',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flex: 1,
+    flexDirection: 'column',
+    height: 140
   },
   imageContainer: {
     flex: 1,
@@ -42,31 +68,32 @@ const styles = StyleSheet.create({
     backgroundColor: 'black'
   },
   button: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 40,
-    backgroundColor: 'blue',
-    color: 'white'
+    backgroundColor: '#2089dc',
+    height: 46,
+    marginTop: 2,
+    alignContent: 'center'
+  },
+  buttonLabel: {
+    color: 'white',
+    fontSize: 20,
+    padding: 8,
+    textAlign: 'center'
   },
   toast: {
+    flex: 1,
     color: 'white',
     left: 0,
     right: 0,
     bottom: 0,
-    padding: 10,
+    padding: 14,
     textAlign: 'center',
     backgroundColor: 'rgba(0, 0, 0, 1.0)'
   },
   muteIcon: {
-    position: 'absolute',
-    top: 30,
     right: 10,
+    width: 40,
     padding: 6,
-    paddingLeft: 10,
-    paddingRight: 10,
-    borderRadius: 26,
+    borderRadius: 40,
     backgroundColor: 'white'
   },
   muteIconToggled: {
@@ -173,47 +200,55 @@ export default class Subscriber extends React.Component {
     const assignToastRef = (toast) => { this.toast_field = toast }
 
     return (
-      <View style={styles.container}>
-        <R5VideoView
-          {...setup}
-          ref={assignVideoRef.bind(this)}
-        />
-        { !displayVideo && <View style={styles.imageContainer}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.subcontainer}>
+          <R5VideoView
+            {...setup}
+            ref={assignVideoRef.bind(this)}
+          />
+          { !displayVideo && <View style={styles.imageContainer}>
             <Image 
               style={{ width: 69, height: 68 }}
               source={{uri: 'https://www.red5pro.com/images/red5pro_icon1.png'}} />
+            </View>
+          }
+          <View style={styles.iconContainer}>
+            <Icon
+              name={audioMuted ? 'md-volume-off' : 'md-volume-high'}
+              type='ionicon'
+              size={26}
+              color={audioIconColor}
+              hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
+              onPress={this.onToggleAudioMute}
+              containerStyle={audioIconStyle}
+            />
           </View>
-        }
-        <Icon
-          name={audioMuted ? 'md-volume-off' : 'md-volume-high'}
-          type='ionicon'
-          size={26}
-          color={audioIconColor}
-          hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
-          onPress={this.onToggleAudioMute}
-          containerStyle={audioIconStyle}
-        />
-        <Text
-          ref={assignToastRef.bind(this)}
-          {...toastProps}>{toastProps.value}</Text>
-        { isDisconnected && <Button {...buttonProps}
-          onPress={this.startRetry}
-          title="Resubscribe"
-          accessibilityLabel="Resubscribe" />
-        }
-        <Button
-          {...buttonProps}
-          onPress={onStop}
-          title="Stop"
-          accessibilityLabel="Stop"
-        />
-        <Button
-          {...buttonProps}
-          onPress={this.onScaleMode}
-          title='Swap Scale'
-          accessibilityLabel='Swap Scale'
-        />
-      </View>
+          <View style={styles.buttonContainer}>
+            <Text
+              ref={assignToastRef.bind(this)}
+              {...toastProps}>{toastProps.value}</Text>
+            { isDisconnected && <TouchableOpacity {...buttonProps}
+              onPress={this.startRetry}
+              title="Resubscribe"
+              accessibilityLabel="Resubscribe">
+                <Text style={styles.buttonLabel}>Resubscribe</Text>
+              </TouchableOpacity>
+            }
+            <TouchableOpacity {...buttonProps}
+              onPress={onStop}
+              accessibilityLabel="Stop">
+              <Text style={styles.buttonLabel}>Stop</Text>
+            </TouchableOpacity>
+            { !isDisconnected && <TouchableOpacity {...buttonProps}
+              onPress={this.onScaleMode}
+              title='Swap Scale'
+              accessibilityLabel='Swap Scale'>
+              <Text style={styles.buttonLabel}>Swap Scale</Text>
+                </TouchableOpacity>
+            }
+          </View>
+        </View>
+      </SafeAreaView>
     )
   }
 
