@@ -344,6 +344,7 @@ These properties are required for **both** Publishers and Subscribers.
 | bufferTime | number | 0.5 | Default buffer. |
 | streamBufferTime | number | 4 | Default buffer for subscribers to allow on the server in sending packets. |
 | parameters | string | none | Optional connection parameters. Often used for authentication. ***[See Note Below](#parameters-configuration-property)** |
+| inheritAVSessionOptions | boolean | `REQUIRED` | Flag to allow SDK to set AVSessionCategroy options.  Setting this to _true_ will have Red5Pro manage the audio session. |
 | key | string | `REQUIRED` | Unique key to be used internally to access the configuration object. |
 
 ### Parameters Configuration Property

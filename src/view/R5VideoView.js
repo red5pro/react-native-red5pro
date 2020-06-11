@@ -128,6 +128,7 @@ R5VideoView.propTypes = {
       bufferTime: PropTypes.number,
       streamBufferTime: PropTypes.number,
       parameters: PropTypes.string,
+      inheritAVSessionOptions: PropTypes.bool.isRequired,
       key: PropTypes.string.isRequired
     }).isRequired,
     onConfigured: PropTypes.func,

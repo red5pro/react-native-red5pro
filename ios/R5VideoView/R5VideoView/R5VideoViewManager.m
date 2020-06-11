@@ -214,7 +214,7 @@ RCT_CUSTOM_VIEW_PROPERTY(configuration, R5Configuration, R5VideoView) {
   configuration.buffer_time = [json[@"bufferTime"] floatValue];
   configuration.stream_buffer_time = [json[@"streamBufferTime"] floatValue];
   configuration.parameters = json[@"parameters"];
-  
+  configuration.inheritAVSessionOptions = [json[@"inheritAVSessionOptions"] boolValue];
   [view loadConfiguration:configuration forKey:json[@"key"]];
 
 }
