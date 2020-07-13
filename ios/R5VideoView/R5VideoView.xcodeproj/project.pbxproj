@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		483019FD21B567360053D52A /* R5StreamModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 483019FC21B567360053D52A /* R5StreamModule.m */; };
+		48301A0121B573300053D52A /* R5StreamItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 48301A0021B573300053D52A /* R5StreamItem.m */; };
+		48301A0321B579120053D52A /* R5StreamPublisher.m in Sources */ = {isa = PBXBuildFile; fileRef = 48301A0221B579120053D52A /* R5StreamPublisher.m */; };
+		48301A7121B6CF910053D52A /* R5StreamSubscriber.m in Sources */ = {isa = PBXBuildFile; fileRef = 48301A7021B6CF910053D52A /* R5StreamSubscriber.m */; };
 		4885C7B01FBDFA7400E77415 /* R5VideoView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4885C7AF1FBDFA7400E77415 /* R5VideoView.m */; };
 		4885C7B11FBDFA7400E77415 /* R5VideoView.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4885C7AE1FBDFA7400E77415 /* R5VideoView.h */; };
 		4885C7B91FBDFABD00E77415 /* R5VideoViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4885C7B71FBDFABD00E77415 /* R5VideoViewManager.m */; };
@@ -26,6 +30,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		483019FB21B566EF0053D52A /* R5StreamModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = R5StreamModule.h; sourceTree = "<group>"; };
+		483019FC21B567360053D52A /* R5StreamModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = R5StreamModule.m; sourceTree = "<group>"; };
+		483019FE21B572430053D52A /* R5StreamInstance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = R5StreamInstance.h; sourceTree = "<group>"; };
+		483019FF21B572EE0053D52A /* R5StreamItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = R5StreamItem.h; sourceTree = "<group>"; };
+		48301A0021B573300053D52A /* R5StreamItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = R5StreamItem.m; sourceTree = "<group>"; };
+		48301A0221B579120053D52A /* R5StreamPublisher.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = R5StreamPublisher.m; sourceTree = "<group>"; };
+		48301A0421B579BD0053D52A /* R5StreamPublisher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = R5StreamPublisher.h; sourceTree = "<group>"; };
+		48301A6E21B6CC910053D52A /* R5LayoutEventEmitter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = R5LayoutEventEmitter.h; sourceTree = "<group>"; };
+		48301A6F21B6CF520053D52A /* R5StreamSubscriber.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = R5StreamSubscriber.h; sourceTree = "<group>"; };
+		48301A7021B6CF910053D52A /* R5StreamSubscriber.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = R5StreamSubscriber.m; sourceTree = "<group>"; };
 		4885C7AB1FBDFA7400E77415 /* libR5VideoView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libR5VideoView.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		4885C7AE1FBDFA7400E77415 /* R5VideoView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = R5VideoView.h; sourceTree = "<group>"; };
 		4885C7AF1FBDFA7400E77415 /* R5VideoView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = R5VideoView.m; sourceTree = "<group>"; };
@@ -65,10 +79,20 @@
 		4885C7AD1FBDFA7400E77415 /* R5VideoView */ = {
 			isa = PBXGroup;
 			children = (
+				48301A6E21B6CC910053D52A /* R5LayoutEventEmitter.h */,
 				4885C7B81FBDFABD00E77415 /* R5VideoViewManager.h */,
 				4885C7B71FBDFABD00E77415 /* R5VideoViewManager.m */,
 				4885C7AE1FBDFA7400E77415 /* R5VideoView.h */,
 				4885C7AF1FBDFA7400E77415 /* R5VideoView.m */,
+				483019FB21B566EF0053D52A /* R5StreamModule.h */,
+				483019FC21B567360053D52A /* R5StreamModule.m */,
+				483019FF21B572EE0053D52A /* R5StreamItem.h */,
+				48301A0021B573300053D52A /* R5StreamItem.m */,
+				483019FE21B572430053D52A /* R5StreamInstance.h */,
+				48301A0421B579BD0053D52A /* R5StreamPublisher.h */,
+				48301A0221B579120053D52A /* R5StreamPublisher.m */,
+				48301A6F21B6CF520053D52A /* R5StreamSubscriber.h */,
+				48301A7021B6CF910053D52A /* R5StreamSubscriber.m */,
 			);
 			path = R5VideoView;
 			sourceTree = "<group>";
@@ -140,6 +164,10 @@
 			files = (
 				4885C7B01FBDFA7400E77415 /* R5VideoView.m in Sources */,
 				4885C7B91FBDFABD00E77415 /* R5VideoViewManager.m in Sources */,
+				48301A7121B6CF910053D52A /* R5StreamSubscriber.m in Sources */,
+				48301A0321B579120053D52A /* R5StreamPublisher.m in Sources */,
+				483019FD21B567360053D52A /* R5StreamModule.m in Sources */,
+				48301A0121B573300053D52A /* R5StreamItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

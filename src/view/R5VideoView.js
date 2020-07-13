@@ -76,7 +76,7 @@ class R5VideoView extends React.Component {
     this.red5provideo = video
   }
 
-  _onLayout = (event) => {
+  _onLayout = (event) => { // eslint-disable-line no-unused-vars
     // const layout = event.nativeEvent.layout
     // console.log(`R5Video:onLayout: ${event.nativeEvent.layout.x}, ${event.nativeEvent.layout.y}, ${event.nativeEvent.layout.width}x${event.nativeEvent.layout.height}`);
   }
@@ -114,8 +114,10 @@ R5VideoView.propTypes = {
     audioBitrate: PropTypes.number,                 // publisher only, kb/s
     audioSampleRate: PropTypes.number,              // publisher only, hz, default iOS is 16000, default Android is 44100
     subscribeVideo: PropTypes.bool,                 // subscriber only
+    hardwareAccelerated: PropTypes.bool,            // subscriber only
     audioMode: PropTypes.number,                    // mainly subscribers, especially with 2 subscribers
     enableBackgroundStreaming: PropTypes.bool,      // publisher and subscriber
+    useEncryption: PropTypes.bool,                  // publisher and subscriber
     zOrderOnTop: PropTypes.bool,                    // publisher and subscriber. Android only.
     zOrderMediaOverlay: PropTypes.bool,             // publisher and subscriber. Android only.
     configuration: PropTypes.shape({
@@ -128,8 +130,9 @@ R5VideoView.propTypes = {
       bufferTime: PropTypes.number,
       streamBufferTime: PropTypes.number,
       parameters: PropTypes.string,
-      key: PropTypes.string.isRequired
-    }).isRequired,
+      key: PropTypes.string.isRequired,
+      autoAttachView: PropTypes.bool
+    }),
     onConfigured: PropTypes.func,
     onMetaDataEvent: PropTypes.func,
     onPublisherStreamStatus: PropTypes.func,
@@ -155,6 +158,8 @@ R5VideoView.defaultProps = {
     useBackfacingCamera: false,
     audioMode: R5AudioMode.STANDARD,
     enableBackgroundStreaming: false,
+    hardwareAccelerated: true,
+    useEncryption: false,
     zOrderOnTop: false,
     zOrderMediaOverlay: false
 }

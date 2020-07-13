@@ -5,7 +5,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 public class SubscribeService  extends Service {
@@ -86,8 +86,8 @@ public class SubscribeService  extends Service {
 		super.onDestroy();
 	}
 
-	class SubscribeServiceBinder extends Binder {
-		SubscribeService getService() {
+	public class SubscribeServiceBinder extends Binder {
+		public SubscribeService getService() {
 			return SubscribeService.this;
 		}
 	}
