@@ -23,6 +23,7 @@ import com.red5pro.reactnative.view.PublishService;
 import com.red5pro.reactnative.view.R5VideoViewLayout;
 import com.red5pro.streaming.R5Connection;
 import com.red5pro.streaming.R5Stream;
+import com.red5pro.streaming.R5StreamProtocol;
 import com.red5pro.streaming.config.R5Configuration;
 import com.red5pro.streaming.event.R5ConnectionEvent;
 import com.red5pro.streaming.media.R5AudioController;
@@ -63,6 +64,7 @@ public class R5StreamPublisher implements R5StreamInstance,
 	protected int mAudioSampleRate = 44100;
 	protected boolean mUseAdaptiveBitrateController = false;
 	protected boolean mUseBackfacingCamera = false;
+	protected boolean mUseEncryption = false;
 
 	protected boolean mIsPublisherSetup;
 	protected boolean mIsRestrainingVideo;
@@ -141,6 +143,7 @@ public class R5StreamPublisher implements R5StreamInstance,
 		target.mAudioBitrate = props.audioBitrate;
 		target.mAudioSampleRate = props.audioSampleRate;
 		target.mUseBackfacingCamera = props.useBackfacingCamera;
+		target.mUseEncryption = props.useEncryption;
 		target.mEnableBackgroundStreaming = props.enableBackgroundStreaming;
 		target.mUseAdaptiveBitrateController = props.useAdaptiveBitrateController;
 
@@ -220,7 +223,8 @@ public class R5StreamPublisher implements R5StreamInstance,
 				mAudioMode,
 				mLogLevel,
 				mScaleMode,
-				mShowDebugView);
+				mShowDebugView,
+				mUseEncryption);
 
 	}
 
@@ -234,7 +238,7 @@ public class R5StreamPublisher implements R5StreamInstance,
 				mAudioMode,
 				mLogLevel,
 				mScaleMode,
-				false);
+				false, false);
 
 	}
 
@@ -251,11 +255,15 @@ public class R5StreamPublisher implements R5StreamInstance,
 						 int audioMode,
 						 int logLevel,
 						 int scaleMode,
-						 boolean showDebugView) {
+						 boolean showDebugView,
+						 boolean useEncryption) {
 
 		mStreamType = recordType;
 		mShowDebugView = showDebugView;
 
+		if (useEncryption) {
+			configuration.setProtocol(R5StreamProtocol.SRTP);
+		}
 		establishConnection(configuration, audioMode, logLevel, scaleMode);
 
 		Log.d(TAG, "Show Debug View? " + mShowDebugView);

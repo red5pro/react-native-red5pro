@@ -114,8 +114,10 @@ R5VideoView.propTypes = {
     audioBitrate: PropTypes.number,                 // publisher only, kb/s
     audioSampleRate: PropTypes.number,              // publisher only, hz, default iOS is 16000, default Android is 44100
     subscribeVideo: PropTypes.bool,                 // subscriber only
+    hardwareAccelerated: PropTypes.bool,            // subscriber only
     audioMode: PropTypes.number,                    // mainly subscribers, especially with 2 subscribers
     enableBackgroundStreaming: PropTypes.bool,      // publisher and subscriber
+    useEncryption: PropTypes.bool,                  // publisher and subscriber
     zOrderOnTop: PropTypes.bool,                    // publisher and subscriber. Android only.
     zOrderMediaOverlay: PropTypes.bool,             // publisher and subscriber. Android only.
     configuration: PropTypes.shape({
@@ -156,6 +158,8 @@ R5VideoView.defaultProps = {
     useBackfacingCamera: false,
     audioMode: R5AudioMode.STANDARD,
     enableBackgroundStreaming: false,
+    hardwareAccelerated: true,
+    useEncryption: false,
     zOrderOnTop: false,
     zOrderMediaOverlay: false
 }

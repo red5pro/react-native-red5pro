@@ -10,6 +10,7 @@
 
 React Native Red5 Pro Publisher & Subscriber.
 
+* [Version Support](#support)
 * [Install](#install)
   * [iOS](#ios)
   * [Android](#android)
@@ -35,6 +36,13 @@ React Native Red5 Pro Publisher & Subscriber.
 > You will need a Red5 Pro SDK License and a Red5 Pro Server in order to use this component.  
 [Sign up for a free trial!](https://account.red5pro.com/register)
 
+# Version Support
+
+This repo and the [examples](examples) have been built and tested against the following:
+
+* React Native `v0.61.5`
+* Red5 Pro Mobile SDKs `v6.0.0`
+
 # Install
 
 Install the `react-native-red5pro` component:
@@ -55,40 +63,20 @@ Finally, run the following to link the libraries into your projects:
 
 ## iOS
 
-### using react-native link
+## Using CocoaPods
+
+Add the following to the `Podfile` of your React Native project:
 
 ```sh
-$ react-native link
-```
-
-After running `react-native link`, the `react-native-red5pro` library - and optionally the `react-native-permissions` library - will be added to the *Libraries* of your iOS project:
-
-![iOS Link](assets/ios_link.png)
-
-### Troubleshooting
-
-If the libraries were not adding using `react-native link`, you can drag them in manually. For the `react-native-red5pro` library:
-
-1. Open a file browser and navigate to the *react-native-red5pro* install in *node_modules*.
-2. Within the *node_modules/react-native-red5pro* directory, locate the `R5VideoView.xcodeproj` under *ios/R5VideoView*.
-3. Drag the `R5VideoView.xcodeproj` file into your Xcode project and under the `Libraries` Group.
-
-The `react-native-red5pro` library should now be installed and available.
-
-_Follow similar instructions for `react-native-permissions`, if needed._
-
-> > Review the [iOS Example](example/ios) included in this repository.
-
-### using cocoaPods
-
-Add the following to your Podfile:
-
-```sh
-pod 'ReactNativePermissions', :path => '../node_modules/react-native-permissions'
 pod 'R5VideoView', :path => '../node_modules/react-native-red5pro'
+
+permissions_path = '../node_modules/react-native-permissions/ios'
+
+pod 'Permission-Camera', :path => "#{permissions_path}/Camera.podspec"
+pod 'Permission-Microphone', :path => "#{permissions_path}/Microphone.podspec"
 ```
 
-Then issue a pod install as you would with any other project:
+Then issue the following within your React Native iOS-based project directory:
 
 ```sh
 $ pod install
@@ -96,7 +84,7 @@ $ pod install
 
 ## Android
 
-### using react-native link
+## Using react-native link
 
 ```sh
 $ react-native link
@@ -142,39 +130,25 @@ This section will describe how to setup your projects to integrate the [Red5 Pro
 
 ## iOS Project Setup
 
-After linking in the `react-native-red5pro` library as described in the [previous section](#installation), you will need to install the *Red5 Pro iOS SDK* and update the permissions for you project.
+After linking in the `react-native-red5pro` library as described in the [previous section](#installation), you will need to install the **Red5 Pro iOS SDK** and update the permissions for you project.
 
 ### Install Red5 Pro SDK
 
-To integrate the *Red5 Pro iOS SDK*:
+To integrate the **Red5 Pro iOS SDK**:
 
 1. Download the latest [Red5 Pro iOS SDK](https://account.red5pro.com/download) from your account. If you don't have an account yet, [Sing up for a free trial!](https://account.red5pro.com/register).
-2. Unpack the *Red5 Pro iOS SDK* into a location on your local machine - there will be a `R5Streaming.framework` file. This is the *Red5 Pro iOS SDK*.
-3. Within your Xcode project panel, determine if you already have a `Frameworks` Group available for your project. If not, follow to step #4; if you have one, follow to step #5.
-4. Right-Click on the top-level project, select `New Group` and when it is generated for the project, click on `New Group` to make it editable and name if `Frameworks`.
-5. Drag the `R5Streaming.framework` file from a file browser into the Xcode project and under the `Frameworks` Group.
-6. In the following dialog, select to `Copy items...` and ensure that your project is selected to add it to.
-7. Click `Finish`.
+2. Unpack the **Red5 Pro iOS SDK** into a location on your local machine. This will unzip to a `R5Streaming.framework` file; that file is the **Red5 Pro iOS SDK**.
 
-The `R5Streaming.framework` should now be located within the `Frameworks` Group of your project. Select it and make note of its location (*Full Path*) in the Identities Panel of your Xcode project.
-
-#### from react-native link installation
-
-The `react-native-red5pro` library is not shipped with the *Red5 Pro SDK*. As such, we need to point the `react-native-red5pro` library point to the `R5Streaming.framework` dependency:
-
-1. Locate the `R5VideoView.xcodeproj` under the `Libraries` Group of the Project Panel of Xcode.
-2. Select the **Target** `R5VideoView`, and click `Build Settings`.
-3. Search for "**frameworks**" (sans quotes), and navigate to the `Framework Search Paths`.
-4. Click on the Value field and add the path to the `R5Streaming.framework` file (either relative or full path).
-
-![iOS Framework Path](assets/ios_framework_path.png)
-
-#### from cocoaPods installation
+### After CocoaPods Installation
 
 1. Locate the `Pods` project in your generated `xcworkspace` and select to open the project settings in Xcode.
-2. Click on `Build Settings`
-3. Search for "**frameworks**" (sans quotes), and navigate to the `Framework Search Paths`.
-4. Click on the Value field and add the path to the `R5Streaming.framework` file (either relative or full path).
+2. Within the `Targets` listing, select `R5VideoView`.
+3. Click on `Build Settings`
+4. Search for "**frameworks**" (sans quotes), and navigate to the `Framework Search Paths`.
+5. Click on the Value field and add the directory path to the `R5Streaming.framework` file (either relative or full path). _Tip: drag and drop the directory holding the framework into an entry in the modal and Xcode will fill in the relative path._
+6. Do the above 5 steps again for your top level project.
+
+![iOS Framework Path](assets/ios_framework_path.png)
 
 ### Required Dependencies
 
@@ -183,7 +157,7 @@ The *Red5 Pro iOS SDK* requires a few additional dependencies in order to proper
 ```
 libc++.1.tbd
 libiconv.2.4.0.tbd
-libbz2.1.0.tbd
+libbz2.tbd
 libz.tbd
 
 GLKit
@@ -218,37 +192,37 @@ Now you can use the `enableBackgroundStreaming` of the library to enable backgro
 
 ### Additional Notes
 
-* You may bew required to set the `Enable Bitcode` Build Setting to a value of `No` in order to use the SDK.
+* You may be required to set the `Enable Bitcode` Build Setting to a value of `No` in order to use the SDK.
 
 ## Android Project Setup
 
-After linking in the `react-native-red5pro` library as described in the [previous section](#installation), you will need to install the *Red5 Pro Android SDK* and update the permissions for you project.
+After linking in the `react-native-red5pro` library as described in the [previous section](#installation), you will need to install the **Red5 Pro Android SDK** and update the permissions for you project.
 
 ### Install Red5 Pro SDK
 
-To integrate the *Red5 Pro Android SDK*:
+To integrate the **Red5 Pro Android SDK**:
 
 1. Download the latest [Red5 Pro Android SDK](https://account.red5pro.com/download) from your account. If you don't have an account yet, [Sing up for a free trial!](https://account.red5pro.com/register).
-2. Unpack the *Red5 Pro Android SDK* into a location on your local machine - there will be a `red5streaming.jar` file and a folder labelled `jniLibs`. This is the *Red5 Pro Android SDK*.
+2. Unpack the **Red5 Pro Android SDK** into a location on your local machine - there will be a `red5streaming.jar` file and a folder labelled `jniLibs`. These files make up the **Red5 Pro Android SDK**.
 3. Drag the `red5streaming.jar` file into the *app/libs* folder of your Android app project in Android Studio.
 4. Drag the `jniLibs` holder under the *app/src/main* folder of your Android app project in Android Studio.
 
 ![Android SDK](assets/android_sdk.png)
 
-The `react-native-red5pro` library is not shipped with the *Red5 Pro SDK*. As such, we need to point the `react-native-red5pro` library point to the `red5streaming.jar` dependency:
+The `react-native-red5pro` library is not shipped with the **Red5 Pro SDK**. As such, we need to point the `react-native-red5pro` library point to the `red5streaming.jar` dependency:
 
-1. Expand the `react-native-red5pro` library in the Project Paenl of Android Studio.
+1. Expand the `react-native-red5pro` library in the Project Panel of Android Studio.
 2. Locate the `build.gradle` file and open it in the editor.
 3. Add the path to the `red5streaming.jar` as a dependency. e.g.,
 
 ```txt
 dependencies {
-    provided "com.facebook.react:react-native:${_reactNativeVersion}"
-    compile files("../example/android/app/libs/red5streaming.jar")
+    implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
+    implementation files("../example/android/app/libs/red5streaming.jar") 
 }
 ```
 
-Now that the *Red5 Pro Android SDK* is a dependency for the `react-native-red5pro` library and is referenced from the parent project, we need to make sure we exclude it from being compiled in twice:
+Now that the **Red5 Pro Android SDK** is a dependency for the `react-native-red5pro` library and is referenced from the parent project, we need to make sure we exclude it from being compiled in twice:
 
 1. Locate the `build.gradle` for your Android **app** and open it in the editor.
 2. Define the `red5sreaming.jar` as an exclusion for the **libs** dependencies.
@@ -257,10 +231,11 @@ The `dependencies` definition in the `build.gradle` of the **app** should look s
 
 ```txt
 dependencies {
-    compile fileTree(dir: "libs", include: ["*.jar"], excludes: ["red5streaming.jar"])
-    compile "com.android.support:appcompat-v7:23.0.1"
-    compile "com.facebook.react:react-native:+"  // From node_modules
-    compile project(':react-native-red5pro')
+    implementation fileTree(dir: "libs", include: ["*.jar"], excludes: ["red5streaming.jar"])
+    implementation "com.facebook.react:react-native:+"  // From node_modules
+
+    implementation project(':react-native-permissions')
+    implementation project(':react-native-red5pro')
 }
 ```
 
@@ -280,6 +255,7 @@ private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
   protected List<ReactPackage> getPackages() {
     return Arrays.<ReactPackage>asList(
         new MainReactPackage(),
+        new RNPermissionsPackage(),
         new R5Package()
     );
   }
@@ -851,5 +827,5 @@ const styles = StyleSheet.create({
 })
 ```
 
-> For more in-depth examples, please refer to the [examples](examples) included in this repository.
+> For more in-depth examples, please refer to the [example](example) included in this repository.
 
