@@ -2,7 +2,7 @@ import { NativeModules } from 'react-native'
 import R5PublishType from '../enum/R5VideoView.publishtype'
 
 const { UIManager } = NativeModules
-const { R5VideoView } = UIManager
+const R5VideoView = UIManager.getViewManagerConfig("R5VideoView")
 const { Commands } = R5VideoView
 
 export const subscribe = (handle, streamName) => {
