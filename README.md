@@ -48,7 +48,7 @@ This repo and the [examples](examples) have been built and tested against the fo
 Install the `react-native-red5pro` component:
 
 ```sh
-$ npm i --save https://github.com/infrared5/react-native-red5pro/tarball/master
+$ npm i --save react-native-red5pro
 ```
 
 If you intend to use the live broadcasting capabilities of the [Red5 Pro SDK](https://www.red5pro.com/docs/streaming/), install the `react-native-permissions` module that will present to the user the permissions dialogs for Camera and Microphone:
