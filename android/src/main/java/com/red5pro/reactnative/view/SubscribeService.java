@@ -1,9 +1,13 @@
 package com.red5pro.reactnative.view;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
 import android.util.Log;
@@ -15,6 +19,7 @@ public class SubscribeService  extends Service {
 	private Notification holderNote;
 	private final SubscribeService.SubscribeServiceBinder mBinder = new SubscribeService.SubscribeServiceBinder();
 
+	private final String NOTIFICATION_CHANNEL_ID = "com.red5pro.reactnative";
 
 	@Nullable
 	@Override
@@ -26,6 +31,15 @@ public class SubscribeService  extends Service {
 	public void onCreate() {
 		Log.d("R5VideoViewLayout", "SubscribeService:onCreate()");
 		super.onCreate();
+
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+			NotificationChannel notificationChannel = new NotificationChannel(
+					NOTIFICATION_CHANNEL_ID,
+					"Publisher",
+					NotificationManager.IMPORTANCE_LOW);
+			NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			manager.createNotificationChannel(notificationChannel);
+		}
 	}
 
 	public void setServicableDelegate(SubscribeService.SubscribeServicable servicable) {
@@ -54,7 +68,15 @@ public class SubscribeService  extends Service {
 
 			Log.d("R5VideoViewLayout", "SubscribeService:setDisplayOn(false)");
 			if (holderNote == null) {
-				holderNote = (new Notification.Builder(getApplicationContext()))
+				Notification.Builder notificationBuilder = null;
+
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+					notificationBuilder = new Notification.Builder(getApplicationContext(), NOTIFICATION_CHANNEL_ID);
+				} else {
+					notificationBuilder = new Notification.Builder(getApplicationContext());
+				}
+
+				holderNote = notificationBuilder
 						.setContentTitle("Red5 Pro")
 						.setContentText("Subscribing from the background")
 						.setSmallIcon(android.R.drawable.ic_media_play)
