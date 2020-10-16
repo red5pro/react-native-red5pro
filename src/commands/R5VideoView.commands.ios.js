@@ -57,3 +57,11 @@ export const attach = (handle, streamName) => {
 export const detach = (handle, streamName) => {
   UIManager.dispatchViewManagerCommand(handle, UIManager.R5VideoView.Commands.detach, [streamName])
 }
+
+export const enableAutoFocus = (handle, streamId) => {
+  UIManager.dispatchViewManagerCommand(handle, UIManager.R5VideoView.Commands.enableAutoFocus, [streamId])
+}
+
+export const disableAutoFocus = (handle, streamId) => {
+  UIManager.dispatchViewManagerCommand(handle, UIManager.R5VideoView.Commands.disableAutoFocus, [streamId])
+}

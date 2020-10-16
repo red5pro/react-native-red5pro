@@ -46,6 +46,8 @@
 - (void)unmuteAudio;
 - (void)muteVideo;
 - (void)unmuteVideo;
+- (void)enableAutoFocus;
+- (void)disableAutoFocus;
 - (void)setPlaybackVolume:(int)value;
 
 # pragma RN Properties

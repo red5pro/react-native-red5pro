@@ -179,6 +179,20 @@
     
 }
 
+- (void)disableAutoFocus:(AVCaptureDevice*)device {
+    if ([device lockForConfiguration:nil] && [device isFocusModeSupported:AVCaptureFocusModeLocked]) {
+        [device setFocusMode:AVCaptureFocusModeLocked];
+        [device unlockForConfiguration];
+    }
+}
+
+- (void)enableAutoFocus:(AVCaptureDevice*)device {
+    if ([device lockForConfiguration:nil] && [device isFocusModeSupported:AVCaptureFocusModeContinuousAutoFocus]) {
+        [device setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
+        [device unlockForConfiguration];
+    }
+}
+
 - (R5Camera *)setUpCamera {
     AVCaptureDevice *video = [self getCameraDevice:_useBackfacingCamera];
     R5Camera *camera = [[R5Camera alloc] initWithDevice:video andBitRate:_bitrate];

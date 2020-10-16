@@ -28,5 +28,7 @@
 - (void)unmuteAudio;
 - (void)muteVideo;
 - (void)unmuteVideo;
+- (void)enableAutoFocus;
+- (void)disableAutoFocus;
 
 @end
