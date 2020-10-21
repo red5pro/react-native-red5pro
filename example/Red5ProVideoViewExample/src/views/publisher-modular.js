@@ -18,6 +18,7 @@ import {
   R5PublishType,
   attach, detach
 } from 'react-native-red5pro'
+import AsyncStorage from '@react-native-community/async-storage'
 
 const styles = StyleSheet.create({
   container: {
@@ -147,7 +148,7 @@ export default class Publisher extends React.Component {
 
   }
 
-  componentDidMount () {
+  async componentDidMount () {
     console.log('Publisher:componentWillMount()')
     AppState.addEventListener('change', this._handleAppStateChange)
 
@@ -158,6 +159,7 @@ export default class Publisher extends React.Component {
     } = this.props
     const streamIdToUse = [configuration.streamName, Math.floor(Math.random() * 0x10000).toString(16)].join('-')
     this.streamId = streamIdToUse
+    const settings = await this.getSettings()
     R5StreamModule.init(streamIdToUse, configuration)
       .then(streamId => {
         console.log('Publisher configuration with ' + streamId)
@@ -165,7 +167,7 @@ export default class Publisher extends React.Component {
         if (this.state.attached) {
           this.doAttach()
         }
-        this.doPublish()
+        this.doPublish(settings)
       })
       .catch(error => {
         console.log('Subscriber:Stream Setup Error - ' + error)
@@ -439,11 +441,16 @@ export default class Publisher extends React.Component {
     }
   }
 
-  doPublish () {
+  doPublish (settings) {
     const {
       streamProps
     } = this.props
 
+    if(settings){
+      streamProps.useAdaptiveBitrateController = settings.adaptiveBitrateEnabled;
+      streamProps.bitrate = settings.doubleBitrateEnabled ? 1500 : 750;
+    }
+    
     R5StreamModule.publish(this.streamId, R5PublishType.LIVE, streamProps)
       .then(streamId => {
         console.log('R5StreamModule publish with ' + streamId);
@@ -463,4 +470,15 @@ export default class Publisher extends React.Component {
       })
   }
 
+  async getSettings() {
+    try {
+      const jsonData = await AsyncStorage.getItem('@settings')
+      console.log('setting en publisher-modular.js', jsonData)
+      const result = JSON.parse(jsonData);
+      console.log('result.adaptiveBitrateEnabled', result.adaptiveBitrateEnabled)
+      return jsonData != null ? JSON.parse(jsonData) : null
+    } catch (error) {
+      console.log(error)
+    }
+  }
 }
