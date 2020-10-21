@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View
 } from 'react-native'
 import {
@@ -20,9 +21,11 @@ import {
 import { 
   R5LogLevel
 } from 'react-native-red5pro'
+import { Icon } from 'react-native-elements'
 
 import Publisher from './src/views/publisher-modular'
 import Subscriber from './src/views/subscriber-modular'
+import Settings from './src/views/settings'
 
 export default class App extends React.Component {
   constructor (props) {
@@ -41,6 +44,8 @@ export default class App extends React.Component {
     this.onUseAuthenticationChange = this.onUseAuthenticationChange.bind(this)
     this.onUsernameChange = this.onUsernameChange.bind(this)
     this.onPasswordChange = this.onPasswordChange.bind(this)
+    this.openSettings = this.openSettings.bind(this)
+    this.closeSettings = this.closeSettings.bind(this)
 
     // Props.
     this.state = {
@@ -49,6 +54,7 @@ export default class App extends React.Component {
       isPublisher: false,
       useAuthentication: false,
       isInErrorState: false,
+      settingsScreenOpened: false,
       hostFieldProps: {
         placeholder: 'Host',
         autoCorrect: false,
@@ -175,6 +181,14 @@ export default class App extends React.Component {
         )
       }
     }
+    else if (!this.state.hasStarted && this.state.settingsScreenOpened) {
+      return (
+        <Settings 
+          style={styles.container} 
+          onClose={this.closeSettings}
+        />
+      )
+    }
     else {
       return (
         <View style={styles.container}>
@@ -242,9 +256,33 @@ export default class App extends React.Component {
             />
           </View>
           }
+          <TouchableOpacity 
+            style={{alignSelf: 'center', marginTop: 50, flexDirection: 'row', alignItems: 'center'}}
+            onPress={this.openSettings}
+          >
+            <Icon
+              name='settings'
+              type='feathericon'
+              color='#2196F3'
+              size={20}
+            />
+            <Text style={{color: '#2196F3', fontSize: 16, marginLeft: 5}}>Settings</Text>
+          </TouchableOpacity>
         </View>
       )
     }
+  }
+
+  openSettings () {
+    this.setState({
+      settingsScreenOpened: true
+    })
+  }
+
+  closeSettings () {
+    this.setState({
+      settingsScreenOpened: false
+    })
   }
 
   requestPermissions () {
