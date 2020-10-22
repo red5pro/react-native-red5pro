@@ -10,6 +10,8 @@ import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 
 import com.reactnativecommunity.rnpermissions.RNPermissionsPackage;
+import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
+
 import com.red5pro.reactnative.R5Package;
 
 import java.util.Arrays;
@@ -27,8 +29,9 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-              new VectorIconsPackage(),
+          new VectorIconsPackage(),
           new RNPermissionsPackage(),
+          new AsyncStoragePackage(),
           new R5Package()
       );
     }

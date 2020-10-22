@@ -43,4 +43,6 @@ target 'Red5ProVideoViewExample' do
   pod 'Permission-Microphone', :path => "#{permissions_path}/Microphone.podspec"
 
   use_native_modules!
+
+  pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
 end
