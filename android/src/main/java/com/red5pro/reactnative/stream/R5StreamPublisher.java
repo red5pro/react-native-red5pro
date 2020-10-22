@@ -32,6 +32,8 @@ import com.red5pro.streaming.source.R5Camera;
 import com.red5pro.streaming.source.R5Microphone;
 import com.red5pro.streaming.view.R5VideoView;
 
+import java.util.List;
+
 public class R5StreamPublisher implements R5StreamInstance,
 		PublishService.PublishServicable {
 
@@ -65,6 +67,7 @@ public class R5StreamPublisher implements R5StreamInstance,
 	protected boolean mUseAdaptiveBitrateController = false;
 	protected boolean mUseBackfacingCamera = false;
 	protected boolean mUseEncryption = false;
+	protected boolean mAutoFocusEnabled = false;
 
 	protected boolean mIsPublisherSetup;
 	protected boolean mIsRestrainingVideo;
@@ -145,6 +148,7 @@ public class R5StreamPublisher implements R5StreamInstance,
 		target.mUseBackfacingCamera = props.useBackfacingCamera;
 		target.mUseEncryption = props.useEncryption;
 		target.mEnableBackgroundStreaming = props.enableBackgroundStreaming;
+		target.mAutoFocusEnabled = props.autoFocusEnabled;
 		target.mUseAdaptiveBitrateController = props.useAdaptiveBitrateController;
 
 	}
@@ -341,6 +345,9 @@ public class R5StreamPublisher implements R5StreamInstance,
 			mStream.updateStreamMeta();
 		}
 
+		if (mAutoFocusEnabled) {
+			this.enableAutoFocus();
+		}
 	}
 
 	public void muteAudio () {
@@ -416,6 +423,18 @@ public class R5StreamPublisher implements R5StreamInstance,
 			mCamera = camera;
 			Camera.Parameters params = mCamera.getCamera().getParameters();
 			params.setRecordingHint(true);
+
+			String focusMode;
+			if (mAutoFocusEnabled) {
+				focusMode = this.getFocusModeAuto();
+			} else {
+				focusMode = this.getFocusModeFixed();
+			}
+			
+			if (focusMode != null) {
+				params.setFocusMode(focusMode);
+			}
+
 			mCamera.getCamera().setParameters(params);
 
 		}
@@ -700,6 +719,92 @@ public class R5StreamPublisher implements R5StreamInstance,
 		} else {
 			Log.d(TAG, "Dispatch using Device emitter.");
 			deviceEventEmitter.emit(type, map);
+		}
+
+	}
+
+	protected String getFocusModeAuto () {
+
+		if (mCamera == null || mCamera.getCamera() == null) {
+			return null;
+		}
+
+		Camera.Parameters params = mCamera.getCamera().getParameters();
+		List<String> focusModes = params.getSupportedFocusModes();
+
+		if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+			return Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO;
+		} else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+			return Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE;
+		} else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_EDOF)) {
+			return Camera.Parameters.FOCUS_MODE_EDOF;
+		} else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+			return Camera.Parameters.FOCUS_MODE_AUTO;
+		}
+
+		return null;
+
+	}
+
+	protected String getFocusModeFixed () {
+
+		if (mCamera == null || mCamera.getCamera() == null) {
+			return null;
+		}
+
+		Camera.Parameters params = mCamera.getCamera().getParameters();
+		List<String> focusModes = params.getSupportedFocusModes();
+
+		if (focusModes.contains(Camera.Parameters.FOCUS_MODE_FIXED)) {
+			return Camera.Parameters.FOCUS_MODE_FIXED;
+		} else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_INFINITY)) {
+			return Camera.Parameters.FOCUS_MODE_INFINITY;
+		}
+
+		return null;
+
+	}
+
+	protected void enableAutoFocus () {
+
+		if (mCamera == null || mCamera.getCamera() == null) {
+			return;
+		}
+
+		mAutoFocusEnabled = true;
+
+		Camera camera = mCamera.getCamera();
+		Camera.Parameters params = camera.getParameters();
+		String focusModeAuto = getFocusModeAuto();
+
+		if (focusModeAuto != null) {
+			params.setFocusMode(focusModeAuto);
+			camera.setParameters(params);
+			Log.d(TAG, "enableAutoFocus(): " + focusModeAuto);
+		} else {
+			Log.d(TAG, "enableAutoFocus(): No supported auto-focus mode found");
+		}
+
+	}
+
+	protected void disableAutoFocus () {
+
+		if (mCamera == null || mCamera.getCamera() == null) {
+			return;
+		}
+
+		mAutoFocusEnabled = false;
+
+		Camera camera = mCamera.getCamera();
+		Camera.Parameters params = camera.getParameters();
+		String focusModeFixed = getFocusModeFixed();
+
+		if (focusModeFixed != null) {
+			params.setFocusMode(focusModeFixed);
+			camera.setParameters(params);
+			Log.d(TAG, "disableAutoFocus(): " + focusModeFixed);
+		} else {
+			Log.d(TAG, "disableAutoFocus(): No supported fixed-focus mode found");
 		}
 
 	}

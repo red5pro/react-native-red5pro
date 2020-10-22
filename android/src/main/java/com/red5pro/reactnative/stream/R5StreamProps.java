@@ -24,6 +24,7 @@ public class R5StreamProps {
 	public int audioSampleRate;
 	public boolean useBackfacingCamera;
 	public boolean useEncryption;
+	public boolean autoFocusEnabled;
 	public boolean hardwareAccelerated;
 	public boolean useAdaptiveBitrateController;
 
@@ -43,6 +44,7 @@ public class R5StreamProps {
 	public static final String PROP_AUDIO_BITRATE = "audioBitrate";
 	public static final String PROP_AUDIO_SAMPLE_RATE = "audioSampleRate";
 	public static final String PROP_BACKFACING_CAMERA = "useBackfacingCamera";
+	public static final String PROP_AUTO_FOCUS_ENABLED = "autoFocusEnabled";
 	public static final String PROP_BACKGROUND_STREAMING = "enableBackgroundStreaming";
 	public static final String PROP_USE_ENCRYPTION = "useEncryption";
 	public static final String PROP_HARDWARE_ACCELERATED = "hardwareAccelerated";
@@ -65,6 +67,7 @@ public class R5StreamProps {
 		props.audioBitrate = map.hasKey(R5StreamProps.PROP_AUDIO_BITRATE) ? map.getInt(R5StreamProps.PROP_AUDIO_BITRATE) : 32;
 		props.audioSampleRate = map.hasKey(R5StreamProps.PROP_AUDIO_SAMPLE_RATE) ? map.getInt(R5StreamProps.PROP_AUDIO_SAMPLE_RATE) : 44100;
 		props.useBackfacingCamera = map.hasKey(R5StreamProps.PROP_BACKFACING_CAMERA) ? map.getBoolean(R5StreamProps.PROP_BACKFACING_CAMERA) : false;
+		props.autoFocusEnabled = map.hasKey(R5StreamProps.PROP_AUTO_FOCUS_ENABLED) ? map.getBoolean(R5StreamProps.PROP_AUTO_FOCUS_ENABLED) : false;
 		props.useEncryption = map.hasKey(R5StreamProps.PROP_USE_ENCRYPTION) ? map.getBoolean(R5StreamProps.PROP_USE_ENCRYPTION) : false;
 		props.hardwareAccelerated = map.hasKey(R5StreamProps.PROP_HARDWARE_ACCELERATED) ? map.getBoolean(R5StreamProps.PROP_HARDWARE_ACCELERATED) : true;
 		props.enableBackgroundStreaming = map.hasKey(R5StreamProps.PROP_BACKGROUND_STREAMING) ? map.getBoolean(R5StreamProps.PROP_BACKGROUND_STREAMING) : false;
@@ -90,6 +93,7 @@ public class R5StreamProps {
 		props.add("audioBitrate=" + audioBitrate);
 		props.add("audioSampleRate=" + audioSampleRate);
 		props.add("useBackfacingCamera=" + useBackfacingCamera);
+		props.add("autoFocusEnabled=" + autoFocusEnabled);
 		props.add("enableBackgroundStreaming=" + enableBackgroundStreaming);
 		props.add("useEncryption=" + useEncryption);
 		props.add("hardwareAccelerated=" + hardwareAccelerated);

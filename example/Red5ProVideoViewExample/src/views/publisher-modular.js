@@ -449,6 +449,7 @@ export default class Publisher extends React.Component {
     if(settings){
       streamProps.useAdaptiveBitrateController = settings.adaptiveBitrateEnabled;
       streamProps.bitrate = settings.doubleBitrateEnabled ? 1500 : 750;
+      streamProps.autoFocusEnabled = settings.autoFocusEnabled;
     }
     
     R5StreamModule.publish(this.streamId, R5PublishType.LIVE, streamProps)

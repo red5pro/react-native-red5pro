@@ -136,7 +136,7 @@ export default function Settings(props) {
         <View style={styles.switchContainer}>
           <Text style={styles.switchLabel}>Enable auto-focus</Text>
           <Switch
-            disabled
+            colo
             value={state.autoFocusEnabled}
             onValueChange={toggleAutoFocus}
           />
