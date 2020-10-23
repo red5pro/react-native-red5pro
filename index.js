@@ -17,7 +17,7 @@ import {
   setPlaybackVolume,
   muteAudio, unmuteAudio,
   muteVideo, unmuteVideo,
-  attach, detach, enableAutoFocus, disableAutoFocus
+  attach, detach
 } from './src/commands/R5VideoView.commands'
 
 module.exports = {
@@ -26,7 +26,6 @@ module.exports = {
   updateScaleMode, updateScaleSize, setPlaybackVolume,
   muteAudio, unmuteAudio, muteVideo, unmuteVideo,
   attach, detach,
-  R5AudioMode, R5LogLevel, R5PublishType, R5ScaleMode, enableAutoFocus,
-  disableAutoFocus
+  R5AudioMode, R5LogLevel, R5PublishType, R5ScaleMode
 }
 

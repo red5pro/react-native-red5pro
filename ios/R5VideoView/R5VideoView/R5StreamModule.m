@@ -287,45 +287,6 @@ RCT_REMAP_METHOD(unmuteVideo,
     
 }
 
-RCT_REMAP_METHOD(enableAutoFocus,
-                 streamId:(NSString *)streamId
-                 withEnableAFResolver:(RCTPromiseResolveBlock)resolve
-                 withEnableAFRejecter:(RCTPromiseRejectBlock)reject) {
-    
-    RCTLogInfo(@"R5StreamModule:enableAutoFocus() %@", streamId);
-    R5StreamItem *item = [[R5StreamModule streamMap] objectForKey:streamId];
-    if (item != nil) {
-        NSObject<R5StreamInstance> *streamInstance = [item getStreamInstance];
-        if (streamInstance != nil) {
-            [(R5StreamPublisher *)streamInstance enableAutoFocus];
-            resolve(streamId);
-            return;
-        }
-    }
-    
-    NSString *errorStr = [NSString stringWithFormat:@"Stream Configuration with id(%@) does not exist.", streamId];
-    NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : errorStr };
-    NSError *error = [NSError errorWithDomain:[[NSBundle mainBundle] bundleIdentifier] code:NSURLErrorCannotFindHost userInfo:userInfo];
-    reject(@"E_CONFIGURATION_ERROR", errorStr, error);
-    
-}
-
-RCT_REMAP_METHOD(disableAutoFocus,
-                 streamId:(NSString *)streamId
-                 withDisableAFResolver:(RCTPromiseResolveBlock)resolve
-                 withDisableAFRejecter:(RCTPromiseRejectBlock)reject) {
-    
-    RCTLogInfo(@"R5StreamModule:disableAutoFocus() %@", streamId);
-    R5StreamItem *item = [[R5StreamModule streamMap] objectForKey:streamId];
-    if (item != nil) {
-        NSObject<R5StreamInstance> *streamInstance = [item getStreamInstance];
-        if (streamInstance != nil) {
-            [(R5StreamPublisher *)streamInstance disableAutoFocus];
-            resolve(streamId);
-            return;
-        }
-    }
-
 RCT_REMAP_METHOD(setPlaybackVolume,
                  streamId:(NSString *)streamId
                  withVolume:(int)value

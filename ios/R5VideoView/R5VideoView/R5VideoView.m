@@ -269,22 +269,6 @@
     });
 }
 
-- (void)enableAutoFocus {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (self->_streamInstance != nil && [self->_streamInstance isKindOfClass:R5StreamPublisher.class]) {
-            [(R5StreamPublisher *)self->_streamInstance enableAutoFocus];
-        }
-    });
-}
-
-- (void)disableAutoFocus {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (self->_streamInstance != nil && [self->_streamInstance isKindOfClass:R5StreamPublisher.class]) {
-            [(R5StreamPublisher *)self->_streamInstance disableAutoFocus];
-        }
-    });
-}
-
 - (void)setPlaybackVolume:(int)value {
     dispatch_async(dispatch_get_main_queue(), ^{
         if (self->_streamInstance != nil && [self->_streamInstance isKindOfClass:R5StreamSubscriber.class]) {

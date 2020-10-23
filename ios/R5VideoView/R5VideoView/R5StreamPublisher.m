@@ -36,6 +36,7 @@
     BOOL _useBackfacingCamera;
     BOOL _useEncryption;
     BOOL _enableBackgroundStreaming;
+    BOOL _autoFocusEnabled;
     
 }
 @end
@@ -101,6 +102,7 @@
     _useBackfacingCamera = NO;
     _useEncryption = NO;
     _enableBackgroundStreaming = NO;
+    _autoFocusEnabled = NO;
     _useAdaptiveBitrateController = NO;
     _audioMode = R5AudioControllerModeStandardIO;
     
@@ -123,6 +125,7 @@
     _useBackfacingCamera = [props objectForKey:@"useBackfacingCamera"] != nil ? [[props objectForKey:@"useBackfacingCamera"] boolValue] : _useBackfacingCamera;
     _useEncryption = [props objectForKey:@"useEncryption"] != nil ? [[props objectForKey:@"useEncryption"] boolValue] : _useEncryption;
     _enableBackgroundStreaming = [props objectForKey:@"enableBackgroundStreaming"] != nil ? [[props objectForKey:@"enableBackgroundStreaming"] boolValue] : _enableBackgroundStreaming;
+    _autoFocusEnabled = [props objectForKey:@"autoFocusEnabled"] != nil ? [[props objectForKey:@"autoFocusEnabled"] boolValue] : _autoFocusEnabled;
     _useAdaptiveBitrateController = [props objectForKey:@"useAdaptiveBitrateController"] != nil ? [[props objectForKey:@"useAdaptiveBitrateController"] boolValue] : _useAdaptiveBitrateController;
 }
 
@@ -195,6 +198,9 @@
 
 - (R5Camera *)setUpCamera {
     AVCaptureDevice *video = [self getCameraDevice:_useBackfacingCamera];
+    if (_autoFocusEnabled) {
+        [self enableAutoFocus:video];
+    }
     R5Camera *camera = [[R5Camera alloc] initWithDevice:video andBitRate:_bitrate];
     [camera setWidth:_cameraWidth];
     [camera setHeight:_cameraHeight];
@@ -271,6 +277,9 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         self->_useBackfacingCamera = !self->_useBackfacingCamera;
         AVCaptureDevice *device = [self getCameraDevice:self->_useBackfacingCamera];
+        if (_autoFocusEnabled) {
+            [self enableAutoFocus:device];
+        }
         R5Camera *camera = (R5Camera *)[self.stream getVideoSource];
         [camera setDevice:device];
     });
