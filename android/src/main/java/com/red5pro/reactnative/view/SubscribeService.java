@@ -77,8 +77,8 @@ public class SubscribeService  extends Service {
 				}
 
 				holderNote = notificationBuilder
-						.setContentTitle("Red5 Pro")
-						.setContentText("Subscribing from the background")
+						.setContentTitle("Whatnot")
+						.setContentText("Playing video in the background")
 						.setSmallIcon(android.R.drawable.ic_media_play)
 						.build();
 				startForeground(7335776, holderNote);
