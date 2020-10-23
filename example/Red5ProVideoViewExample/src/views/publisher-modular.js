@@ -474,9 +474,6 @@ export default class Publisher extends React.Component {
   async getSettings() {
     try {
       const jsonData = await AsyncStorage.getItem('@settings')
-      console.log('setting en publisher-modular.js', jsonData)
-      const result = JSON.parse(jsonData);
-      console.log('result.adaptiveBitrateEnabled', result.adaptiveBitrateEnabled)
       return jsonData != null ? JSON.parse(jsonData) : null
     } catch (error) {
       console.log(error)

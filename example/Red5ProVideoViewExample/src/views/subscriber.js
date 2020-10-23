@@ -265,8 +265,9 @@ export default class Subscriber extends React.Component {
     console.log(`Subscriber:onSubscriberStreamStatus :: ${JSON.stringify(event.nativeEvent.status, null, 2)}`)
     const status = event.nativeEvent.status
     let message = isValidStatusMessage(status.message) ? status.message : status.name
+
     if (status.name.toLowerCase() === 'error' ||
-        message.toLowerCase() === 'disconnected') {
+      message.toLowerCase() === 'disconnected' ) {
       this.doUnsubscribe()
       this.setState({
         isDisconnected: true,

@@ -22,6 +22,7 @@ import {
   setPlaybackVolume,
   attach, detach
 } from 'react-native-red5pro'
+import AsyncStorage from '@react-native-community/async-storage'
 
 const isValidStatusMessage = (value) => {
   return value && typeof value !== 'undefined' && value !== 'undefined' && value !== 'null'
@@ -126,6 +127,7 @@ export default class Subscriber extends React.Component {
     this.doDetach = this.doDetach.bind(this)
     this.doSubscribe = this.doSubscribe.bind(this)
     this.doUnsubscribe = this.doUnsubscribe.bind(this)
+    this.getSettings = this.getSettings.bind(this)
 
     this.state = {
       appState: AppState.currentState,
@@ -154,7 +156,7 @@ export default class Subscriber extends React.Component {
 
   }
 
-  componentDidMount () {
+  async componentDidMount () {
     console.log('Subscriber:componentWillMount()')
     AppState.addEventListener('change', this._handleAppStateChange)
 
@@ -165,6 +167,7 @@ export default class Subscriber extends React.Component {
     } = this.props
     const streamIdToUse = [configuration.streamName, Math.floor(Math.random() * 0x10000).toString(16)].join('-')
     this.streamId = streamIdToUse
+    this.settings = await this.getSettings()
     R5StreamModule.init(streamIdToUse, configuration)
       .then(streamId => {
         console.log('Subscriber configuration with ' + streamId)
@@ -193,6 +196,8 @@ export default class Subscriber extends React.Component {
     this.emitter.removeAllListeners('onConfigured')
     this.emitter.removeAllListeners('onSubscriberStreamStatus')
     this.emitter.removeAllListeners('onUnsubscribeNotification')
+
+    clearTimeout(this.retryTimer)
   }
 
   componentDidUpdate (prevProps, prevState) {
@@ -350,8 +355,13 @@ export default class Subscriber extends React.Component {
     const status = event.hasOwnProperty('nativeEvent') ? event.nativeEvent.status : event.status
     console.log(`Subscriber:onSubscriberStreamStatus :: ${JSON.stringify(status, null, 2)}`)
     let message = isValidStatusMessage(status.message) ? status.message : status.name
-    if (status.name.toLowerCase() === 'error' ||
-        message.toLowerCase() === 'disconnected') {
+
+    if (status.name.toLowerCase() === 'error' && this.settings.autoReconnectSubscriberEnabled) {
+      this.setState({isConnecting: true}, () => {
+        this.startAutoReconnect()
+        this.setState({isConnecting: false})
+      })
+    } else if (message.toLowerCase() === 'disconnected') {
       this.doUnsubscribe()
       this.setState({
         isDisconnected: true,
@@ -481,6 +491,7 @@ export default class Subscriber extends React.Component {
       })
       .then(streamId => {
         console.log('R5StreamModule subscriber with ' + streamId);
+        this.streamId = streamId
       })
       .catch(error => {
         console.log('Subscriber:Stream Subscribe Error - ' + error)
@@ -497,4 +508,22 @@ export default class Subscriber extends React.Component {
       })
   }
 
+  startAutoReconnect () {
+    let reconnectTimeout = 5000     // 5 second timeout
+
+    this.retryTimer = setTimeout(() => {
+      this.doSubscribe()
+      this.doDetach()
+      this.doAttach()
+    }, reconnectTimeout)
+  }
+
+  async getSettings() {
+    try {
+      const jsonData = await AsyncStorage.getItem('@settings')
+      return jsonData != null ? JSON.parse(jsonData) : null
+    } catch (error) {
+      console.log(error)
+    }
+  }
 }

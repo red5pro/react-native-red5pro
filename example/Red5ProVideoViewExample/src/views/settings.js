@@ -42,7 +42,8 @@ export default function Settings(props) {
     autoFocusEnabled: false,
     autoReconnectEnabled: false,
     adaptiveBitrateEnabled: false,
-    doubleBitrateEnabled: false
+    doubleBitrateEnabled: false,
+    autoReconnectSubscriberEnabled: false
   })
 
   useEffect(() => {
@@ -113,6 +114,15 @@ export default function Settings(props) {
     })
   }
 
+  const toggleAutoReconnectSubscriber = () => {
+    const newValue = !state.autoReconnectSubscriberEnabled
+
+    setState({
+      ...state,
+      autoReconnectSubscriberEnabled: newValue
+    })
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -163,6 +173,14 @@ export default function Settings(props) {
             colo
             value={state.doubleBitrateEnabled}
             onValueChange={toggledoubleBitrate}
+          />
+        </View>
+        <View style={styles.switchContainer}>
+          <Text style={styles.switchLabel}>Enable auto-reconnect subscriber</Text>
+          <Switch
+            colo
+            value={state.autoReconnectSubscriberEnabled}
+            onValueChange={toggleAutoReconnectSubscriber}
           />
         </View>
       </View>
