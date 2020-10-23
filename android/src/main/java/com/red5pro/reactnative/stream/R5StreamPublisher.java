@@ -424,19 +424,16 @@ public class R5StreamPublisher implements R5StreamInstance,
 			Camera.Parameters params = mCamera.getCamera().getParameters();
 			params.setRecordingHint(true);
 
-			String focusMode;
-			if (mAutoFocusEnabled) {
-				focusMode = this.getFocusModeAuto();
-			} else {
-				focusMode = this.getFocusModeFixed();
-			}
-			
-			if (focusMode != null) {
-				params.setFocusMode(focusMode);
+			if (mCamera && mCamera.getCamera()) {
+				String focusMode = mAutoFocusEnabled ? this.getFocusModeAuto() : this.getFocusModeFixed();
+				
+				if (focusMode != null) {
+					params.setFocusMode(focusMode);
+				}
 			}
 
 			mCamera.getCamera().setParameters(params);
-
+			
 		}
 
 		// Assign ABR Controller if requested.
