@@ -200,6 +200,8 @@
     AVCaptureDevice *video = [self getCameraDevice:_useBackfacingCamera];
     if (_autoFocusEnabled) {
         [self enableAutoFocus:video];
+    } else {
+        [self disableAutoFocus:video];
     }
     R5Camera *camera = [[R5Camera alloc] initWithDevice:video andBitRate:_bitrate];
     [camera setWidth:_cameraWidth];
@@ -279,6 +281,8 @@
         AVCaptureDevice *device = [self getCameraDevice:self->_useBackfacingCamera];
         if (_autoFocusEnabled) {
             [self enableAutoFocus:device];
+        } else {
+            [self disableAutoFocus:device];
         }
         R5Camera *camera = (R5Camera *)[self.stream getVideoSource];
         [camera setDevice:device];
