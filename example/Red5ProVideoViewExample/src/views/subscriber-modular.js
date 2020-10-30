@@ -4,7 +4,6 @@ import {
   AppState,
   NativeEventEmitter,
   findNodeHandle,
-  Button,
   Image,
   SafeAreaView,
   StyleSheet,
@@ -173,9 +172,7 @@ export default class Subscriber extends React.Component {
         console.log('Subscriber configuration with ' + streamId)
         this.streamId = streamId
         this.doSubscribe()
-        if (this.state.attached) {
-          this.doAttach()
-        }
+        setTimeout(() => {this.doAttach()}, 100)
       })
       .catch(error => {
         console.log('Subscriber:Stream Setup Error - ' + error)
@@ -356,7 +353,13 @@ export default class Subscriber extends React.Component {
     console.log(`Subscriber:onSubscriberStreamStatus :: ${JSON.stringify(status, null, 2)}`)
     let message = isValidStatusMessage(status.message) ? status.message : status.name
 
-    if (status.name.toLowerCase() === 'error' && this.settings.autoReconnectSubscriberEnabled) {
+    if (status.name.toLowerCase() === 'error' ||
+        message.toLowerCase() === 'netstream.play.sufficientbw.video' &&
+        this.settings.autoReconnectSubscriberEnabled) {
+      this.setState({
+        isDisconnected: true,
+        isConnecting: false
+      }, () => { this.doUnsubscribe() })
       this.setState({isConnecting: true}, () => {
         this.startAutoReconnect()
         this.setState({isConnecting: false})
