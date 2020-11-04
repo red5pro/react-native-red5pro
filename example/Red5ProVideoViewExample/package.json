@@ -26,7 +26,8 @@
     "react-native-red5pro": "^6.0.0",
     "react-native-vector-icons": "^6.6.0",
     "react-test-renderer": "16.9.0",
-    "@react-native-community/async-storage": "^1.12.1"
+    "@react-native-community/async-storage": "^1.12.1",
+    "@react-native-community/netinfo": "^5.9.7"
   },
   "jest": {
     "preset": "react-native"
