@@ -22,6 +22,7 @@ import {
   R5LogLevel
 } from 'react-native-red5pro'
 import { Icon } from 'react-native-elements'
+import { useNetInfo } from '@react-native-community/netinfo'
 
 import Publisher from './src/views/publisher-modular'
 import Subscriber from './src/views/subscriber-modular'
@@ -268,6 +269,8 @@ export default class App extends React.Component {
             />
             <Text style={{color: '#2196F3', fontSize: 16, marginLeft: 5}}>Settings</Text>
           </TouchableOpacity>
+          
+          <NetStats/>
         </View>
       )
     }
@@ -449,3 +452,14 @@ const styles = StyleSheet.create({
     padding: 20
   }
 })
+
+const NetStats = () => {
+  const NetInfo = useNetInfo();
+
+  return(
+    <View>
+      <Text>Type: {NetInfo.type}</Text>
+      <Text>Is Connected? {NetInfo.isConnected.toString()}</Text>
+    </View>
+  );
+};
