@@ -43,7 +43,6 @@ export default function Settings(props) {
     autoReconnectEnabled: false,
     adaptiveBitrateEnabled: false,
     doubleBitrateEnabled: false,
-    autoReconnectSubscriberEnabled: false
   })
 
   useEffect(() => {
@@ -114,15 +113,6 @@ export default function Settings(props) {
     })
   }
 
-  const toggleAutoReconnectSubscriber = () => {
-    const newValue = !state.autoReconnectSubscriberEnabled
-
-    setState({
-      ...state,
-      autoReconnectSubscriberEnabled: newValue
-    })
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -146,7 +136,6 @@ export default function Settings(props) {
         <View style={styles.switchContainer}>
           <Text style={styles.switchLabel}>Enable auto-focus</Text>
           <Switch
-            colo
             value={state.autoFocusEnabled}
             onValueChange={toggleAutoFocus}
           />
@@ -154,7 +143,6 @@ export default function Settings(props) {
         <View style={styles.switchContainer}>
           <Text style={styles.switchLabel}>Enable auto-reconnect</Text>
           <Switch
-            disabled
             value={state.autoReconnectEnabled}
             onValueChange={toggleAutoReconnect}
           />
@@ -162,7 +150,6 @@ export default function Settings(props) {
         <View style={styles.switchContainer}>
           <Text style={styles.switchLabel}>Enable adaptive bitrate</Text>
           <Switch
-            colo
             value={state.adaptiveBitrateEnabled}
             onValueChange={toggleAdaptiveBitrate}
           />
@@ -170,17 +157,8 @@ export default function Settings(props) {
         <View style={styles.switchContainer}>
           <Text style={styles.switchLabel}>Enable double bitrate (1500)</Text>
           <Switch
-            colo
             value={state.doubleBitrateEnabled}
             onValueChange={toggledoubleBitrate}
-          />
-        </View>
-        <View style={styles.switchContainer}>
-          <Text style={styles.switchLabel}>Enable auto-reconnect subscriber</Text>
-          <Switch
-            colo
-            value={state.autoReconnectSubscriberEnabled}
-            onValueChange={toggleAutoReconnectSubscriber}
           />
         </View>
       </View>

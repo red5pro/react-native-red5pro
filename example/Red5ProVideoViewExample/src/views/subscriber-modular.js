@@ -133,7 +133,7 @@ export default class Subscriber extends React.Component {
       scaleMode: R5ScaleMode.SCALE_TO_FILL,
       audioMuted: false,
       isInErrorState: false,
-      isConnecting: false,
+      isConnecting: true,
       isDisconnected: true,
       attached: true,
       swappedLayout: false,
@@ -172,7 +172,8 @@ export default class Subscriber extends React.Component {
         console.log('Subscriber configuration with ' + streamId)
         this.streamId = streamId
         this.doSubscribe()
-        setTimeout(() => {this.doAttach()}, 100)
+        setTimeout(() => {this.doAttach()}, 1000)
+        setTimeout(() => {this.state.isConnecting && this.props.onReconnect()}, 1000)
       })
       .catch(error => {
         console.log('Subscriber:Stream Setup Error - ' + error)
@@ -264,7 +265,7 @@ export default class Subscriber extends React.Component {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.subcontainer}>
-          { !attached &&
+         { !attached &&
             <View style={styles.container}>
               <TouchableOpacity
                 style={[styles.button, styles.attachButton]}
@@ -353,28 +354,22 @@ export default class Subscriber extends React.Component {
     console.log(`Subscriber:onSubscriberStreamStatus :: ${JSON.stringify(status, null, 2)}`)
     let message = isValidStatusMessage(status.message) ? status.message : status.name
 
-    if (status.name.toLowerCase() === 'error' ||
-        message.toLowerCase() === 'netstream.play.sufficientbw.video' &&
-        this.settings.autoReconnectSubscriberEnabled) {
-      this.setState({
-        isDisconnected: true,
-        isConnecting: false
-      }, () => { this.doUnsubscribe() })
-      this.setState({isConnecting: true}, () => {
-        this.startAutoReconnect()
-        this.setState({isConnecting: false})
-      })
-    } else if (message.toLowerCase() === 'disconnected') {
+  // Status Codes: 0 === CONNECTED, 1 === DISCONNECTED, 2 === ERROR, 5 === START_STREAMING
+    if (status.code === 2 ||
+    message.toLowerCase() === 'netstream.play.sufficientbw.video' &&
+    this.settings?.autoReconnectEnabled) {
+      this.props.onReconnect()
+    } else if (status.code === 1) {
       this.doUnsubscribe()
       this.setState({
         isDisconnected: true,
         isConnecting: false
       })
-    } else if (message.toLowerCase() === 'connected') {
+    } else if (status.code === 0) {
       this.setState({
         isDisconnected: false,
         isConnecting: false
-      })
+      }, this.props.clearReconnectTimer())
     }
     if (!this.state.inErrorState) {
       this.setState({
@@ -510,23 +505,14 @@ export default class Subscriber extends React.Component {
         console.log('Subscriber:Stream Unsubscribe Error - ' + error)
       })
   }
-
-  startAutoReconnect () {
-    let reconnectTimeout = 5000     // 5 second timeout
-
-    this.retryTimer = setTimeout(() => {
-      this.doSubscribe()
-      this.doDetach()
-      this.doAttach()
-    }, reconnectTimeout)
-  }
-
+  
   async getSettings() {
     try {
       const jsonData = await AsyncStorage.getItem('@settings')
       return jsonData != null ? JSON.parse(jsonData) : null
     } catch (error) {
       console.log(error)
+      return null
     }
   }
 }

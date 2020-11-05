@@ -19,9 +19,9 @@ PODS:
     - DoubleConversion
     - glog
   - glog (0.3.5)
-  - Permission-Camera (2.0.9):
+  - Permission-Camera (2.2.2):
     - RNPermissions
-  - Permission-Microphone (2.0.9):
+  - Permission-Microphone (2.2.2):
     - RNPermissions
   - R5VideoView (6.0.0):
     - React
@@ -223,8 +223,10 @@ PODS:
     - React-cxxreact (= 0.61.5)
     - React-jsi (= 0.61.5)
     - ReactCommon/jscallinvoker (= 0.61.5)
-  - RNPermissions (2.0.9):
-    - React
+  - RNCAsyncStorage (1.12.1):
+    - React-Core
+  - RNPermissions (2.2.2):
+    - React-Core
   - RNVectorIcons (6.6.0):
     - React
   - Yoga (1.14.0)
@@ -260,6 +262,7 @@ DEPENDENCIES:
   - React-RCTVibration (from `../node_modules/react-native/Libraries/Vibration`)
   - ReactCommon/jscallinvoker (from `../node_modules/react-native/ReactCommon`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - "RNCAsyncStorage (from `../node_modules/@react-native-community/async-storage`)"
   - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -323,6 +326,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/Libraries/Vibration"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  RNCAsyncStorage:
+    :path: "../node_modules/@react-native-community/async-storage"
   RNPermissions:
     :path: "../node_modules/react-native-permissions"
   RNVectorIcons:
@@ -337,8 +342,8 @@ SPEC CHECKSUMS:
   FBReactNativeSpec: 118d0d177724c2d67f08a59136eb29ef5943ec75
   Folly: 30e7936e1c45c08d884aa59369ed951a8e68cf51
   glog: 1f3da668190260b06b429bb211bfbee5cd790c28
-  Permission-Camera: b0fec577b27488314a885f9c74433e02f3585b9b
-  Permission-Microphone: c46ef776bd65d251d3bcb544bedaf7160c1afe06
+  Permission-Camera: 375576c57ea625c88137d2cc52ba6dfeb21db036
+  Permission-Microphone: b3de743c3ffa4f6de043119c7cbd092c0d1f9b35
   R5VideoView: fd46c5914681f75c018c02b300adaa04bb015d4b
   RCTRequired: b153add4da6e7dbc44aebf93f3cf4fcae392ddf1
   RCTTypeSafety: 9aa1b91d7f9310fc6eadc3cf95126ffe818af320
@@ -359,10 +364,11 @@ SPEC CHECKSUMS:
   React-RCTText: 9ccc88273e9a3aacff5094d2175a605efa854dbe
   React-RCTVibration: a49a1f42bf8f5acf1c3e297097517c6b3af377ad
   ReactCommon: 198c7c8d3591f975e5431bec1b0b3b581aa1c5dd
-  RNPermissions: 6db7e0a4d94c9c02390d11020b1d3d187aaf77e5
+  RNCAsyncStorage: cb9a623793918c6699586281f0b51cbc38f046f9
+  RNPermissions: 067727df624665d4a6c8e2cffcc172ba608b96ed
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   Yoga: f2a7cd4280bfe2cca5a7aed98ba0eb3d1310f18b
 
-PODFILE CHECKSUM: c27649df623aab0f249d437aa0be0f59868c3394
+PODFILE CHECKSUM: 65ca37b00dd80f66de7b444e2fd1a89e3dcc78e3
 
 COCOAPODS: 1.9.3

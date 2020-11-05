@@ -159,15 +159,14 @@ export default class Publisher extends React.Component {
     } = this.props
     const streamIdToUse = [configuration.streamName, Math.floor(Math.random() * 0x10000).toString(16)].join('-')
     this.streamId = streamIdToUse
-    const settings = await this.getSettings()
+    this.settings = await this.getSettings()
     R5StreamModule.init(streamIdToUse, configuration)
       .then(streamId => {
         console.log('Publisher configuration with ' + streamId)
         this.streamId = streamId
-        if (this.state.attached) {
-          this.doAttach()
-        }
-        this.doPublish(settings)
+        this.doPublish(this.settings)
+        setTimeout(() => {this.doAttach()}, 1000)
+        setTimeout(() => {this.state.isConnecting && this.props.onReconnect()}, 1000)
       })
       .catch(error => {
         console.log('Subscriber:Stream Setup Error - ' + error)
@@ -349,6 +348,13 @@ export default class Publisher extends React.Component {
     const status = event.hasOwnProperty('nativeEvent') ? event.nativeEvent.status : event.status
     console.log(`Publisher:onPublisherStreamStatus :: ${JSON.stringify(status, null, 2)}`)
     let message = isValidStatusMessage(status.message) ? status.message : status.name
+
+    // Status Codes: 0 === CONNECTED, 1 === DISCONNECTED, 2 === ERROR, 5 === START_STREAMING
+    if (status.code === 1 || status.code === 2 && this.settings.autoReconnectEnabled) {
+      this.props.onReconnect()
+    } else if (status.code === 5 && this.settings.autoReconnectEnabled) {
+      this.props.clearReconnectTimer()
+    }
     if (!this.state.inErrorState) {
       this.setState({
         toastProps: {...this.state.toastProps, value: message},
@@ -446,7 +452,7 @@ export default class Publisher extends React.Component {
       streamProps
     } = this.props
 
-    if(settings){
+    if(settings && (streamProps.useAdaptiveBitrateController !== settings.adaptiveBitrateEnabled)){
       streamProps.useAdaptiveBitrateController = settings.adaptiveBitrateEnabled;
       streamProps.bitrate = settings.doubleBitrateEnabled ? 1500 : 750;
       streamProps.autoFocusEnabled = settings.autoFocusEnabled;

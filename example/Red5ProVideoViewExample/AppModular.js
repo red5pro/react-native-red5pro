@@ -35,6 +35,8 @@ export default class App extends React.Component {
     this.onPublish = this.onPublish.bind(this)
     this.onSubscribe = this.onSubscribe.bind(this)
     this.onStop = this.onStop.bind(this)
+    this.onReconnect = this.onReconnect.bind(this)
+    this.clearReconnectTimer = this.clearReconnectTimer.bind(this)
 
     // UI Actions.
     this.onHostChange = this.onHostChange.bind(this)
@@ -55,6 +57,7 @@ export default class App extends React.Component {
       useAuthentication: false,
       isInErrorState: false,
       settingsScreenOpened: false,
+      reconnectTimer: 2000,
       hostFieldProps: {
         placeholder: 'Host',
         autoCorrect: false,
@@ -168,6 +171,8 @@ export default class App extends React.Component {
             streamProps={this.state.streamProps}
             style={styles.container}
             onStop={this.onStop}
+            onReconnect={this.onReconnect}
+            clearReconnectTimer={this.clearReconnectTimer}
           />
         )
       }
@@ -177,6 +182,8 @@ export default class App extends React.Component {
             streamProps={this.state.streamProps}
             style={styles.container}
             onStop={this.onStop}
+            onReconnect={this.onReconnect}
+            clearReconnectTimer={this.clearReconnectTimer}
           />
         )
       }
@@ -414,6 +421,33 @@ export default class App extends React.Component {
     this.setState({
       hasStarted: false,
       isInErrorState: false
+    })
+  }
+
+  onReconnect () {
+    setTimeout(() => {
+      this.setState({
+        hasStarted: false,
+        isInErrorState: false
+      })
+    }, 1000) 
+
+    let newReconnectTimer = this.state.reconnectTimer*2
+    console.log(`App:onReconnect() :: Unmounted component. Retry in ${newReconnectTimer} milliseconds`)
+
+    setTimeout(() => {
+      console.log(`App:onReconnect() :: Re-mounting component`)
+      this.setState({
+        hasStarted: true,
+        reconnectTimer: newReconnectTimer
+      })
+    }, newReconnectTimer)
+  }
+
+  clearReconnectTimer () {
+    console.log('App:clearReconnectTimer()')
+    this.setState({
+      reconnectTimer: 2000
     })
   }
 }
