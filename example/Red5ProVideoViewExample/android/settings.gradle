@@ -6,9 +6,11 @@ include ':app',
         ':react-native-red5pro',
         ':react-native-vector-icons',
         ':@react-native-community_async-storage',
-        ':react-native-permissions'
+        ':react-native-permissions',
+        ':@react-native-community_netinfo'
 
 project(':react-native-red5pro').projectDir = new File(rootProject.projectDir, '../../../android')
 project(':react-native-vector-icons').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-vector-icons/android')
 project(':react-native-permissions').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-permissions/android')
 project(':@react-native-community_async-storage').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-community/async-storage/android')
+project(':@react-native-community_netinfo').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-community/netinfo/android')

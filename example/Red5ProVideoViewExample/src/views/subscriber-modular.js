@@ -22,6 +22,7 @@ import {
   attach, detach
 } from 'react-native-red5pro'
 import AsyncStorage from '@react-native-community/async-storage'
+import NetInfo from '@react-native-community/netinfo'
 
 const isValidStatusMessage = (value) => {
   return value && typeof value !== 'undefined' && value !== 'undefined' && value !== 'null'
@@ -135,6 +136,7 @@ export default class Subscriber extends React.Component {
       isInErrorState: false,
       isConnecting: true,
       isDisconnected: true,
+      isConnected: null,
       attached: true,
       swappedLayout: false,
       buttonProps: {
@@ -167,13 +169,20 @@ export default class Subscriber extends React.Component {
     const streamIdToUse = [configuration.streamName, Math.floor(Math.random() * 0x10000).toString(16)].join('-')
     this.streamId = streamIdToUse
     this.settings = await this.getSettings()
+    this.unsubscribeNetListener = NetInfo.addEventListener(state => {
+      if (this.state.isConnected !== state.isConnected) {
+        console.log(`Connection State changed: ${state.isConnected}`)
+        this.setState({
+          isConnected: state.isConnected
+        })
+      }
+    })
     R5StreamModule.init(streamIdToUse, configuration)
       .then(streamId => {
         console.log('Subscriber configuration with ' + streamId)
         this.streamId = streamId
         this.doSubscribe()
         setTimeout(() => {this.doAttach()}, 1000)
-        setTimeout(() => {this.state.isConnecting && this.props.onReconnect()}, 1000)
       })
       .catch(error => {
         console.log('Subscriber:Stream Setup Error - ' + error)
@@ -194,9 +203,8 @@ export default class Subscriber extends React.Component {
     this.emitter.removeAllListeners('onConfigured')
     this.emitter.removeAllListeners('onSubscriberStreamStatus')
     this.emitter.removeAllListeners('onUnsubscribeNotification')
-
-    clearTimeout(this.retryTimer)
-  }
+    this.unsubscribeNetListener()
+    }
 
   componentDidUpdate (prevProps, prevState) {
     if (prevState.attached !== this.state.attached) {
@@ -212,6 +220,20 @@ export default class Subscriber extends React.Component {
       if (this.state.attached) {
         this.doAttach()
       } 
+    }
+
+    if (prevState.isConnected !== this.state.isConnected) {
+      if (this.state.isConnected && prevState.isConnected !== null && this.settings?.autoReconnectEnabled) {
+        console.log('Reconnecting Stream')
+        setTimeout(() => {this.props.onReconnect()}, 1000)
+      } else if (!this.state.isConnected) {
+        if (prevState.isConnected === null) {
+          console.log('Your device has no available internet connection')
+        } else {
+          console.log('Connection is down, please reconnect internet')
+          this.props.clearReconnectTimer()
+        }
+      }
     }
   }
 
@@ -354,23 +376,6 @@ export default class Subscriber extends React.Component {
     console.log(`Subscriber:onSubscriberStreamStatus :: ${JSON.stringify(status, null, 2)}`)
     let message = isValidStatusMessage(status.message) ? status.message : status.name
 
-  // Status Codes: 0 === CONNECTED, 1 === DISCONNECTED, 2 === ERROR, 5 === START_STREAMING
-    if (status.code === 2 ||
-    message.toLowerCase() === 'netstream.play.sufficientbw.video' &&
-    this.settings?.autoReconnectEnabled) {
-      this.props.onReconnect()
-    } else if (status.code === 1) {
-      this.doUnsubscribe()
-      this.setState({
-        isDisconnected: true,
-        isConnecting: false
-      })
-    } else if (status.code === 0) {
-      this.setState({
-        isDisconnected: false,
-        isConnecting: false
-      }, this.props.clearReconnectTimer())
-    }
     if (!this.state.inErrorState) {
       this.setState({
         toastProps: {...this.state.toastProps, value: message},
