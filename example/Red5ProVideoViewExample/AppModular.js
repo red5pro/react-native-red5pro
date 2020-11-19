@@ -22,6 +22,7 @@ import {
   R5LogLevel
 } from 'react-native-red5pro'
 import { Icon } from 'react-native-elements'
+import { useNetInfo } from '@react-native-community/netinfo'
 
 import Publisher from './src/views/publisher-modular'
 import Subscriber from './src/views/subscriber-modular'
@@ -430,7 +431,7 @@ export default class App extends React.Component {
         hasStarted: false,
         isInErrorState: false
       })
-    }, 1000) 
+    }, 10) 
 
     let newReconnectTimer = this.state.reconnectTimer*2
     console.log(`App:onReconnect() :: Unmounted component. Retry in ${newReconnectTimer} milliseconds`)
@@ -447,7 +448,7 @@ export default class App extends React.Component {
   clearReconnectTimer () {
     console.log('App:clearReconnectTimer()')
     this.setState({
-      reconnectTimer: 2000
+      reconnectTimer: 500
     })
   }
 }

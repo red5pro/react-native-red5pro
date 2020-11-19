@@ -19,9 +19,9 @@ PODS:
     - DoubleConversion
     - glog
   - glog (0.3.5)
-  - Permission-Camera (2.2.2):
+  - Permission-Camera (2.0.9):
     - RNPermissions
-  - Permission-Microphone (2.2.2):
+  - Permission-Microphone (2.0.9):
     - RNPermissions
   - R5VideoView (6.0.0):
     - React
@@ -188,6 +188,8 @@ PODS:
     - React-cxxreact (= 0.61.5)
     - React-jsi (= 0.61.5)
   - React-jsinspector (0.61.5)
+  - react-native-netinfo (5.9.7):
+    - React-Core
   - React-RCTActionSheet (0.61.5):
     - React-Core/RCTActionSheetHeaders (= 0.61.5)
   - React-RCTAnimation (0.61.5):
@@ -225,8 +227,8 @@ PODS:
     - ReactCommon/jscallinvoker (= 0.61.5)
   - RNCAsyncStorage (1.12.1):
     - React-Core
-  - RNPermissions (2.2.2):
-    - React-Core
+  - RNPermissions (2.0.9):
+    - React
   - RNVectorIcons (6.6.0):
     - React
   - Yoga (1.14.0)
@@ -251,6 +253,7 @@ DEPENDENCIES:
   - React-jsi (from `../node_modules/react-native/ReactCommon/jsi`)
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
+  - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
   - React-RCTAnimation (from `../node_modules/react-native/Libraries/NativeAnimation`)
   - React-RCTBlob (from `../node_modules/react-native/Libraries/Blob`)
@@ -306,6 +309,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsiexecutor"
   React-jsinspector:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
+  react-native-netinfo:
+    :path: "../node_modules/@react-native-community/netinfo"
   React-RCTActionSheet:
     :path: "../node_modules/react-native/Libraries/ActionSheetIOS"
   React-RCTAnimation:
@@ -342,8 +347,8 @@ SPEC CHECKSUMS:
   FBReactNativeSpec: 118d0d177724c2d67f08a59136eb29ef5943ec75
   Folly: 30e7936e1c45c08d884aa59369ed951a8e68cf51
   glog: 1f3da668190260b06b429bb211bfbee5cd790c28
-  Permission-Camera: 375576c57ea625c88137d2cc52ba6dfeb21db036
-  Permission-Microphone: b3de743c3ffa4f6de043119c7cbd092c0d1f9b35
+  Permission-Camera: b0fec577b27488314a885f9c74433e02f3585b9b
+  Permission-Microphone: c46ef776bd65d251d3bcb544bedaf7160c1afe06
   R5VideoView: fd46c5914681f75c018c02b300adaa04bb015d4b
   RCTRequired: b153add4da6e7dbc44aebf93f3cf4fcae392ddf1
   RCTTypeSafety: 9aa1b91d7f9310fc6eadc3cf95126ffe818af320
@@ -354,6 +359,7 @@ SPEC CHECKSUMS:
   React-jsi: cb2cd74d7ccf4cffb071a46833613edc79cdf8f7
   React-jsiexecutor: d5525f9ed5f782fdbacb64b9b01a43a9323d2386
   React-jsinspector: fa0ecc501688c3c4c34f28834a76302233e29dc0
+  react-native-netinfo: e36c1bb6df27ab84aa933679b3f5bbf9d180b18f
   React-RCTActionSheet: 600b4d10e3aea0913b5a92256d2719c0cdd26d76
   React-RCTAnimation: 791a87558389c80908ed06cc5dfc5e7920dfa360
   React-RCTBlob: d89293cc0236d9cb0933d85e430b0bbe81ad1d72
@@ -365,10 +371,10 @@ SPEC CHECKSUMS:
   React-RCTVibration: a49a1f42bf8f5acf1c3e297097517c6b3af377ad
   ReactCommon: 198c7c8d3591f975e5431bec1b0b3b581aa1c5dd
   RNCAsyncStorage: cb9a623793918c6699586281f0b51cbc38f046f9
-  RNPermissions: 067727df624665d4a6c8e2cffcc172ba608b96ed
+  RNPermissions: 6db7e0a4d94c9c02390d11020b1d3d187aaf77e5
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   Yoga: f2a7cd4280bfe2cca5a7aed98ba0eb3d1310f18b
 
-PODFILE CHECKSUM: 65ca37b00dd80f66de7b444e2fd1a89e3dcc78e3
+PODFILE CHECKSUM: aa0e5bc8a81b211cd3806f937be78836c4371045
 
 COCOAPODS: 1.9.3
