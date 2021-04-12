@@ -22,7 +22,7 @@ React Native Red5 Pro Publisher & Subscriber.
   * [R5VideoView](#r5videoview)
 * [R5StreamModule Usage](#r5streammodule-usage)
   * [Methods](#module-methods)
-  * [Stream Properies](#module-stream-properties)
+  * [Stream Properties](#module-stream-properties)
   * [Events](#module-events)
   * [Known Issues](#known-issues)
 * [R5VideoView Usage](#r5videoview-usage)
