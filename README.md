@@ -318,7 +318,7 @@ Included in the `react-native-red5pro` project are two libraries that can be use
 
 The `R5StreamModule` is a Native Module.
 
-The `R5StreamModule` is used to establish a streaming session without requiring a correspnding view to display and render the stream in your App on a UI View. This can be useful when the App only requires playing back the audio of a stream, or not requiring a publisher preview view, along with other feature scenarios.
+The `R5StreamModule` is used to establish a streaming session without requiring a corresponding view to display and render the stream in your App on a UI View. This can be useful when the App only requires playing back the audio of a stream, or not requiring a publisher preview view, along with other feature scenarios.
 
 The original reason for developing and including the `R5StreamModule` was to allow a previously established stream to be detached and reattached to `R5VideoView` instance when the UI state of the App requires a change in your project. By using the `R5StreamModule` you can maintain the previously established publisher or subscriber session while updating the view state - all while not interrupting the stream.
 
