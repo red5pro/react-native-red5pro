@@ -1,5 +1,9 @@
 # Changes
 
+## 8.0.0
+
+- bump of version to match SDK version. (bustardcelly)
+
 ## 7.2.0
 
 - bump of version to match SDK version. (bustardcelly)
