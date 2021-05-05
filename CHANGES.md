@@ -1,5 +1,22 @@
 # Changes
 
+## 7.2.0
+
+- bump of version to match SDK version. (bustardcelly)
+- Also allowing for background services on Android >= 28. (bustardcelly)
+- 7.2.0 SDK for android example. (bustardcelly)
+- fixed foreground service crash on Android version >= 28 (Chung Wei Leong)
+- install instructions (bustardcelly)
+- enforcing style light for Android 13+ (bustardcelly)
+- modular subscriber UI updates for "notch". (bustardcelly)
+- publisher modular layout updates. (bustardcelly)
+- fixing darkmode text issues in iOS example. (bustardcelly)
+- not clearing input fields on focus. (bustardcelly)
+- fix for android scroll out on keyboard. (bustardcelly)
+- Support for iOS attach/detach view. (bustardcelly)
+- squashed device orientation bug on iOS pub. (bustardcelly)
+- fix for backfacing orientation issue. (bustardcelly)
+X
 ## 3.0.0
 
 - android resubscribe support. (bustardcelly)
