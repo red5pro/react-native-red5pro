@@ -113,7 +113,7 @@ project(':react-native-red5pro').projectDir = new File(rootProject.projectDir, '
 Now locate the `build.gradle` for your Android app, and add the following to the `dependencies`:
 
 ```txt
-compile project(':react-native-red5pro')
+implementation project(':react-native-red5pro')
 ```
 
 > Review the [Android Example](example/android) included in this repository.
