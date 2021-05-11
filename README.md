@@ -107,7 +107,7 @@ rootProject.name = 'Red5ProVideoViewExample'
 include ':app',
         ':react-native-red5pro'
 
-project(':react-native-red5pro').projectDir = new File(rootProject.projectDir, '../../android')
+project(':react-native-red5pro').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-red5pro/android')
 ```
 
 Now locate the `build.gradle` for your Android app, and add the following to the `dependencies`:
