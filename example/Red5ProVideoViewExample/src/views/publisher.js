@@ -162,12 +162,19 @@ export default class Publisher extends React.Component {
     const nodeHandle = findNodeHandle(this.red5pro_video_publisher)
     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
       console.log('Publisher:AppState - App has come to the foreground.')
+      if (enableBackgroundStreaming) {
+        console.log('Background Streaming enabled: unmuteVideo')
+        unmuteVideo(findNodeHandle(this.red5pro_video_publisher))
+      }
     } else if (nextAppState.match(/inactive|background/) && this.state.appState === 'active') {
       console.log('Publisher:AppState - App has gone to the background.')
       if (!enableBackgroundStreaming) {
         console.log('Publisher:AppState - unpublish()')
         // unpublish(nodeHandle)
         onStop()
+      } else {
+        console.log('Background Streaming enabled: muteVideo')
+        muteVideo(findNodeHandle(this.red5pro_video_publisher))
       }
     }
     this.setState({
