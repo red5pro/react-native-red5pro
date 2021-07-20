@@ -9,6 +9,9 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
@@ -55,6 +58,8 @@ public class R5StreamSubscriber implements R5StreamInstance,
 	private boolean mEnableBackgroundStreaming;
 	private SubscribeService mBackgroundSubscribeService;
 	private Intent mSubscribeIntent;
+
+	private Timer mStreamStatsEmitTimer;
 
 	private ServiceConnection mSubscribeServiceConnection = new ServiceConnection() {
 		@Override
@@ -118,6 +123,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 			mConnection = null;
 		}
 		mIsStreaming = false;
+		stopDebugInfoMonitor();
 
 	}
 
@@ -262,6 +268,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		}
 
 		doSubscribe(configuration.getStreamName(), hardwareAccelerated);
+		startDebufInfoMonitor();
 		return this;
 
 	}
@@ -460,4 +467,43 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		}
 	}
 
+	// Emit stream debug stats as streamSubscriberStatus message every 5 seconds
+	private void startDebufInfoMonitor() {
+		mStreamStatsEmitTimer = new Timer();
+		mStreamStatsEmitTimer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				String debugInfo = mStream.getDebugInfo();
+				R5Stream.R5Stats stats = mStream.getStats();
+
+				WritableMap statsMap = new WritableNativeMap();
+				statsMap.putDouble("buffered_time", stats.buffered_time);
+				statsMap.putDouble("subscribe_latency", stats.subscribe_latency);
+				statsMap.putInt("pkts_audio_dropped", Math.toIntExact(stats.pkts_audio_dropped));
+				statsMap.putInt("pkts_video_dropped", Math.toIntExact(stats.pkts_video_dropped));
+				statsMap.putDouble("bitrate_received_smoothed", stats.bitrate_received_smoothed);
+
+				// Emulate a regular stream subscriber event and piggyback on SUBSCRIBER_STATUS
+				WritableMap statusMap = new WritableNativeMap();
+				statusMap.putInt("code", 100);
+				statusMap.putString("name", "NEW_STREAM_STATS");
+				statusMap.putString("message", "new stream stats");
+				statusMap.putString("streamName", mConfiguration.getStreamName());
+				statusMap.putMap("streamStats", statsMap);
+
+				WritableMap map = new WritableNativeMap();
+				map.putMap("status", statusMap);
+
+				if (mEventEmitter != null) {
+					mEventEmitter.receiveEvent(mEmitterId, R5StreamSubscriber.Events.SUBSCRIBER_STATUS.toString(), map);
+				}
+			}
+		}, 0, 5000);
+	}
+
+	private void stopDebugInfoMonitor() {
+		if (mStreamStatsEmitTimer != null) {
+			mStreamStatsEmitTimer.cancel();
+		}
+	}
 }
