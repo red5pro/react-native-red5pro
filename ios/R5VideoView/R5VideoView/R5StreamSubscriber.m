@@ -26,6 +26,8 @@
     BOOL _hardwareAccelerated;
     NSString *_streamName;  // required.
     
+    NSTimer *_timer;
+    
 }
 @end
 
@@ -101,6 +103,8 @@
     self.configuration = nil;
     [self removeObservers];
     
+    [self stopStreamStatsMonitor];
+    
 }
 
 - (void)establishConnection:(R5Configuration *)configuration {
@@ -133,6 +137,8 @@
         [self.stream play:self->_streamName withHardwareAcceleration:self->_hardwareAccelerated];
         
     });
+    
+    [self startStreamStatsMonitor];
     
 }
 
@@ -274,6 +280,44 @@
         [self emitEvent:@"onMetaDataEvent" withBody:@{@"metadata": params}];
     });
     
+}
+
+- (void)emitStreamStats {
+    r5_stats *stats = [self.stream getDebugStats];
+    
+    if (!stats) return;
+    
+    NSDictionary *statsDict = @{
+                            @"buffered_time": [NSNumber numberWithFloat:stats->buffered_time],
+                            @"subscribe_latency": [NSNumber numberWithFloat:stats->subscribe_latency],
+                            @"pkts_audio_dropped": [NSNumber numberWithLong:stats->pkts_audio_dropped],
+                            @"pkts_video_dropped": [NSNumber numberWithLong:stats->pkts_video_dropped],
+                            @"bitrate_received_smoothed": [NSNumber numberWithFloat:stats->bitrate_received_smoothed],
+                            };
+    
+    // Emulate a regular stream subscriber event and piggyback on SUBSCRIBER_STATUS
+    NSDictionary *statusDict = @{
+                            @"code": @(100),
+                            @"name": @("NEW_STREAM_STATS"),
+                            @"message": @("new stream stats"),
+                            @"streamName": _streamName ? _streamName : nil,
+                            @"streamStats": statsDict,
+                            };
+    
+    NSDictionary *dict = @{@"status": statusDict};
+    
+    [self emitEvent:@"onSubscriberStreamStatus" withBody:dict];
+}
+
+- (void)startStreamStatsMonitor {
+    _timer = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(emitStreamStats) userInfo:nil repeats:YES];
+}
+
+- (void)stopStreamStatsMonitor {
+    if(_timer) {
+        [_timer invalidate];
+        _timer = nil;
+    }
 }
 
 @end
