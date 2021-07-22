@@ -123,7 +123,8 @@ public class R5StreamSubscriber implements R5StreamInstance,
 			mConnection = null;
 		}
 		mIsStreaming = false;
-		stopDebugInfoMonitor();
+
+		stopStreamStatsMonitor();
 
 	}
 
@@ -268,7 +269,9 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		}
 
 		doSubscribe(configuration.getStreamName(), hardwareAccelerated);
-		startDebufInfoMonitor();
+
+		startStreamStatsMonitor();
+
 		return this;
 
 	}
@@ -468,12 +471,11 @@ public class R5StreamSubscriber implements R5StreamInstance,
 	}
 
 	// Emit stream debug stats as streamSubscriberStatus message every 5 seconds
-	private void startDebufInfoMonitor() {
+	private void startStreamStatsMonitor() {
 		mStreamStatsEmitTimer = new Timer();
 		mStreamStatsEmitTimer.scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
-				String debugInfo = mStream.getDebugInfo();
 				R5Stream.R5Stats stats = mStream.getStats();
 
 				WritableMap statsMap = new WritableNativeMap();
@@ -501,7 +503,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		}, 0, 5000);
 	}
 
-	private void stopDebugInfoMonitor() {
+	private void stopStreamStatsMonitor() {
 		if (mStreamStatsEmitTimer != null) {
 			mStreamStatsEmitTimer.cancel();
 		}
