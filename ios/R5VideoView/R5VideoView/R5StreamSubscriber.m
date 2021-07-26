@@ -298,7 +298,7 @@
     // Emulate a regular stream subscriber event and piggyback on SUBSCRIBER_STATUS
     NSDictionary *statusDict = @{
                             @"code": @(100),
-                            @"name": @("NEW_STREAM_STATS"),
+                            @"name": @("STREAM_STATS"),
                             @"message": @("new stream stats"),
                             @"streamName": _streamName ? _streamName : nil,
                             @"streamStats": statsDict,

@@ -488,7 +488,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 				// Emulate a regular stream subscriber event and piggyback on SUBSCRIBER_STATUS
 				WritableMap statusMap = new WritableNativeMap();
 				statusMap.putInt("code", 100);
-				statusMap.putString("name", "NEW_STREAM_STATS");
+				statusMap.putString("name", "STREAM_STATS");
 				statusMap.putString("message", "new stream stats");
 				statusMap.putString("streamName", mConfiguration.getStreamName());
 				statusMap.putMap("streamStats", statsMap);
