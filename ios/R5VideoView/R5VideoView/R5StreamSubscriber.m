@@ -285,6 +285,7 @@
 - (void)emitStreamStats {
     r5_stats *stats = [self.stream getDebugStats];
     
+    // stats is nil before the stream is connected
     if (!stats) return;
     
     NSDictionary *statsDict = @{
