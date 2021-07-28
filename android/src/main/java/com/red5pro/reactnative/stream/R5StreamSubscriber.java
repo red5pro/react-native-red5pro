@@ -476,28 +476,33 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		mStreamStatsEmitTimer.scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
-				R5Stream.R5Stats stats = mStream.getStats();
+				try {
+					R5Stream.R5Stats stats = mStream.getStats();
 
-				WritableMap statsMap = new WritableNativeMap();
-				statsMap.putDouble("buffered_time", stats.buffered_time);
-				statsMap.putDouble("subscribe_latency", stats.subscribe_latency);
-				statsMap.putInt("pkts_audio_dropped", Math.toIntExact(stats.pkts_audio_dropped));
-				statsMap.putInt("pkts_video_dropped", Math.toIntExact(stats.pkts_video_dropped));
-				statsMap.putDouble("bitrate_received_smoothed", stats.bitrate_received_smoothed);
+					WritableMap statsMap = new WritableNativeMap();
+					statsMap.putDouble("buffered_time", stats.buffered_time);
+					statsMap.putDouble("subscribe_latency", stats.subscribe_latency);
+					statsMap.putInt("pkts_audio_dropped", Math.toIntExact(stats.pkts_audio_dropped));
+					statsMap.putInt("pkts_video_dropped", Math.toIntExact(stats.pkts_video_dropped));
+					statsMap.putDouble("bitrate_received_smoothed", stats.bitrate_received_smoothed);
 
-				// Emulate a regular stream subscriber event and piggyback on SUBSCRIBER_STATUS
-				WritableMap statusMap = new WritableNativeMap();
-				statusMap.putInt("code", 100);
-				statusMap.putString("name", "STREAM_STATS");
-				statusMap.putString("message", "new stream stats");
-				statusMap.putString("streamName", mConfiguration.getStreamName());
-				statusMap.putMap("streamStats", statsMap);
+					// Emulate a regular stream subscriber event and piggyback on SUBSCRIBER_STATUS
+					WritableMap statusMap = new WritableNativeMap();
+					statusMap.putInt("code", 100);
+					statusMap.putString("name", "STREAM_STATS");
+					statusMap.putString("message", "new stream stats");
+					statusMap.putString("streamName", mConfiguration.getStreamName());
+					statusMap.putMap("streamStats", statsMap);
 
-				WritableMap map = new WritableNativeMap();
-				map.putMap("status", statusMap);
+					WritableMap map = new WritableNativeMap();
+					map.putMap("status", statusMap);
 
-				if (mEventEmitter != null) {
-					mEventEmitter.receiveEvent(mEmitterId, R5StreamSubscriber.Events.SUBSCRIBER_STATUS.toString(), map);
+					if (mEventEmitter != null) {
+						mEventEmitter.receiveEvent(mEmitterId, R5StreamSubscriber.Events.SUBSCRIBER_STATUS.toString(), map);
+					}
+				}
+				catch(Exception e) {
+					Log.d(TAG, "startStreamStatsMonitor failed to get stream stats");
 				}
 			}
 		}, 0, 5000);
