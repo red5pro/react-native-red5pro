@@ -23,6 +23,7 @@ import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.red5pro.reactnative.view.PublishService;
 import com.red5pro.reactnative.view.R5VideoViewLayout;
 import com.red5pro.reactnative.view.SubscribeService;
+import com.red5pro.reactnative.util.MathUtil;
 import com.red5pro.streaming.R5Connection;
 import com.red5pro.streaming.R5Stream;
 import com.red5pro.streaming.R5StreamProtocol;
@@ -482,8 +483,8 @@ public class R5StreamSubscriber implements R5StreamInstance,
 					WritableMap statsMap = new WritableNativeMap();
 					statsMap.putDouble("buffered_time", stats.buffered_time);
 					statsMap.putDouble("subscribe_latency", stats.subscribe_latency);
-					statsMap.putInt("pkts_audio_dropped", Math.toIntExact(stats.pkts_audio_dropped));
-					statsMap.putInt("pkts_video_dropped", Math.toIntExact(stats.pkts_video_dropped));
+					statsMap.putInt("pkts_audio_dropped", MathUtil.toIntExact(stats.pkts_audio_dropped));
+					statsMap.putInt("pkts_video_dropped", MathUtil.toIntExact(stats.pkts_video_dropped));
 					statsMap.putDouble("bitrate_received_smoothed", stats.bitrate_received_smoothed);
 
 					// Emulate a regular stream subscriber event and piggyback on SUBSCRIBER_STATUS
