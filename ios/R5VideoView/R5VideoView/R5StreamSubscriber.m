@@ -120,6 +120,7 @@
     self.connection = connection;
     self.configuration = configuration;
     
+    [[self.stream audioController] setPlaybackSampleRate: 44100];
 }
 
 - (void)subscribe:(R5Configuration *)configuration andProps:(NSDictionary *)props {
