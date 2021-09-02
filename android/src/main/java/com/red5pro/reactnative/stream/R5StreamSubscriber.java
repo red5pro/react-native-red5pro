@@ -164,6 +164,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		mConfiguration = configuration;
 		mConnection = new R5Connection(configuration);
 		mStream = new R5Stream(mConnection);
+		mStream.audioController.sampleRate = 44100;
 
 		mStream.setListener(this);
 		mStream.client = this;
