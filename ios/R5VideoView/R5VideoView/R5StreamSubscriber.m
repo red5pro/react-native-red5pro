@@ -119,8 +119,6 @@
     self.stream = stream;
     self.connection = connection;
     self.configuration = configuration;
-    
-    [[self.stream audioController] setPlaybackSampleRate: 44100];
 }
 
 - (void)subscribe:(R5Configuration *)configuration andProps:(NSDictionary *)props {
@@ -135,6 +133,7 @@
         }
         
         [self.stream setAudioController:[[R5AudioController alloc] initWithMode:self->_audioMode]];
+        [[self.stream audioController] setPlaybackSampleRate: 44100];
         [self.stream play:self->_streamName withHardwareAcceleration:self->_hardwareAccelerated];
         
     });
