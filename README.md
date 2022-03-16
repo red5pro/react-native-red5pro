@@ -41,7 +41,7 @@ React Native Red5 Pro Publisher & Subscriber.
 This repo and the [examples](examples) have been built and tested against the following:
 
 * React Native `v0.61.5`
-* Red5 Pro Mobile SDKs `v7.0.0`
+* Red5 Pro Mobile SDKs `v9.0.0`
 
 # Install
 
