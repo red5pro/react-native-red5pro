@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Button,
   Platform,
@@ -23,6 +23,7 @@ import Publisher from './src/views/publisher'
 import Subscriber from './src/views/subscriber'
 
 export default class App extends React.Component {
+
   constructor (props) {
     super(props)
 
@@ -272,15 +273,15 @@ export default class App extends React.Component {
 
   getStateFromProps () {
     const { useAuthentication } = this.state
-    const hostValue = this.host_field.props.value
-    const licenseValue = this.license_field.props.value
-    const streamNameValue = this.stream_name_field.props.value
-    const usernameValue = useAuthentication ? this.username_field.props.value : undefined
-    const passwordValue = useAuthentication ? this.password_field.props.value : undefined
+    const hostValue = this.state.hostFieldProps.value
+    const licenseValue = this.state.licenseFieldProps.value
+    const streamNameValue = this.state.streamNameFieldProps.value
+    const usernameValue = useAuthentication ? this.usernameFieldProps.value : undefined
+    const passwordValue = useAuthentication ? this.passwordFieldProps.value : undefined
     return {
-      hostFieldProps: {...this.state.hostFieldProps, value: hostValue},
-      licenseFieldProps: {...this.state.licenseFieldProps, value: licenseValue},
-      streamNameFieldProps: {...this.state.streamNameFieldProps, value: streamNameValue},
+      hostFieldProps: this.state.hostFieldProps,
+      licenseFieldProps: this.state.licenseFieldProps,
+      streamNameFieldProps: this.state.streamNameFieldProps,
       streamProps: {...this.state.streamProps,
         configuration: {...this.state.streamProps.configuration,
           host: hostValue,
