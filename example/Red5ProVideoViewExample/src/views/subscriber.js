@@ -105,7 +105,6 @@ const Subscriber = ({ onStop }) => {
 
   const { stream } = useContext(StreamContext)
 
-  let retryTimer = 0
   const appState = useRef(AppState.currentState)
   const [appStateCurrent, setAppStateCurrent] = useState(appState.current)
   const [subscriberRef, setSubscriberRef] = useState(null)
@@ -141,7 +140,11 @@ const Subscriber = ({ onStop }) => {
   }
 
   const doUnsubscribe = () => {
-    unsubscribe(findNodeHandle(subscriberRef))
+    try {
+      unsubscribe(findNodeHandle(subscriberRef))
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   const onAppStateChange = nextAppState => {
@@ -184,8 +187,8 @@ const Subscriber = ({ onStop }) => {
     console.log(`Subscriber:onSubscriberStreamStatus :: ${JSON.stringify(status, null, 2)}`)
     let message = isValidStatusMessage(status.message) ? status.message : status.name
     if (status.name.toLowerCase() === 'error' ||
-        message.toLowerCase() === 'disconnected') {
-      doUnsubscribe()
+      message.toLowerCase() === 'disconnected') {
+      //doUnsubscribe()
       setIsDisconnected(true)
     } else if (message.toLowerCase() === 'connected') {
       setIsDisconnected(false)
@@ -225,17 +228,6 @@ const Subscriber = ({ onStop }) => {
     setAudioMuted(!audioMuted)
   }
 
-  const onStartRetry = () => {
-    stopRetry()
-    retryTimer = setTimeout(() => {
-      doSubscribe()
-    }, 1000)
-  }
-
-  const stopRetry = () => {
-    clearTimeout(retryTimer)
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.subcontainer}>
@@ -270,14 +262,6 @@ const Subscriber = ({ onStop }) => {
         </View>
         <View style={styles.buttonContainer}>
           <Text style={styles.toast}>{toastMessage}</Text>
-          {isDisconnected && (
-            <TouchableOpacity style={styles.button}
-              onPress={onStartRetry}
-              title="Resubscribe"
-              accessibilityLabel="Resubscribe">
-                <Text style={styles.buttonLabel}>Resubscribe</Text>
-            </TouchableOpacity>
-          )}
           <TouchableOpacity style={styles.button}
             onPress={onStopSubscribe}
             accessibilityLabel="Stop">
