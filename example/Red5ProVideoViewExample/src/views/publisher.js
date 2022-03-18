@@ -98,11 +98,12 @@ const isValidStatusMessage = (value) => {
   return value && typeof value !== 'undefined' && value !== 'undefined' && value !== 'null'
 }
 
-const Publisher = ({ streamProps, style, onStop }) => {
+const Publisher = ({ onStop }) => {
 
   const { stream } = useContext(StreamContext)
 
   const appState = useRef(AppState.currentState)
+  const [appStateCurrent, setAppStateCurrent] = useState(appState.current)
   const [publisherRef, setPublisherRef] = useState(null)
   const [configuration, setConfiguration] = useState(null)
   const [toastMessage, setToastMessage] = useState('waiting...')
@@ -132,7 +133,7 @@ const Publisher = ({ streamProps, style, onStop }) => {
   const onAppStateChange = nextAppState => {
     console.log(`Publisher:AppState - ${nextAppState}`)
     const { enableBackgroundStreaming } = stream
-    if (appState.match(/inactive|background/) && nextAppState === 'active') {
+    if (appStateCurrent.match(/inactive|background/) && nextAppState === 'active') {
       console.log('Publisher:AppState - App has come to the foreground.')
       if (enableBackgroundStreaming) {
         console.log('Background Streaming enabled: unmuteVideo')
@@ -148,6 +149,7 @@ const Publisher = ({ streamProps, style, onStop }) => {
         muteVideo(findNodeHandle(publisherRef))
       }
     }
+    setAppStateCurrent(nextAppState)
   }
 
   const onStopPublish = () => {

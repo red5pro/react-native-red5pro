@@ -4,7 +4,6 @@ import {
   AppState,
   NativeEventEmitter,
   findNodeHandle,
-  Button,
   SafeAreaView,
   StyleSheet,
   Text,

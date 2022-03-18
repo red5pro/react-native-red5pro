@@ -1,8 +1,5 @@
 import React from 'react'
-import {
-  Platform,
-  StyleSheet
-} from 'react-native'
+import { Platform } from 'react-native'
 import { 
   check, 
   request, 
@@ -16,20 +13,6 @@ import { StreamProvider } from './src/components/StreamProvider'
 import Publisher from './src/views/publisher'
 import Subscriber from './src/views/subscriber'
 import Settings from './src/views/Settings'
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-    justifyContent: 'center'
-  },
-  text: {
-    left: 0,
-    right: 0,
-    textAlign: 'center',
-    padding: 20
-  }
-})
 
 export default class App extends React.Component {
 
@@ -106,22 +89,14 @@ export default class App extends React.Component {
       if (this.state.isPublisher) {
         return (
           <StreamProvider>
-            <Publisher
-              streamProps={this.state.streamProps}
-              style={styles.container}
-              onStop={this.onStop}
-              />
+            <Publisher onStop={this.onStop} />
           </StreamProvider>
         )
       }
       else {
         return (
           <StreamProvider>
-            <Subscriber
-              streamProps={this.state.streamProps}
-              style={styles.container}
-              onStop={this.onStop}
-              />
+            <Subscriber onStop={this.onStop} />
           </StreamProvider>
         )
       }
