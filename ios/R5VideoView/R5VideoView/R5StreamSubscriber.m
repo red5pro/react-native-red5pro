@@ -24,6 +24,7 @@
     BOOL _playbackVideo;
     BOOL _enableBackgroundStreaming;
     BOOL _hardwareAccelerated;
+    int _audioSampleRate;
     NSString *_streamName;  // required.
     
 }
@@ -71,6 +72,7 @@
     _playbackVideo = YES;
     _hardwareAccelerated = YES;
     _enableBackgroundStreaming = NO;
+    _audioSampleRate = 16000;
     
     if (props == nil) {
         return;
@@ -81,6 +83,7 @@
     _audioMode = [props objectForKey:@"audioMode"] != nil ? [[props objectForKey:@"audioMode"] intValue] : _audioMode;
     _showDebugInfo = [props objectForKey:@"showDebugView"] != nil ? [[props objectForKey:@"showDebugView"] boolValue] : _showDebugInfo;
     _playbackVideo = [props objectForKey:@"subscribeVideo"] != nil ? [[props objectForKey:@"subscribeVideo"] boolValue] : _playbackVideo;
+    _audioSampleRate = [props objectForKey:@"audioSampleRate"] != nil ? [[props objectForKey:@"audioSampleRate"] intValue] : _audioSampleRate;
     _hardwareAccelerated = [props objectForKey:@"hardwareAccelerated"] != nil ? [[props objectForKey:@"hardwareAccelerated"] boolValue] : _hardwareAccelerated;
     _enableBackgroundStreaming = [props objectForKey:@"enableBackgroundStreaming"] != nil ? [[props objectForKey:@"enableBackgroundStreaming"] boolValue] : _enableBackgroundStreaming;
     
@@ -130,6 +133,7 @@
         }
         
         [self.stream setAudioController:[[R5AudioController alloc] initWithMode:self->_audioMode]];
+        [[self.stream audioController] setPlaybackSampleRate: self->_audioSampleRate];
         [self.stream play:self->_streamName withHardwareAcceleration:self->_hardwareAccelerated];
         
     });

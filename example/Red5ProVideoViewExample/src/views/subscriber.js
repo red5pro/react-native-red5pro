@@ -117,7 +117,6 @@ const Subscriber = ({ onStop }) => {
   const [scaleMode, setScaleMode] = useState(R5ScaleMode.SCALE_TO_FILL)
 
   useEffect(() => {
-    console.log('Add App State Change.')
     const subscribe = AppState.addEventListener('change', onAppStateChange)
     return () => {
       subscribe.remove()
@@ -251,7 +250,7 @@ const Subscriber = ({ onStop }) => {
         )}
         <View style={styles.iconContainer}>
           <Icon
-            name={audioMuted ? 'md-volume-off' : 'md-volume-high'}
+            name={audioMuted ? 'volume-off' : 'volume-high'}
             type='ionicon'
             size={26}
             color={audioMuted ? '#fff' : '#000'}
