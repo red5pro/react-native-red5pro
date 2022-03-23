@@ -10,6 +10,10 @@ import Publisher from './src/views/Publisher-modular'
 import Subscriber from './src/views/Subscriber-modular'
 import Settings from './src/views/Settings'
 
+// Silly hack to quiet the NativeEventEmiiter warnings on Android.
+import { LogBox } from 'react-native'
+LogBox.ignoreLogs(['new NativeEventEmitter'])
+
 const App = () => {
 
   const [hasPermissions, setHasPermissions] = useState(false)
