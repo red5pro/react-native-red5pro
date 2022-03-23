@@ -1,6 +1,6 @@
 {
   "name": "react-native-red5pro",
-  "version": "9.0.0",
+  "version": "10.0.0-beta.1",
   "description": "React Native Red5 Pro Publisher/Subscriber",
   "main": "index.js",
   "scripts": {

@@ -52,6 +52,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 	private boolean mIsStreaming;
 	private boolean mIsBackgroundBound;
 	private boolean mHardwareAccelerated;
+	private int mAudioSampleRate = 44100;
 	private boolean mEnableBackgroundStreaming;
 	private SubscribeService mBackgroundSubscribeService;
 	private Intent mSubscribeIntent;
@@ -165,7 +166,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
 	}
 
-	protected void doSubscribe (String streamName, Boolean hardwareAccelerated) {
+	protected void doSubscribe (String streamName, Boolean hardwareAccelerated, int sampleRate) {
 
 		Log.d(TAG, "doSubscribe()");
 		if (mPlaybackVideo) {
@@ -173,6 +174,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		} else {
 			mStream.deactivate_display();
 		}
+		mStream.audioController.sampleRate = sampleRate;
 		mStream.play(streamName, hardwareAccelerated);
 
 	}
@@ -180,7 +182,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 	public void subscribeBound () {
 
 		Log.d(TAG, "doSubscribeBound()");
-		doSubscribe(mConfiguration.getStreamName(), mHardwareAccelerated);
+		doSubscribe(mConfiguration.getStreamName(), mHardwareAccelerated, mAudioSampleRate);
 
 	}
 
@@ -188,7 +190,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 										 boolean enableBackground) {
 
 		return subscribe(configuration, true, enableBackground,
-				mAudioMode, mLogLevel, mScaleMode, false, true, false);
+				mAudioMode, mLogLevel, mScaleMode, false, true, mAudioSampleRate, false);
 
 	}
 
@@ -197,7 +199,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 										 boolean enableBackground) {
 
 		return subscribe(configuration, playbackVideo, enableBackground,
-				mAudioMode, mLogLevel, mScaleMode, false, true, false);
+				mAudioMode, mLogLevel, mScaleMode, false, true, mAudioSampleRate, false);
 
 	}
 
@@ -209,7 +211,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
                                          int scaleMode) {
 
         return subscribe(configuration, playbackVideo, enableBackground,
-                audioMode, logLevel, scaleMode, false, true, false);
+                audioMode, logLevel, scaleMode, false, true, mAudioSampleRate, false);
 
     }
 
@@ -224,6 +226,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 				props.scaleMode,
 				props.showDebugView,
 				props.hardwareAccelerated,
+				props.audioSampleRate,
 				props.useEncryption);
 
 	}
@@ -235,8 +238,9 @@ public class R5StreamSubscriber implements R5StreamInstance,
 										 int audioMode,
 										 int logLevel,
 										 int scaleMode,
-                                         boolean showDebugView,
+										 boolean showDebugView,
 										 boolean hardwareAccelerated,
+										 int audioSampleRate,
 										 boolean useEncryption) {
 
 		mLogLevel = logLevel;
@@ -245,6 +249,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		mPlaybackVideo = playbackVideo;
 		mShowDebugView = showDebugView;
 		mHardwareAccelerated = hardwareAccelerated;
+    	mAudioSampleRate = audioSampleRate;
 
 		if (useEncryption) {
 			configuration.setProtocol(R5StreamProtocol.SRTP);
@@ -261,7 +266,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 			return this;
 		}
 
-		doSubscribe(configuration.getStreamName(), hardwareAccelerated);
+		doSubscribe(configuration.getStreamName(), hardwareAccelerated, mAudioSampleRate);
 		return this;
 
 	}

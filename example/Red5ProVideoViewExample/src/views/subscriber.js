@@ -1,9 +1,8 @@
 /* eslint-disable no-console */
-import React from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import {
   AppState,
   findNodeHandle,
-  Button,
   Image,
   SafeAreaView,
   StyleSheet,
@@ -12,6 +11,7 @@ import {
   View
 } from 'react-native'
 import { Icon } from 'react-native-elements'
+import { StreamContext } from '../components/StreamProvider'
 import { 
   R5VideoView,
   R5ScaleMode,
@@ -101,270 +101,183 @@ const styles = StyleSheet.create({
   }
 })
 
-export default class Subscriber extends React.Component {
-  constructor (props) {
-    super(props)
+const Subscriber = ({ onStop }) => {
 
-    // Events.
-    this.onMetaData = this.onMetaData.bind(this)
-    this.onConfigured = this.onConfigured.bind(this)
-    this.onSubscriberStreamStatus = this.onSubscriberStreamStatus.bind(this)
-    this.onUnsubscribeNotification = this.onUnsubscribeNotification.bind(this)
+  const { stream } = useContext(StreamContext)
 
-    this.onScaleMode = this.onScaleMode.bind(this)
-    this.onToggleAudioMute = this.onToggleAudioMute.bind(this)
+  const appState = useRef(AppState.currentState)
+  const [appStateCurrent, setAppStateCurrent] = useState(appState.current)
+  const [subscriberRef, setSubscriberRef] = useState(null)
+  const [configuration, setConfiguration] = useState(null)
+  const [toastMessage, setToastMessage] = useState('waiting...')
+  const [isInErrorState, setIsInErrorState] = useState(false)
+  const [isDisconnected, setIsDisconnected] = useState(false)
+  const [audioMuted, setAudioMuted] = useState(false)
+  const [audioIconStyle, setAudioIconStyle] = useState([styles.muteIcon, styles.muteIconRight])
+  const [scaleMode, setScaleMode] = useState(R5ScaleMode.SCALE_TO_FILL)
 
-    this.doSubscribe = this.doSubscribe.bind(this)
-    this.doUnsubscribe = this.doUnsubscribe.bind(this)
-    this.retry = this.retry.bind(this)
-    this.startRetry = this.startRetry.bind(this)
-    this.stopRetry = this.stopRetry.bind(this)
+  useEffect(() => {
+    const subscribe = AppState.addEventListener('change', onAppStateChange)
+    return () => {
+      subscribe.remove()
+    }
+  }, [])
 
-    this.state = {
-      appState: AppState.currentState,
-      scaleMode: R5ScaleMode.SCALE_TO_FILL,
-      audioMuted: false,
-      isInErrorState: false,
-      isConnecting: false,
-      isDisconnected: true,
-      buttonProps: {
-        style: styles.button
-      },
-      toastProps: {
-        style: styles.toast,
-        value: 'waiting...'
-      },
-      videoProps: {
-        style: styles.videoView,
-        onMetaData: this.onMetaData,
-        onConfigured: this.onConfigured,
-        onSubscriberStreamStatus: this.onSubscriberStreamStatus,
-        onUnSubscribeNotification: this.onUnsubscribeNotification
-      }
+  useEffect(() => {
+    console.log('Subscriber:Stream')
+    if (stream) {
+      const { configuration } = stream
+      console.log('Subscriber:Configuration - ' + JSON.stringify(configuration, null, 2))
+      setConfiguration(configuration)
+    }
+  }, [stream])
+
+  const doSubscribe = () => {
+    const { streamName } = configuration
+    subscribe(findNodeHandle(subscriberRef), streamName)
+    setPlaybackVolume(findNodeHandle(subscriberRef), 100)
+  }
+
+  const doUnsubscribe = () => {
+    try {
+      unsubscribe(findNodeHandle(subscriberRef))
+    } catch (e) {
+      console.error(e)
     }
   }
 
-  componentDidMount () {
-    console.log('Subscriber:componentWillMount()')
-    AppState.addEventListener('change', this._handleAppStateChange)
-  }
-
-  componentWillUnmount () {
-    console.log('Subscriber:componentWillUnmount()')
-    this.stopRetry()
-    AppState.removeEventListener('change', this._handleAppStateChange)
-    this.doUnsubscribe()
-  }
-
-  _handleAppStateChange = (nextAppState) => {
+  const onAppStateChange = nextAppState => {
     console.log(`Subscriber:AppState - ${nextAppState}`)
-    const { streamProps: { enableBackgroundStreaming } } = this.props
-    const { onStop } = this.props
-    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+    const { enableBackgroundStreaming } = stream
+    if (appStateCurrent.match(/inactive|background/) && nextAppState === 'active') {
       console.log('Subscriber:AppState - App has come to the foreground.')
     } else if (nextAppState === 'inactive') {
       console.log('Subscriber:AppState - App has gone to the background.')
       if (!enableBackgroundStreaming) {
         console.log('Subscriber:AppState - unsubscribe()')
-        //        this.doUnsubscribe()
-        onStop()
+        onStopSubscribe()
       }
     }
-    this.setState({
-      appState: nextAppState
-    })
+    setAppStateCurrent(nextAppState)
   }
 
-  render () {
-    const {
-      videoProps,
-      toastProps,
-      buttonProps,
-      audioMuted,
-      isDisconnected
-    } = this.state
-
-    const {
-      onStop,
-      streamProps
-    } = this.props
-
-    const setup = Object.assign({}, streamProps, videoProps)
-
-    const displayVideo = setup.subscribeVideo
-
-    const audioIconColor = audioMuted ? '#fff' : '#000'
-    const audioIconStyle = audioMuted ? [styles.muteIcon, styles.muteIconToggled] : styles.muteIcon
-
-    const assignVideoRef = (video) => { this.red5pro_video_subscriber = video }
-    const assignToastRef = (toast) => { this.toast_field = toast }
-
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.subcontainer}>
-          <R5VideoView
-            {...setup}
-            ref={assignVideoRef.bind(this)}
-          />
-          { !displayVideo && <View style={styles.imageContainer}>
-            <Image 
-              style={{ width: 69, height: 68 }}
-              source={{uri: 'https://www.red5pro.com/images/red5pro_icon1.png'}} />
-            </View>
-          }
-          <View style={styles.iconContainer}>
-            <Icon
-              name={audioMuted ? 'md-volume-off' : 'md-volume-high'}
-              type='ionicon'
-              size={26}
-              color={audioIconColor}
-              hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
-              onPress={this.onToggleAudioMute}
-              containerStyle={audioIconStyle}
-            />
-          </View>
-          <View style={styles.buttonContainer}>
-            <Text
-              ref={assignToastRef.bind(this)}
-              {...toastProps}>{toastProps.value}</Text>
-            { isDisconnected && <TouchableOpacity {...buttonProps}
-              onPress={this.startRetry}
-              title="Resubscribe"
-              accessibilityLabel="Resubscribe">
-                <Text style={styles.buttonLabel}>Resubscribe</Text>
-              </TouchableOpacity>
-            }
-            <TouchableOpacity {...buttonProps}
-              onPress={onStop}
-              accessibilityLabel="Stop">
-              <Text style={styles.buttonLabel}>Stop</Text>
-            </TouchableOpacity>
-            { !isDisconnected && <TouchableOpacity {...buttonProps}
-              onPress={this.onScaleMode}
-              title='Swap Scale'
-              accessibilityLabel='Swap Scale'>
-              <Text style={styles.buttonLabel}>Swap Scale</Text>
-                </TouchableOpacity>
-            }
-          </View>
-        </View>
-      </SafeAreaView>
-    )
+  const onStopSubscribe = () => {
+    try {
+      doUnsubscribe()
+    } catch (e) {
+      console.error(e)
+    }
+    onStop()
   }
 
-  onMetaData (event) {
-    console.log(`Subscriber:onMetadata :: ${event.nativeEvent.metadata}`)
+  const onMetaData = event => {
+    const { nativeEvent: { metadata } } = event
+    console.log(`Subscriber:onMetadata :: ${metadata}`)
   }
 
-  onConfigured (event) {
-    console.log(`Subscriber:onConfigured :: ${event.nativeEvent.key}`)
-    this.doSubscribe()
+  const onConfigured = event => {
+    const { nativeEvent: { key } } = event
+    console.log(`Subscriber:onConfigured :: ${key}`)
+    doSubscribe()
   }
 
-  onSubscriberStreamStatus (event) {
-    console.log(`Subscriber:onSubscriberStreamStatus :: ${JSON.stringify(event.nativeEvent.status, null, 2)}`)
-    const status = event.nativeEvent.status
+  const onSubscriberStreamStatus = event => {
+    const { nativeEvent: { status } } = event
+    console.log(`Subscriber:onSubscriberStreamStatus :: ${JSON.stringify(status, null, 2)}`)
     let message = isValidStatusMessage(status.message) ? status.message : status.name
     if (status.name.toLowerCase() === 'error' ||
-        message.toLowerCase() === 'disconnected') {
-      this.doUnsubscribe()
-      this.setState({
-        isDisconnected: true,
-        isConnecting: false
-      })
+      message.toLowerCase() === 'disconnected') {
+      //doUnsubscribe()
+      setIsDisconnected(true)
     } else if (message.toLowerCase() === 'connected') {
-      this.setState({
-        isDisconnected: false,
-        isConnecting: false
-      })
+      setIsDisconnected(false)
     }
-    if (!this.state.inErrorState) {
-      this.setState({
-        toastProps: {...this.state.toastProps, value: message},
-        isInErrorState: (status.code === 2)
-      })
+    if (!isInErrorState) {
+      setIsInErrorState(status.code === 2)
     }
+    setToastMessage(message)
   }
 
-  onUnsubscribeNotification (event) {
-    console.log(`Subscriber:onUnsubscribeNotification:: ${JSON.stringify(event.nativeEvent.status, null, 2)}`)
-    this.setState({
-      isInErrorState: false,
-      toastProps: {...this.state.toastProps, value: 'waiting...'}
-    })
+  const onUnsubscribeNotification = event => {
+    const { nativeEvent: { status } } = event
+    console.log(`Subscriber:onUnsubscribeNotification:: ${JSON.stringify(status, null, 2)}`)
+    setIsInErrorState(false)
+    setToastMessage('waiting...')
   }
 
-  onScaleMode () {
+  const onScaleMode = () => {
     console.log('Subscriber:onScaleMode()')
-    const {
-      scaleMode
-    } = this.state
     let scale = scaleMode + 1
     if (scale > 2) {
       scale = 0
     }
-    updateScaleMode(findNodeHandle(this.red5pro_video_subscriber), scale)
-    this.setState({
-      scaleMode: scale
-    })
+    updateScaleMode(findNodeHandle(subscriberRef), scale)
+    setScaleMode(scale)
   }
 
-  onToggleAudioMute () {
+  const onToggleAudioMute = () => {
     console.log('Subscriber:onToggleAudioMute()')
-    const { audioMuted } = this.state
+    const style = [styles.muteIcon, styles.muteIconRight]
     if (audioMuted) {
-      setPlaybackVolume(findNodeHandle(this.red5pro_video_subscriber), 100)
+      setPlaybackVolume(findNodeHandle(subscriberRef), 100)
     } else {
-      setPlaybackVolume(findNodeHandle(this.red5pro_video_subscriber), 0)
+      setPlaybackVolume(findNodeHandle(subscriberRef), 0)
     }
-    this.setState({
-      audioMuted: !audioMuted
-    })
+    setAudioIconStyle(!audioMuted ? style.concat([styles.muteIconToggled]) : style)
+    setAudioMuted(!audioMuted)
   }
 
-  doSubscribe () {
-    const {
-      streamProps: {
-        configuration: {
-          streamName
-        }
-      }
-    } = this.props
-    const nodeHandle = findNodeHandle(this.red5pro_video_subscriber)
-    if (nodeHandle) {
-      subscribe(findNodeHandle(this.red5pro_video_subscriber), streamName)
-      setPlaybackVolume(findNodeHandle(this.red5pro_video_subscriber), 100)
-    }
-  }
-
-  doUnsubscribe () {
-    const nodeHandle = findNodeHandle(this.red5pro_video_subscriber)
-    if (nodeHandle) {
-      unsubscribe(nodeHandle)
-    }
-  }
-
-  startRetry () {
-    this.stopRetry()
-    this.retryTimer = setTimeout(() => {
-      this.retry()
-    }, 1000)
-  }
-
-  stopRetry () {
-    clearTimeout(this.retryTimer)
-  }
-
-  retry () {
-    const {
-      streamProps: {
-        configuration: {
-          streamName
-        }
-      }
-    } = this.props
-
-    console.log(`attempting retry for stream name :: ${streamName}`)
-    subscribe(findNodeHandle(this.red5pro_video_subscriber), streamName)
-  }
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.subcontainer}>
+        {configuration && (
+          <R5VideoView
+            {...stream}
+            ref={ref => setSubscriberRef(ref)}
+            style={styles.videoView}
+            onMetaData={onMetaData}
+            onConfigured={onConfigured}
+            onSubscriberStreamStatus={onSubscriberStreamStatus}
+            onUnSubscribeNotification={onUnsubscribeNotification}
+            />
+        )}
+        {!stream.subscribeVideo && (
+          <View style={styles.imageContainer}>
+            <Image 
+              style={{ width: 69, height: 68 }}
+              source={{uri: 'https://www.red5pro.com/docs/static/Red5Pro_logo_white_red.8a131521.svg'}} />
+          </View>
+        )}
+        <View style={styles.iconContainer}>
+          <Icon
+            name={audioMuted ? 'volume-off' : 'volume-high'}
+            type='ionicon'
+            size={26}
+            color={audioMuted ? '#fff' : '#000'}
+            hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
+            onPress={onToggleAudioMute}
+            containerStyle={audioIconStyle}
+            />
+        </View>
+        <View style={styles.buttonContainer}>
+          <Text style={styles.toast}>{toastMessage}</Text>
+          <TouchableOpacity style={styles.button}
+            onPress={onStopSubscribe}
+            accessibilityLabel="Stop">
+            <Text style={styles.buttonLabel}>Stop</Text>
+          </TouchableOpacity>
+          {!isDisconnected && (
+            <TouchableOpacity style={styles.button}
+              onPress={onScaleMode}
+              title='Swap Scale'
+              accessibilityLabel='Swap Scale'>
+              <Text style={styles.buttonLabel}>Swap Scale</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    </SafeAreaView>
+  )
 }
+
+export default Subscriber
