@@ -40,8 +40,8 @@ React Native Red5 Pro Publisher & Subscriber.
 
 This repo and the [examples](examples) have been built and tested against the following:
 
-* React Native `v0.61.5`
-* Red5 Pro Mobile SDKs `v9.0.0`
+* React Native `v0.67.3`
+* Red5 Pro Mobile SDK `v10.0.0`
 
 # Install
 
@@ -72,8 +72,8 @@ pod 'R5VideoView', :path => '../node_modules/react-native-red5pro'
 
 permissions_path = '../node_modules/react-native-permissions/ios'
 
-pod 'Permission-Camera', :path => "#{permissions_path}/Camera.podspec"
-pod 'Permission-Microphone', :path => "#{permissions_path}/Microphone.podspec"
+  pod 'Permission-Camera', :path => "#{permissions_path}/Camera/Permission-Camera.podspec"
+  pod 'Permission-Microphone', :path => "#{permissions_path}/Microphone/Permission-Microphone.podspec"
 ```
 
 Then issue the following within your React Native iOS-based project directory:
@@ -322,17 +322,10 @@ The `R5StreamModule` is used to establish a streaming session without requiring 
 
 The original reason for developing and including the `R5StreamModule` was to allow a previously established stream to be detached and reattached to `R5VideoView` instance when the UI state of the App requires a change in your project. By using the `R5StreamModule` you can maintain the previously established publisher or subscriber session while updating the view state - all while not interrupting the stream.
 
-To initialize a stream session, from which you can start a publisher or subscriber stream, you initilize/register the configuration using the `R5StreamModule.init` method which returns a `Promise`:
+To initialize a stream session, from which you can start a publisher or subscriber stream, you initilize/register the configuration using the `R5StreamModule.init` method which returns a `Promise` and can be used with `async/await`:
 
 ```
-this.streamId = undefined // will be defined in success and utilized in lifecycle API.
-R5StreamModule.init('<uniquestreamid>', configuration)
-  .then(streamId => {
-    this.streamId = streamId
-  })
-  .catch(error => {
-    // error occurred in initialization.
-  })
+const streamId = await R5StreamModule.init('<uniquestreamid>', configuration)
 ```
 
 For publishers, the `<uniquestreamid>` can be the stream name you will publish with. For subscriber, the `<uniquestreamid>` will be a unique subscriper id.
@@ -348,14 +341,15 @@ The `R5VideoView` is used to declare a UI view instance that a stream will be sh
 The `R5VideoView` is declared similar to the following and is recommended to retain a reference for other node handling and interaction:
 
 ```js
-render () {
-  const { videoProps } = this.props
-  const assignVideoRef = (video) => { this.red5pro_video_publisher = video }
+  const [subscriberRef, setSubscriberRef] = useState(null)
+
+...
+
   return (
     <View>
       <R5VideoView
-        {...videoProps}
-        ref={assignVideoRef.bind(this)}
+        {...streamConfiguration}
+        ref={ref => setSubscriberRef(ref)}
       />
     </View>
   )
@@ -437,22 +431,33 @@ The following events are available:
 To establish a listener for these events, you must first establish a `NativeEventEmiiter` instance using the `R5StreamModule`:
 
 ```js
+import { useRef } from 'react'
 import { NativeEventEmiiter } from 'react-native'
 import { R5StreamModule } from 'react-native-red5pro'
 ...
-this.emitter = new NativeEventEmiiter(R5StreamModule)
+  const emitter = useRef(new NativeEventEmitter(R5StreamModule))
 ```
 
 Once an emitter is established, use the `addListener` method, e.g,:
 
 ```js
-this.emitter.addListener('onMetaDataEvent', this.onMetaData)
-```
-
-To remove event listeners:
-
-```js
-this.emitter.removeAllListeners('onMetaDataEvent')
+  useEffect(() => {
+    const eventEmitter = emitter.current
+    if (eventEmitter) {
+      eventEmitter.addListener('onMetaDataEvent', onMetaData)
+      eventEmitter.addListener('onConfigured', onConfigured)
+      eventEmitter.addListener('onSubscriberStreamStatus', onSubscriberStreamStatus)
+      eventEmitter.addListener('onUnsubscribeNotification', onUnsubscribeNotification)
+    }
+    return () => {
+      if (eventEmitter) {
+        eventEmitter.removeAllListeners('onMetaDataEvent')
+        eventEmitter.removeAllListeners('onConfigured')
+        eventEmitter.removeAllListeners('onSubscriberStreamStatus')
+        eventEmitter.removeAllListeners('onUnsubscribeNotification')
+      }
+    }
+  }, [])
 ```
 
 ## Known Issues
@@ -598,88 +603,80 @@ You will need to have a Red5 Pro SDK license and access to a reployed Red5 Pro S
 > [Sign up for a free trial of Red5 Pro!](https://account.red5pro.com/register)
 
 ```js
-import React from 'react'
+import React, { useState } from 'react'
 import { findNodeHandle, View, Button, StyleSheet } from 'react-native'
 
 import { R5VideoView } from 'react-native-red5pro'
 import { R5LogLevel } from 'react-native-red5pro'
-import { publish,
-         unpublish,
-         swapCamera } from 'react-native-red5pro'
+import {
+  publish,
+  unpublish,
+  swapCamera
+} from 'react-native-red5pro'
 
-export default class App extends React.Component {
+const streamConfig = {
+  configuration: {
+    host: 'your.red5pro.deploy', // IP or Fully Qualified Domain Name
+    port: 8554,
+    contextName: 'live',
+    bufferTime: 0.5,
+    streamBufferTime: 2,
+    key: Math.floor(Math.random() * 0x10000).toString(16),
+    bundleID: 'com.red5pro.example',
+    licenseKey: 'YOUR-LICENSE-KEY',
+    streamName: 'mystream'
+  },
+  showDebugView: true,
+  logLevel: R5LogLevel.DEBUG
+}
 
-  constructor (props) {
-    super(props)
+export default App = () => {
 
-    this.state = {
-      publisher: {
-        ref: 'video',
-        configuration: {
-          host: 'your.red5pro.deploy', // IP or Fully Qualified Domain Name
-          port: 8554,
-          contextName: 'live',
-          bufferTime: 0.5,
-          streamBufferTime: 2,
-          key: Math.floor(Math.random() * 0x10000).toString(16),
-          bundleID: 'com.red5pro.example',
-          licenseKey: 'YOUR-LICENSE-KEY',
-          streamName: 'mystream'
-        },
-        showDebugView: true,
-        logLevel: R5LogLevel.DEBUG,
-        onConfigured: this.onConfigured.bind(this)
-      }
-    }
+  const [publisherRef, setPublisherRef] = useState(null)
 
-    this.onStop = this.onStop.bind(this)
-    this.onSwapCamera = this.onSwapCamera.bind(this)
-
+  const onMetaData = event => {
+    const { nativeEvent: { metadata } } = event
+    console.log(`Publisher:onMetadata :: ${metadata}`)
   }
 
-  render () {
-
-    return (
-      <View style={styles.container}>
-        <R5VideoView {...this.state.publisher} style={styles.video} />
-        <Button
-          style={styles.button}
-          onPress={this.onStop}
-          title='Stop'
-          accessibilityLabel='Stop'
-          />
-        <Button
-          style={styles.button}
-          onPress={this.onSwapCamera}
-          title='Swap Camera'
-          accessibilityLabel='Swap Camera'
-          />
-      </View>
-    )
-
+  const onConfigured = event => {
+    const { configuration: { streamName } } = streamConfig
+    const { nativeEvent: { key } } = event
+    console.log(`Publisher:onConfigured :: ${key}`)
+    publish(findNodeHandle(publisherRef), streamName)
   }
 
-  onConfigured () {
-    // By providing the `configuration` state prop to the view,
-    // the component starts the configuration process.
-
-    const streamName = this.state.publisher.configuration.streamName
-    publish(findNodeHandle(this.refs.video), streamName)
-
+  const onStop = () => {
+    unpublish(findNodeHandle(publisherRef))
   }
 
-  onStop () {
-
-    unpublish(findNodeHandle(this.refs.video))
-
+  const onSwapCamera = () => {
+    swapCamera(findNodeHandle(publisherRef))
   }
 
-  onSwapCamera () {
-
-    swapCamera(findNodeHandle(this.refs.video))
-
-  }
-
+  return (
+    <View style={styles.container}>
+      <R5VideoView
+        {...streamConfig}
+        ref={ref => setPublisherRef(ref)}
+        style={styles.videoView}
+        onMetaData={onMetaData}
+        onConfigured={onConfigured}
+        />
+      <Button
+        style={styles.button}
+        onPress={this.onStop}
+        title='Stop'
+        accessibilityLabel='Stop'
+        />
+      <Button
+        style={styles.button}
+        onPress={this.onSwapCamera}
+        title='Swap Camera'
+        accessibilityLabel='Swap Camera'
+        />
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
@@ -707,101 +704,92 @@ const styles = StyleSheet.create({
 
 ## Component Subscriber Example
 
-You will need to have a Red5 Pro SDK license and access to a reployed Red5 Pro Server in order to use the following example.
+You will need to have a Red5 Pro SDK license and access to a deployed Red5 Pro Server in order to use the following example.
 
 > [Sign up for a free trial of Red5 Pro!](https://account.red5pro.com/register)
 
 ```js
-import React from 'react'
+import React, { useState } from 'react'
 import { findNodeHandle, View, Button, StyleSheet } from 'react-native'
 
 import { R5VideoView } from 'react-native-red5pro'
 import { R5LogLevel, R5ScaleMode } from 'react-native-red5pro'
-import { subscribe,
-         unsubscribe,
-         updateScaleMode } from 'react-native-red5pro'
+import {
+  subscribe,
+  unsubscribe,
+  updateScaleMode
+} from 'react-native-red5pro'
 
-export default class App extends React.Component {
+const streamConfig = {
+  configuration: {
+    host: 'your.red5pro.deploy', // IP or Fully Qualified Domain Name
+    port: 8554,
+    contextName: 'live',
+    bufferTime: 0.5,
+    streamBufferTime: 2,
+    key: Math.floor(Math.random() * 0x10000).toString(16),
+    bundleID: 'com.red5pro.example',
+    licenseKey: 'YOUR-LICENSE-KEY',
+    streamName: 'mystream'
+  },
+  showDebugView: true,
+  logLevel: R5LogLevel.DEBUG,
+  scaleMode: R5ScaleMode.SCALE_TO_FILL
+}
 
-  constructor (props) {
-    super(props)
+export default App = () => {
 
-    this.state = {
-      subscriber: {
-        ref: 'video',
-        configuration: {
-          host: 'your.red5pro.deploy', // IP or Fully Qualified Domain Name
-          port: 8554,
-          contextName: 'live',
-          bufferTime: 0.5,
-          streamBufferTime: 2,
-          key: Math.floor(Math.random() * 0x10000).toString(16),
-          bundleID: 'com.red5pro.example',
-          licenseKey: 'YOUR-LICENSE-KEY',
-          streamName: 'mystream'
-        },
-        showDebugView: true,
-        logLevel: R5LogLevel.DEBUG,
-        scaleMode: R5ScaleMode.SCALE_TO_FILL,
-        onConfigured: this.onConfigured.bind(this)
-      }
-    }
+  const [subscriberRef, setSubscriberRef] = useState(null)
+  const [scaleMode, setScaleMode] = useState(R5ScaleMode.SCALE_TO_FILL)
 
-    this.scaleMode = this.state.subscriber.scaleMode
-    this.onScaleMode = this.onScaleMode.bind(this)
-
-    this.onStop = this.onStop.bind(this)
-
+  const onMetaData = event => {
+    const { nativeEvent: { metadata } } = event
+    console.log(`Subscriber:onMetadata :: ${metadata}`)
   }
 
-  render () {
-
-    return (
-      <View style={styles.container}>
-        <R5VideoView {...this.state.subscriber} style={styles.video} />
-        <Button
-          style={styles.button}
-          onPress={this.onStop}
-          title='Stop'
-          accessibilityLabel='Stop'
-          />
-        <Button
-          style={styles.button}
-          onPress={this.onScaleMode}
-          title='Swap Scale Mode'
-          accessibilityLabel='Swap Scale Mode'
-          />
-      </View>
-    )
-
+  const onConfigured = event => {
+    const { configuration: { streamName } } = streamConfig
+    const { nativeEvent: { key } } = event
+    console.log(`Subscriber:onConfigured :: ${key}`)
+    subscribe(findNodeHandle(subscriberRef), streamName)
   }
 
-  onConfigured () {
-    // By providing the `configuration` state prop to the view,
-    // the component starts the configuration process.
-
-    const streamName =  this.state.subscriber.configuration.streamName
-    subscribe(findNodeHandle(this.refs.video), streamName)
-
+  const onStop = () => {
+    unsubscribe(findNodeHandle(subscriberRef))
   }
 
-  onStop () {
-
-    unsubscribe(findNodeHandle(this.refs.video))
-
-  }
-
-  onScaleMode () {
-
-    let scale = this.scaleMode + 1
+  const onSwapScaleMode = () => {
+    let scale = scaleMode + 1
     if (scale > 2) {
       scale = 0
     }
-    this.scaleMode = scale
-    updateScaleMode(findNodeHandle(this.refs.video), scale)
-
+    updateScaleMode(findNodeHandle(subscriberRef), scale)
+    setScaleMode(scale)
   }
 
+  return (
+    <View style={styles.container}>
+      <R5VideoView
+        {...streamConfig}
+        ref={ref => setSubscriberRef(ref)}
+        style={styles.videoView}
+        onMetaData={onMetaData}
+        onConfigured={onConfigured}
+        />
+      <Button
+        style={styles.button}
+        onPress={onStop}
+        title='Stop'
+        accessibilityLabel='Stop'
+        />
+      <Button
+        style={styles.button}
+        onPress={onSwapScaleMode}
+        title='Swap Scale Mode'
+        accessibilityLabel='Swap Scale Mode'
+        />
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
