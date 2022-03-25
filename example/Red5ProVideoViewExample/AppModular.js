@@ -6,8 +6,8 @@ import {
   PERMISSIONS 
 } from 'react-native-permissions'
 import { StreamProvider } from './src/components/StreamProvider'
-import Publisher from './src/views/Publisher-modular'
-import Subscriber from './src/views/Subscriber-modular'
+import Publisher from './src/views/publisher-modular'
+import Subscriber from './src/views/subscriber-modular'
 import Settings from './src/views/Settings'
 
 // Silly hack to quiet the NativeEventEmiiter warnings on Android.
