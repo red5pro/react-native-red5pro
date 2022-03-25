@@ -6,8 +6,8 @@ import {
   PERMISSIONS 
 } from 'react-native-permissions'
 import { StreamProvider } from './src/components/StreamProvider'
-import Publisher from './src/views/Publisher'
-import Subscriber from './src/views/Subscriber'
+import Publisher from './src/views/publisher'
+import Subscriber from './src/views/subscriber'
 import Settings from './src/views/Settings'
 
 const App = () => {
