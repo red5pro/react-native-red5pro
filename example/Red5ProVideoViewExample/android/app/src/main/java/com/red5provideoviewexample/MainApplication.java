@@ -9,7 +9,7 @@ import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 
-import com.reactnativecommunity.rnpermissions.RNPermissionsPackage;
+import com.zoontek.rnpermissions.RNPermissionsPackage;
 import com.red5pro.reactnative.R5Package;
 
 import java.util.Arrays;
