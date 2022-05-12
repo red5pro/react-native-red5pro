@@ -1,9 +1,8 @@
 /* eslint-disable no-console */
-import React from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import {
   AppState,
   findNodeHandle,
-  Button,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -11,6 +10,7 @@ import {
   View
 } from 'react-native'
 import { Icon } from 'react-native-elements'
+import { StreamContext } from '../components/StreamProvider'
 import {
   R5VideoView,
   publish,
@@ -98,225 +98,180 @@ const isValidStatusMessage = (value) => {
   return value && typeof value !== 'undefined' && value !== 'undefined' && value !== 'null'
 }
 
-export default class Publisher extends React.Component {
-  constructor (props) {
-    super(props)
+const Publisher = ({ onStop }) => {
 
-    // Events.
-    this.onMetaData = this.onMetaData.bind(this)
-    this.onConfigured = this.onConfigured.bind(this)
-    this.onPublisherStreamStatus = this.onPublisherStreamStatus.bind(this)
-    this.onUnpublishNotification = this.onUnpublishNotification.bind(this)
+  const { stream } = useContext(StreamContext)
 
-    this.onSwapCamera = this.onSwapCamera.bind(this)
-    this.onToggleAudioMute = this.onToggleAudioMute.bind(this)
-    this.onToggleVideoMute = this.onToggleVideoMute.bind(this)
+  const appState = useRef(AppState.currentState)
+  const [appStateCurrent, setAppStateCurrent] = useState(appState.current)
+  const [publisherRef, setPublisherRef] = useState(null)
+  const [configuration, setConfiguration] = useState(null)
+  const [toastMessage, setToastMessage] = useState('waiting...')
+  const [isInErrorState, setIsInErrorState] = useState(false)
+  const [audioMuted, setAudioMuted] = useState(false)
+  const [videoMuted, setVideoMuted] = useState(false)
+  const [audioIconStyle, setAudioIconStyle] = useState([styles.muteIcon, styles.muteIconRight])
+  const [videoIconStyle, setVideoIconStyle] = useState([styles.muteIcon, styles.muteIconRight])
 
-    this.state = {
-      appState: AppState.currentState,
-      audioMuted: false,
-      isInErrorState: false,
-      videoMuted: false,
-      buttonProps: {
-        style: styles.button
-      },
-      toastProps: {
-        style: styles.toast,
-        value: 'waiting...'
-      },
-      videoProps: {
-        style: styles.videoView,
-        onMetaData: this.onMetaData,
-        onConfigured: this.onConfigured,
-        onPublisherStreamStatus: this.onPublisherStreamStatus,
-        onUnpublishNotification: this.onUnpublishNotification
-      }
+  useEffect(() => {
+    console.log('Add App State Change.')
+    const subscribe = AppState.addEventListener('change', onAppStateChange)
+    return () => {
+      subscribe.remove()
     }
-  }
+  }, [])
 
-  componentDidMount () {
-    console.log('Publisher:componentWillMount()')
-    AppState.addEventListener('change', this._handleAppStateChange)
-  }
-
-  componentWillUnmount () {
-    console.log('Publisher:componentWillUnmount()')
-    AppState.removeEventListener('change', this._handleAppStateChange)
-    const nodeHandle = findNodeHandle(this.red5pro_video_publisher)
-    const {
-      streamProps: {
-        configuration: {
-          streamName
-        }
-      }
-    } = this.props
-    if (nodeHandle) {
-      unpublish(nodeHandle, streamName)
+  useEffect(() => {
+    console.log('Publisher:Stream')
+    if (stream) {
+      const { configuration } = stream
+      console.log('Publisher:Configuration - ' + JSON.stringify(configuration, null, 2))
+      setConfiguration(configuration)
     }
-  }
+  }, [stream])
 
-  _handleAppStateChange = (nextAppState) => {
+  const onAppStateChange = nextAppState => {
     console.log(`Publisher:AppState - ${nextAppState}`)
-    const { streamProps: { enableBackgroundStreaming } } = this.props
-    const { onStop } = this.props
-    const nodeHandle = findNodeHandle(this.red5pro_video_publisher)
-    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+    const { enableBackgroundStreaming } = stream
+    if (appStateCurrent.match(/inactive|background/) && nextAppState === 'active') {
       console.log('Publisher:AppState - App has come to the foreground.')
       if (enableBackgroundStreaming) {
         console.log('Background Streaming enabled: unmuteVideo')
-        unmuteVideo(findNodeHandle(this.red5pro_video_publisher))
+        unmuteVideo(findNodeHandle(publisherRef))
       }
-    } else if (nextAppState.match(/inactive|background/) && this.state.appState === 'active') {
+    } else if (nextAppState.match(/inactive|background/) && appState === 'active') {
       console.log('Publisher:AppState - App has gone to the background.')
       if (!enableBackgroundStreaming) {
         console.log('Publisher:AppState - unpublish()')
-        // unpublish(nodeHandle)
-        onStop()
+        onStopPublish()
       } else {
         console.log('Background Streaming enabled: muteVideo')
-        muteVideo(findNodeHandle(this.red5pro_video_publisher))
+        muteVideo(findNodeHandle(publisherRef))
       }
     }
-    this.setState({
-      appState: nextAppState
-    })
+    setAppStateCurrent(nextAppState)
   }
 
-  render () {
-    const {
-      videoProps,
-      toastProps,
-      buttonProps,
-      audioMuted,
-      videoMuted
-    } = this.state
-
-    const {
-      onStop,
-      streamProps
-    } = this.props
-
-    const setup = Object.assign({}, streamProps, videoProps)
-
-    const audioIconColor = audioMuted ? '#fff' : '#000'
-    const videoIconColor = videoMuted ? '#fff' : '#000'
-    const audioIconStyle = audioMuted ? [styles.muteIcon, styles.muteIconRight, styles.muteIconToggled] : [styles.muteIcon, styles.muteIconRight]
-    const videoIconStyle = videoMuted ? [styles.muteIcon, styles.muteIconRightmost, styles.muteIconToggled] : [styles.muteIcon, styles.muteIconRightmost]
-
-    const assignVideoRef = (video) => { this.red5pro_video_publisher = video }
-    const assignToastRef = (toast) => { this.toast_field = toast }
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.subcontainer}>
-          <R5VideoView
-            {...setup}
-            ref={assignVideoRef.bind(this)}
-          />
-          <View style={styles.iconContainer}>
-            <Icon
-              name={audioMuted ? 'mic-off' : 'mic'}
-              type='feathericon'
-              size={36}
-              color={audioIconColor}
-              hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
-              onPress={this.onToggleAudioMute}
-              containerStyle={audioIconStyle}
-            />
-            <Icon
-              name={videoMuted ? 'videocam-off' : 'videocam'}
-              type='feathericon'
-              size={36}
-              color={videoIconColor}
-              hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
-              onPress={this.onToggleVideoMute}
-              containerStyle={videoIconStyle}
-            />
-          </View>
-          <View style={styles.buttonContainer}>
-            <Text
-              ref={assignToastRef.bind(this)}
-              {...toastProps}>{toastProps.value}</Text>
-            <TouchableOpacity {...buttonProps}
-              onPress={onStop}
-              accessibilityLabel='Stop'>
-              <Text style={styles.buttonLabel}>Stop</Text>
-            </TouchableOpacity>
-            <TouchableOpacity {...buttonProps}
-              onPress={this.onSwapCamera}
-              accessibilityLabel='Swap Camera'>
-              <Text style={styles.buttonLabel}>Swap Camera</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </SafeAreaView>
-    )
-  }
-
-  onMetaData (event) {
-    console.log(`Publisher:onMetadata :: ${event.nativeEvent.metadata}`)
-  }
-
-  onConfigured (event) {
-    const {
-      streamProps: {
-        configuration: {
-          streamName
-        }
+  const onStopPublish = () => {
+    if (configuration) {
+      try {
+        const { streamName } = configuration
+        console.log(`Unpublish: ${streamName}`)
+        unpublish(findNodeHandle(publisherRef), streamName)
+      } catch (e) {
+        console.error(e)
       }
-    } = this.props
-
-    console.log(`Publisher:onConfigured :: ${event.nativeEvent.key}`)
-    publish(findNodeHandle(this.red5pro_video_publisher), streamName)
-  }
-
-  onPublisherStreamStatus (event) {
-    console.log(`Publisher:onPublisherStreamStatus :: ${JSON.stringify(event.nativeEvent.status, null, 2)}`)
-    const status = event.nativeEvent.status
-    let message = isValidStatusMessage(status.message) ? status.message : status.name
-    if (!this.state.inErrorState) {
-      this.setState({
-        toastProps: {...this.state.toastProps, value: message},
-        isInErrorState: (status.code === 2)
-      })
     }
+    onStop()
   }
 
-  onUnpublishNotification (event) {
-    console.log(`Publisher:onUnpublishNotification:: ${JSON.stringify(event.nativeEvent.status, null, 2)}`)
-    this.setState({
-      isInErrorState: false,
-      toastProps: {...this.state.toastProps, value: 'Unpublished'}
-    })
-  }
-
-  onSwapCamera () {
+  const onSwapCamera = () => {
     console.log('Publisher:onSwapCamera()')
-    swapCamera(findNodeHandle(this.red5pro_video_publisher))
+    swapCamera(findNodeHandle(publisherRef))
   }
 
-  onToggleAudioMute () {
-    console.log('Publisher:onToggleAudioMute()')
-    const { audioMuted } = this.state
+  const onToggleAudioMute = () => {
+    const style = [styles.muteIcon, styles.muteIconRight]
     if (audioMuted) {
-      unmuteAudio(findNodeHandle(this.red5pro_video_publisher))
+      unmuteAudio(findNodeHandle(publisherRef))
     } else {
-      muteAudio(findNodeHandle(this.red5pro_video_publisher))
+      muteAudio(findNodeHandle(publisherRef))
     }
-    this.setState({
-      audioMuted: !audioMuted
-    })
+    setAudioIconStyle(!audioMuted ? style.concat([styles.muteIconToggled]) : style)
+    setAudioMuted(!audioMuted)
   }
 
-  onToggleVideoMute () {
-    console.log('Publisher:onToggleVideoMute()')
-    const { videoMuted } = this.state
+  const onToggleVideoMute = () => {
+    const style = [styles.muteIcon, styles.muteIconRightmost]
     if (videoMuted) {
-      unmuteVideo(findNodeHandle(this.red5pro_video_publisher))
+      unmuteVideo(findNodeHandle(publisherRef))
     } else {
-      muteVideo(findNodeHandle(this.red5pro_video_publisher))
+      muteVideo(findNodeHandle(publisherRef))
     }
-    this.setState({
-      videoMuted: !videoMuted
-    })
+    setVideoIconStyle(!videoMuted ? style.concat([styles.muteIconToggled]) : style)
+    setVideoMuted(!videoMuted)
   }
+
+  const onMetaData = event => {
+    const { nativeEvent: { metadata } } = event
+    console.log(`Publisher:onMetadata :: ${metadata}`)
+  }
+
+  const onConfigured = event => {
+    const { streamName } = configuration
+    const { nativeEvent: { key } } = event
+    console.log(`Publisher:onConfigured :: ${key}`)
+    publish(findNodeHandle(publisherRef), streamName)
+  }
+
+  const onPublisherStreamStatus = event => {
+    const { nativeEvent: { status } } = event
+    console.log(`Publisher:onPublisherStreamStatus :: ${JSON.stringify(status, null, 2)}`)
+    let message = isValidStatusMessage(status.message) ? status.message : status.name
+    if (!isInErrorState) {
+      setIsInErrorState(status.code === 2)
+    }
+    setToastMessage(message)
+  }
+
+  const onUnpublishNotification = event => {
+    const { nativeEvent: { status } } = event
+    console.log(`Publisher:onUnpublishNotification:: ${JSON.stringify(status, null, 2)}`)
+    setIsInErrorState(false)
+    setToastMessage('Unpublished')
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.subcontainer}>
+        {configuration && (
+          <R5VideoView
+            {...stream}
+            ref={ref => setPublisherRef(ref)}
+            style={styles.videoView}
+            onMetaData={onMetaData}
+            onConfigured={onConfigured}
+            onPublisherStreamStatus={onPublisherStreamStatus}
+            onUnpublishNotification={onUnpublishNotification}
+            />
+        )}
+        <View style={styles.iconContainer}>
+          <Icon
+            name={audioMuted ? 'mic-off' : 'mic'}
+            type='feathericon'
+            size={36}
+            color={audioMuted ? '#fff' : '#000'}
+            hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
+            onPress={onToggleAudioMute}
+            containerStyle={audioIconStyle}
+            />
+          <Icon
+            name={videoMuted ? 'videocam-off' : 'videocam'}
+            type='feathericon'
+            size={36}
+            color={videoMuted ? '#fff' : '#000'}
+            hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
+            onPress={onToggleVideoMute}
+            containerStyle={videoIconStyle}
+            />
+        </View>
+        <View style={styles.buttonContainer}>
+          <Text style={styles.toast}>{toastMessage}</Text>
+          <TouchableOpacity style={styles.button}
+            onPress={onStopPublish}
+            accessibilityLabel='Stop'>
+            <Text style={styles.buttonLabel}>Stop</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button}
+            onPress={onSwapCamera}
+            accessibilityLabel='Swap Camera'>
+            <Text style={styles.buttonLabel}>Swap Camera</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </SafeAreaView>
+  )
+
 }
+
+export default Publisher

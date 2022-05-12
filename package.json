@@ -1,6 +1,6 @@
 {
   "name": "react-native-red5pro",
-  "version": "7.2.0",
+  "version": "10.0.0",
   "description": "React Native Red5 Pro Publisher/Subscriber",
   "main": "index.js",
   "scripts": {
@@ -47,5 +47,7 @@
     "babel-eslint": "^9.0.0",
     "eslint": "^5.5.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "upgrade": "^1.1.0"
+  }
 }

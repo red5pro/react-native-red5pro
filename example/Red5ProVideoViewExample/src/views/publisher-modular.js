@@ -1,10 +1,9 @@
 /* eslint-disable no-console */
-import React from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import {
   AppState,
   NativeEventEmitter,
   findNodeHandle,
-  Button,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -12,6 +11,7 @@ import {
   View
 } from 'react-native'
 import { Icon } from 'react-native-elements'
+import { StreamContext } from '../components/StreamProvider'
 import {
   R5StreamModule,
   R5VideoView,
@@ -99,368 +99,307 @@ const isValidStatusMessage = (value) => {
   return value && typeof value !== 'undefined' && value !== 'undefined' && value !== 'null'
 }
 
-export default class Publisher extends React.Component {
-  constructor (props) {
-    super(props)
+const Publisher = ({ onStop }) => {
+  const { stream } = useContext(StreamContext)
 
-    this.emitter = new NativeEventEmitter(R5StreamModule)
+  const emitter = useRef(new NativeEventEmitter(R5StreamModule))
+  const pubRef = useRef()
 
-    // Events.
-    this.onMetaData = this.onMetaData.bind(this)
-    this.onConfigured = this.onConfigured.bind(this)
-    this.onPublisherStreamStatus = this.onPublisherStreamStatus.bind(this)
-    this.onUnpublishNotification = this.onUnpublishNotification.bind(this)
+  const appState = useRef(AppState.currentState)
+  const [appStateCurrent, setAppStateCurrent] = useState(appState.current)
+  const [streamId, setStreamId] = useState(null)
+  const [configuration, setConfiguration] = useState(null)
+  const [toastMessage, setToastMessage] = useState('waiting...')
+  const [isInErrorState, setIsInErrorState] = useState(false)
+  const [audioMuted, setAudioMuted] = useState(false)
+  const [videoMuted, setVideoMuted] = useState(false)
+  const [audioIconStyle, setAudioIconStyle] = useState([styles.muteIcon, styles.muteIconRight])
+  const [videoIconStyle, setVideoIconStyle] = useState([styles.muteIcon, styles.muteIconRight])
+  const [attached, setAttached] = useState(true)
+  const [swappedLayout, setSwappedLayout] = useState(false)
 
-    this.onSwapCamera = this.onSwapCamera.bind(this)
-    this.onToggleDetach = this.onToggleDetach.bind(this)
-    this.onToggleAudioMute = this.onToggleAudioMute.bind(this)
-    this.onToggleVideoMute = this.onToggleVideoMute.bind(this)
-    this.onSwapLayout = this.onSwapLayout.bind(this)
-
-    this.doAttach = this.doAttach.bind(this)
-    this.doDetach = this.doDetach.bind(this)
-    this.doPublish = this.doPublish.bind(this)
-    this.doUnpublish = this.doUnpublish.bind(this)
-
-    this.state = {
-      appState: AppState.currentState,
-      audioMuted: false,
-      isInErrorState: false,
-      videoMuted: false,
-      swappedLayout: false,
-      attached: true,
-      buttonProps: {
-        style: styles.button
-      },
-      toastProps: {
-        style: styles.toast,
-        value: 'waiting...'
-      },
-      videoProps: {
-        style: styles.videoView,
-        onMetaData: this.onMetaData,
-        onConfigured: this.onConfigured,
-        onPublisherStreamStatus: this.onPublisherStreamStatus,
-        onUnpublishNotification: this.onUnpublishNotification
+  useEffect(() => {
+    const subscribe = AppState.addEventListener('change', onAppStateChange)
+    const eventEmitter = emitter.current
+    if (eventEmitter) {
+      eventEmitter.addListener('onMetaDataEvent', onMetaData)
+      eventEmitter.addListener('onConfigured', onConfigured)
+      eventEmitter.addListener('onPublisherStreamStatus', onPublisherStreamStatus)
+      eventEmitter.addListener('onUnpublishNotification', onUnpublishNotification)
+    }
+    return () => {
+      subscribe.remove()
+      if (eventEmitter) {
+        eventEmitter.removeAllListeners('onMetaDataEvent')
+        eventEmitter.removeAllListeners('onConfigured')
+        eventEmitter.removeAllListeners('onPublisherStreamStatus')
+        eventEmitter.removeAllListeners('onUnpublishNotification')
       }
     }
+  }, [])
 
-  }
+  useEffect(() => {
+    console.log('Publisher:Stream')
+    if (stream) {
+      const { configuration } = stream
+      console.log('Publisher:Configuration - ' + JSON.stringify(configuration, null, 2))
+      setConfiguration(configuration)
+    }
+  }, [stream])
 
-  componentDidMount () {
-    console.log('Publisher:componentWillMount()')
-    AppState.addEventListener('change', this._handleAppStateChange)
+  useEffect(() => {
+    if (configuration) {
+      console.log(`Publisher:init()`)
+      init()
+    }
+  }, [configuration])
 
-    const {
-      streamProps: {
-        configuration
+  useEffect(() => {
+    if (attached) {
+      doAttach()
+    }
+  }, [attached, swappedLayout])
+
+  useEffect(() => {
+    if (streamId) {
+      console.log(`Stream Id is set: ${streamId}`)
+      doPublish()
+      if (attached) {
+        doAttach()
       }
-    } = this.props
+    }
+  }, [streamId])
+
+  const init = async () => {
     const streamIdToUse = [configuration.streamName, Math.floor(Math.random() * 0x10000).toString(16)].join('-')
-    this.streamId = streamIdToUse
-    R5StreamModule.init(streamIdToUse, configuration)
-      .then(streamId => {
-        console.log('Publisher configuration with ' + streamId)
-        this.streamId = streamId
-        if (this.state.attached) {
-          this.doAttach()
-        }
-        this.doPublish()
-      })
-      .catch(error => {
-        console.log('Subscriber:Stream Setup Error - ' + error)
-      })
-
-    this.emitter.addListener('onMetaDataEvent', this.onMetaData)
-    this.emitter.addListener('onConfigured', this.onConfigured)
-    this.emitter.addListener('onPublisherStreamStatus', this.onPublisherStreamStatus)
-    this.emitter.addListener('onUnpublishNotification', this.onUnpublishNotification)
-  }
-
-  componentWillUnmount () {
-    console.log('Publisher:componentWillUnmount()')
-    AppState.removeEventListener('change', this._handleAppStateChange)
-    this.doUnpublish()
-    this.emitter.removeAllListeners('onMetaDataEvent')
-    this.emitter.removeAllListeners('onConfigured')
-    this.emitter.removeAllListeners('onPublisherStreamStatus')
-    this.emitter.removeAllListeners('onUnpublishNotification')
-  }
-
-  componentDidUpdate (prevProps, prevState) {
-    if (prevState.attached !== this.state.attached) {
-      if (this.state.attached) {
-        this.doAttach()
-      } else {
-        // this.doDetach()
-        // Not detaching here, as we need a view reference to do detachment.
-        // As such, the act of detaching is in the original method that changed state.
-      }
-    }
-    if (prevState.swappedLayout !== this.state.swappedLayout) {
-      if (this.state.attached) {
-        this.doAttach()
-      }
+    try {
+      console.log(`Stream Id to use: ${streamIdToUse}`)
+      const id = await R5StreamModule.init(streamIdToUse, configuration)
+      setStreamId(id)
+    } catch (e) {
+      console.error(e)
+      console.log('Publisher:Stream Setup Error - ' + e.message)
     }
   }
 
-  _handleAppStateChange = (nextAppState) => {
+  const doPublish = async() => {
+    try {
+      await R5StreamModule.publish(streamId, R5PublishType.LIVE, stream)
+      if (attached) {
+        doAttach()
+      }
+      console.log(`R5StreamModule publisher with ${streamId}.`);
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const doUnpublish = async () => {
+    try {
+      const id = await R5StreamModule.unpublish(streamId)
+      console.log(`R5StreamModule unpublished with stream id: ${id}.`)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const doDetach = () => {
+    const nodeHandle = findNodeHandle(pubRef.current)
+    if (nodeHandle && streamId) {
+      console.log(`[Publisher:doDetach]: found view, stream id: ${streamId}...`)
+      detach(nodeHandle, streamId)
+    }
+  }
+
+  const doAttach = () => {
+    const nodeHandle = findNodeHandle(pubRef.current)
+    if (nodeHandle && streamId) {
+      console.log(`[Publisher:doAttach]: found view, stream id: ${streamId}...`)
+      attach(nodeHandle, streamId)
+    }
+  }
+
+  const onAppStateChange = nextAppState => {
     console.log(`Publisher:AppState - ${nextAppState}`)
-    const { streamProps: { enableBackgroundStreaming } } = this.props
-    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+    const { enableBackgroundStreaming } = stream
+    if (appStateCurrent.match(/inactive|background/) && nextAppState === 'active') {
       console.log('Publisher:AppState - App has come to the foreground.')
-    } else if (nextAppState.match(/inactive|background/) && this.state.appState === 'active') {
+    } else if (nextAppState === 'inactive') {
       console.log('Publisher:AppState - App has gone to the background.')
       if (!enableBackgroundStreaming) {
         console.log('Publisher:AppState - unpublish()')
-        this.doUnpublish()
+        onStopPublish()
       }
     }
-    this.setState({
-      appState: nextAppState
-    })
+    setAppStateCurrent(nextAppState)
   }
 
-  render () {
-    const {
-      toastProps,
-      buttonProps,
-      videoProps,
-      audioMuted,
-      videoMuted,
-      attached,
-      swappedLayout
-    } = this.state
+  const onStopPublish = () => {
+    try {
+      doUnpublish()
+    } catch (e) {
+      console.error(e)
+    }
+    onStop()
+  }
+  const onMetaData = event => {
+    const metadata = event.nativeEvent ? event.nativeEvent.metadata : event.metadata
+    console.log(`Publisher:onMetadata :: ${metadata}`)
+  }
 
-    const {
-      onStop,
-      streamProps
-    } = this.props
+  const onConfigured = event => {
+    const key = event.nativeEvent ? event.nativeEvent.key : event.key
+    console.log(`Publisher:onConfigured :: ${key}`)
+  }
 
-    const setup = Object.assign({}, streamProps, videoProps)
-    // Remove the configuration from the setup for views. We just want props.
-    delete setup.configuration
+  const onPublisherStreamStatus = event => {
+    const status = event.nativeEvent ? event.nativeEvent.status : event.status
+    console.log(`Publisher:onPublisherStreamStatus :: ${JSON.stringify(status, null, 2)}`)
+    let message = isValidStatusMessage(status.message) ? status.message : status.name
+    if (!isInErrorState) {
+      setIsInErrorState(status.code === 2)
+    }
+    setToastMessage(message)
+  }
 
-    const audioIconColor = audioMuted ? '#fff' : '#000'
-    const videoIconColor = videoMuted ? '#fff' : '#000'
-    const audioIconStyle = audioMuted ? [styles.muteIcon, styles.muteIconRight, styles.muteIconToggled] : [styles.muteIcon, styles.muteIconRight]
-    const videoIconStyle = videoMuted ? [styles.muteIcon, styles.muteIconRightmost, styles.muteIconToggled] : [styles.muteIcon, styles.muteIconRightmost]
-    const buttonContainerStyle = [styles.buttonContainer]
-    const iconContainerStyle = [styles.iconContainer]
-    iconContainerStyle.push(swappedLayout ? styles.swappedIconContainer : styles.unswappedIconContainer)
+  const onUnpublishNotification = event => {
+    const status = event.nativeEvent ? event.nativeEvent.status : event.status
+    console.log(`Publisher:onUnpublishNotification:: ${JSON.stringify(status, null, 2)}`)
+    setIsInErrorState(false)
+    setToastMessage('Unpublished.')
+  }
+  const onToggleAudioMute = () => {
+    console.log('Publisher:onToggleAudioMute()')
+    const style = [styles.muteIcon, styles.muteIconRight]
+    if (audioMuted) {
+      R5StreamModule.unmuteAudio(streamId)
+    } else {
+      R5StreamModule.muteAudio(streamId)
+    }
+    setAudioIconStyle(!audioMuted ? style.concat([styles.muteIconToggled]) : style)
+    setAudioMuted(!audioMuted)
+  }
 
-    const assignVideoRef = (video) => { this.red5pro_video_publisher = video }
-    const assignToastRef = (toast) => { this.toast_field = toast }
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.subcontainer}>
-          { !attached &&
-            <View style={styles.container}>
-              <TouchableOpacity
-                style={[styles.button, styles.attachButton]}
-                onPress={this.onToggleDetach}
-                title='Attach'>
-                <Text style={styles.buttonLabel}>Attach</Text>
-              </TouchableOpacity>
-            </View>
-          }
-          { attached && !swappedLayout &&
-            <R5VideoView
-              {...setup}
-              ref={assignVideoRef.bind(this)}
+  const onToggleVideoMute = () => {
+    console.log('Publisher:onToggleVideoMute()')
+    const style = [styles.muteIcon, styles.muteIconRightmost]
+    if (videoMuted) {
+      R5StreamModule.unmuteVideo(streamId)
+    } else {
+      R5StreamModule.muteVideo(streamId)
+    }
+    setVideoIconStyle(!videoMuted ? style.concat([styles.muteIconToggled]) : style)
+    setVideoMuted(!videoMuted)
+  }
+
+  const onSwapCamera = () => {
+    console.log('Publisher:onSwapCamera()')
+    R5StreamModule.swapCamera(streamId)
+  }
+
+  const onToggleDetach = () => {
+    console.log('Publisher:onToggleDetach()')
+    const toAttach = !attached
+    if (!toAttach) {
+      doDetach()
+    } else {
+      doAttach()
+    }
+    setAttached(toAttach)
+  }
+
+  const onSwapLayout = () => {
+    console.log('Publisher:onSwapLayout()')
+    if (attached) {
+      doDetach()
+    }
+    setSwappedLayout(!swappedLayout)
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.subcontainer}>
+        {!attached && (
+          <View style={styles.container}>
+            <TouchableOpacity
+              style={[styles.button, styles.attachButton]}
+              onPress={onToggleDetach}
+              title='Attach'>
+              <Text style={styles.buttonLabel}>Attach</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        {attached && !swappedLayout && (
+          <R5VideoView
+            {...stream}
+            ref={pubRef}
+            style={styles.videoView}
+            onMetaData={onMetaData}
+            onConfigured={onConfigured}
+            onPublisherStreamStatus={onPublisherStreamStatus}
+            onUnpublishNotification={onUnpublishNotification}
             />
-          }
-          <View style={iconContainerStyle}>
-            <Icon
-              name={audioMuted ? 'mic-off' : 'mic'}
-              type='feathericon'
-              size={36}
-              color={audioIconColor}
-              hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
-              onPress={this.onToggleAudioMute}
-              containerStyle={audioIconStyle}
+        )}
+        <View style={styles.iconContainer}>
+          <Icon
+            name={audioMuted ? 'mic-off' : 'mic'}
+            type='ionicon'
+            size={36}
+            color={audioMuted ? '#fff' : '#000'}
+            hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
+            onPress={onToggleAudioMute}
+            containerStyle={audioIconStyle}
             />
             <Icon
               name={videoMuted ? 'videocam-off' : 'videocam'}
               type='feathericon'
               size={36}
-              color={videoIconColor}
+              color={videoMuted ? '#fff' : '#000'}
               hitSlop={{ left: 10, top: 10, right: 10, bottom: 10 }}
-              onPress={this.onToggleVideoMute}
+              onPress={onToggleVideoMute}
               containerStyle={videoIconStyle}
-            />
-          </View>
-          <View style={buttonContainerStyle}>
-            <Text
-              ref={assignToastRef.bind(this)}
-              {...toastProps}>{toastProps.value}</Text>
-            <TouchableOpacity {...buttonProps}
-              onPress={onStop}
-              title='Stop'
-              accessibilityLabel='Stop'>
-              <Text style={styles.buttonLabel}>Stop</Text>
-            </TouchableOpacity>
-            <TouchableOpacity {...buttonProps}
-              {...this.state.buttonProps}
-              onPress={this.onSwapCamera}
-              title='Swap Camera'
-              accessibilityLabel='Swap Camera'>
-              <Text style={styles.buttonLabel}>Swap Camera</Text>
-            </TouchableOpacity>
-            { attached &&
-              <TouchableOpacity {...buttonProps}
-                {...buttonProps}
-                onPress={this.onToggleDetach}
-                title='Detach'>
-                <Text style={styles.buttonLabel}>Detach</Text>
-              </TouchableOpacity>
-            }
-            <TouchableOpacity {...buttonProps}
-              {...buttonProps}
-              onPress={this.onSwapLayout}
-              title='Swap Layout'>
-              <Text style={styles.buttonLabel}>Swap Layout</Text>
-            </TouchableOpacity>
-            { attached && swappedLayout &&
-              <R5VideoView
-                {...setup}
-                ref={assignVideoRef.bind(this)}
-              />
-            }
-          </View>
+          />
         </View>
-      </SafeAreaView>
-    )
-  }
-
-  onMetaData (event) {
-    const metadata = event.hasOwnProperty('nativeEvent') ? event.nativeEvent.metadata : event.metadata
-    console.log(`Publisher:onMetadata :: ${metadata}`)  
-  }
-
-  onConfigured (event) {
-    const key = event.hasOwnProperty('nativeEvent') ? event.nativeEvent.key : event.key
-    console.log(`Publisher:onConfigured :: ${key}`)
-  }
-
-  onPublisherStreamStatus (event) {
-    const status = event.hasOwnProperty('nativeEvent') ? event.nativeEvent.status : event.status
-    console.log(`Publisher:onPublisherStreamStatus :: ${JSON.stringify(status, null, 2)}`)
-    let message = isValidStatusMessage(status.message) ? status.message : status.name
-    if (!this.state.inErrorState) {
-      this.setState({
-        toastProps: {...this.state.toastProps, value: message},
-        isInErrorState: (status.code === 2)
-      })
-    }
-  }
-
-  onUnpublishNotification (event) {
-    const status = event.hasOwnProperty('nativeEvent') ? event.nativeEvent.status : event.status
-    console.log(`Publisher:onUnpublishNotification:: ${JSON.stringify(status, null, 2)}`)
-    this.setState({
-      isInErrorState: false,
-      toastProps: {...this.state.toastProps, value: 'Unpublished'}
-    })
-  }
-
-  onToggleDetach () {
-    console.log('Subscriber:onToggleDetach()')
-    const {
-      attached
-    } = this.state
-    const toAttach = !attached
-    if (!toAttach) {
-      this.doDetach()
-    }
-    this.setState({
-      attached: !attached
-    })
-  }
-
-  onSwapLayout () {
-    console.log('Subscriber:onSwapLayout()')
-    const {
-      attached,
-      swappedLayout
-    } = this.state
-    if (attached) {
-      this.doDetach()
-    }
-    this.setState({
-      swappedLayout: !swappedLayout
-    })
-  }
-
-  onSwapCamera () {
-    console.log('Publisher:onSwapCamera()')
-    R5StreamModule.swapCamera(this.streamId)
-  }
-
-  onToggleAudioMute () {
-    console.log('Publisher:onToggleAudioMute()')
-    const { audioMuted } = this.state
-    if (audioMuted) {
-      R5StreamModule.unmuteAudio(this.streamId)
-    } else {
-      R5StreamModule.muteAudio(this.streamId)
-    }
-    this.setState({
-      audioMuted: !audioMuted
-    })
-  }
-
-  onToggleVideoMute () {
-    console.log('Publisher:onToggleVideoMute()')
-    const { videoMuted } = this.state
-    if (videoMuted) {
-      R5StreamModule.unmuteVideo(this.streamId)
-    } else {
-      R5StreamModule.muteVideo(this.streamId)
-    }
-    this.setState({
-      videoMuted: !videoMuted
-    })
-  }
-
-  doDetach () {
-    const nodeHandle = findNodeHandle(this.red5pro_video_publisher)
-    if (nodeHandle) {
-      console.log(`[Publisher:doDetach]: found view...`)
-      detach(nodeHandle, this.streamId)
-    }
-  }
-
-  doAttach () {
-    const nodeHandle = findNodeHandle(this.red5pro_video_publisher)
-    if (nodeHandle) {
-      console.log(`[Publisher:doAttach]: found view...`)
-     attach(nodeHandle, this.streamId)
-    }
-  }
-
-  doPublish () {
-    const {
-      streamProps
-    } = this.props
-
-    R5StreamModule.publish(this.streamId, R5PublishType.LIVE, streamProps)
-      .then(streamId => {
-        console.log('R5StreamModule publish with ' + streamId);
-      })
-      .catch(error => {
-        console.log('Publisher:Stream Publish Error - ' + error)
-      })
-  }
-
-  doUnpublish () {
-    R5StreamModule.unpublish(this.streamId)
-      .then(streamId => {
-        console.log('R5StreamModule unpublished with ' + streamId);
-      })
-      .catch(error => {
-        console.log('Publisher:Stream Unpublished Error - ' + error)
-      })
-  }
-
+        <View style={styles.buttonContainer}>
+          <Text style={styles.toast}>{toastMessage}</Text>
+          <TouchableOpacity style={styles.button}
+            onPress={onStopPublish}
+            accessibilityLabel="Stop">
+            <Text style={styles.buttonLabel}>Stop</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button}
+            onPress={onSwapCamera}
+            title='Swap Camera'
+            accessibilityLabel='Swap Camera'>
+            <Text style={styles.buttonLabel}>Swap Camera</Text>
+          </TouchableOpacity>
+          {attached && (
+            <TouchableOpacity style={styles.button}
+              onPress={onToggleDetach}
+              title='Detach'>
+              <Text style={styles.buttonLabel}>Detach</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity style={styles.button}
+            onPress={onSwapLayout}
+            title='Swap Layout'>
+            <Text style={styles.buttonLabel}>Swap Layout</Text>
+          </TouchableOpacity>
+          {attached && swappedLayout && (
+            <R5VideoView
+              {...stream}
+              ref={pubRef}
+              style={styles.videoView}
+              onMetaData={onMetaData}
+              onConfigured={onConfigured}
+              onPublisherStreamStatus={onPublisherStreamStatus}
+              onUnpublishNotification={onUnpublishNotification}
+              />
+          )}
+        </View>
+      </View>
+    </SafeAreaView>
+  )
 }
+
+export default Publisher
