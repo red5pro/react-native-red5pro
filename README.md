@@ -136,7 +136,7 @@ After linking in the `react-native-red5pro` library as described in the [previou
 
 To integrate the **Red5 Pro iOS SDK**:
 
-1. Download the latest [Red5 Pro iOS SDK](https://account.red5pro.com/download) from your account. If you don't have an account yet, [Sing up for a free trial!](https://account.red5pro.com/register).
+1. Download the latest [Red5 Pro iOS SDK](https://account.red5pro.com/download) from your account. If you don't have an account yet, [Sign up for a free trial!](https://account.red5pro.com/register).
 2. Unpack the **Red5 Pro iOS SDK** into a location on your local machine. This will unzip to a `R5Streaming.framework` file; that file is the **Red5 Pro iOS SDK**.
 
 ### After CocoaPods Installation
