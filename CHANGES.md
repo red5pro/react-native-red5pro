@@ -1,5 +1,19 @@
 # Changes
 
+## 10.0.1
+
+- Defining default props for testing. (Todd Anderson)
+- Change to default hardware acceleration rendering to true. (Todd Anderson)
+    >
+    > Proper assignment of hardwareAccelerated prop through API.
+    > Change to initial scaleMode setting on playback.
+    >
+- Update README.md (Jessica Palmer)
+
+## 10.0.0
+
+- bump of version to match SDK version. (bustardcelly)
+
 ## 9.0.0
 
 - bump of version to match SDK version. (bustardcelly)
