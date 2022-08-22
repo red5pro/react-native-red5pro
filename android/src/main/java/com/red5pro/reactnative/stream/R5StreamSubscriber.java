@@ -51,7 +51,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 
 	private boolean mIsStreaming;
 	private boolean mIsBackgroundBound;
-	private boolean mHardwareAccelerated;
+	private boolean mHardwareAccelerated = true;
 	private int mAudioSampleRate = 44100;
 	private boolean mEnableBackgroundStreaming;
 	private SubscribeService mBackgroundSubscribeService;
@@ -162,7 +162,6 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		mStream.client = this;
 
 		mStream.setLogLevel(logLevel);
-		mStream.setScaleMode(scaleMode);
 
 	}
 
@@ -176,7 +175,7 @@ public class R5StreamSubscriber implements R5StreamInstance,
 		}
 		mStream.audioController.sampleRate = sampleRate;
 		mStream.play(streamName, hardwareAccelerated);
-
+		mStream.setScaleMode(mScaleMode);
 	}
 
 	public void subscribeBound () {

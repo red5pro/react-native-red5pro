@@ -464,6 +464,11 @@ public class R5VideoViewManager extends SimpleViewManager<R5VideoViewLayout> imp
         view.updatePubSubBackgroundStreaming(value);
     }
 
+	@ReactProp(name = "hardwareAccelerated", defaultBoolean = true)
+	public void setHardwareAccelerated(R5VideoViewLayout view, boolean value) {
+		view.updateHardwareAccelerated(value);
+	}
+
     @ReactProp(name = "zOrderOnTop", defaultBoolean = true)
     public  void setZOrderOnTop(R5VideoViewLayout view, boolean value) {
         view.updateZOrderOnTop(value);

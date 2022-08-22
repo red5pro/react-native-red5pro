@@ -58,6 +58,7 @@ public class R5VideoViewLayout extends FrameLayout
     protected boolean mUseAdaptiveBitrateController = false;
     protected boolean mUseBackfacingCamera = false;
     protected boolean mEnableBackgroundStreaming = false;
+    protected boolean mHardwareAccelerated = true;
     protected boolean mZOrderOnTop = false;
     protected boolean mZOrderMediaOverlay = false;
 
@@ -346,6 +347,7 @@ public class R5VideoViewLayout extends FrameLayout
         props.showDebugView = mShowDebug;
         props.subscribeVideo = mPlaybackVideo;
         props.enableBackgroundStreaming = mEnableBackgroundStreaming;
+        props.hardwareAccelerated = mHardwareAccelerated;
         return props;
 
     }
@@ -489,6 +491,10 @@ public class R5VideoViewLayout extends FrameLayout
             mStreamInstance.updateScaleMode(mode);
         }
     }
+
+	public void updateHardwareAccelerated(boolean hw) {
+		this.mHardwareAccelerated = hw;
+	}
 
     public void updateLogLevel(int level) {
         this.mLogLevel = level;
