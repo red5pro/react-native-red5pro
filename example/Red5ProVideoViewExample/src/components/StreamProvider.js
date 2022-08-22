@@ -1,6 +1,7 @@
 import React, { createContext, useState } from 'react'
 import { 
   R5LogLevel,
+  R5ScaleMode
 } from 'react-native-red5pro'
 
 const StreamContext = createContext()
@@ -32,7 +33,9 @@ const StreamProvider = ({ children }) => {
       logLevel: R5LogLevel.DEBUG,
       useBackfacingCamera: false,
       enableBackgroundStreaming: false,
-      useAuthentication: false
+      useAuthentication: false,
+      hardwareAccelerated: true,
+      scaleMode: R5ScaleMode.SCALE_TO_FILL,
     }
   }
 
