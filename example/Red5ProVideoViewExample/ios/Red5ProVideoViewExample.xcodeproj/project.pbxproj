@@ -471,6 +471,7 @@
 				FRAMEWORK_SEARCH_PATHS = "\"$(SRCROOT)/Red5ProVideoViewExample/Frameworks\"";
 				INFOPLIST_FILE = Red5ProVideoViewExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 10.0.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -493,6 +494,7 @@
 				FRAMEWORK_SEARCH_PATHS = "\"$(SRCROOT)/Red5ProVideoViewExample/Frameworks\"";
 				INFOPLIST_FILE = Red5ProVideoViewExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 10.0.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
