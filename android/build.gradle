@@ -19,5 +19,5 @@ android {
 
 dependencies {
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    implementation files("../example/Red5ProVideoViewExample/android/app/libs/red5streaming.jar")
+    implementation files("$rootDir/app/libs/red5streaming.jar")
 }
