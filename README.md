@@ -49,7 +49,7 @@ Install the `react-native-red5pro` component:
 $ npm i --save react-native-red5pro
 ```
 
-If you intend to use the live broadcasting capabilities of the [Red5 Pro SDK](https://www.red5pro.com/docs/streaming/), install the `react-native-permissions` module that will present to the user the permissions dialogs for Camera and Microphone:
+If you intend to use the live broadcasting capabilities of the [Red5 Pro SDK](https://www.red5.net/live-streaming-sdks/), install the `react-native-permissions` module that will present to the user the permissions dialogs for Camera and Microphone:
 
 ```sh
 $ npm i --save react-native-permissions
