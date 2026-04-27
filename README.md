@@ -4,11 +4,9 @@
 
 ---
 
-# react-native-red5pro
+# React Native Red5 Pro Publisher & Subscriber
 
 > This project is in **BETA**.
-
-React Native Red5 Pro Publisher & Subscriber.
 
 * [Version Support](#support)
 * [Install](#install)
