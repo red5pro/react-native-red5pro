@@ -6,7 +6,13 @@
 
 # React Native Red5 Pro Publisher & Subscriber
 
-> This project is in **BETA**.
+> This repository is no longer actively maintained and reflects an earlier implementation of a React Native integration with Red5 Pro. It was built using older versions of React Native and the Red5 Pro Mobile SDK, and it may not function correctly in modern environments without updates.
+
+However, the project remains a useful technical reference for developers looking to understand how to build real-time streaming applications with Red5 Pro in React Native. It demonstrates key concepts such as live stream publishing and subscribing, native module integration, camera and microphone handling, and basic streaming workflows.
+
+If you are looking for a production-ready solution, we recommend using the latest [Red5 SDKs](https://www.red5.net/live-streaming-sdks/) and [documentation](https://www.red5.net/docs/)
+
+If you are a Red5 Pro customer interested in adapting or modernizing this repository for your use case [reach out to our team](https://www.red5.net/contact/). We can help you evaluate your requirements and guide you toward a current, supported implementation.
 
 * [Version Support](#support)
 * [Install](#install)
