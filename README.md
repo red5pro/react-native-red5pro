@@ -4,11 +4,9 @@
 
 ---
 
-# react-native-red5pro
+# React Native Red5 Pro Publisher & Subscriber
 
 > This project is in **BETA**.
-
-React Native Red5 Pro Publisher & Subscriber.
 
 * [Version Support](#support)
 * [Install](#install)
@@ -122,7 +120,7 @@ compile project(':react-native-red5pro')
 
 It is assumed that you have used the [create-react-native](https://github.com/react-community/create-react-native-app) CLI tool to bootstrap your projects. If you have used other means to set up your projects, some instructions may be different.
 
-In addition to adding the `react-native-red5pro` library - and optionally `react-native-permissions` library - as [described above](#installation), there are additional project settings required, including the addition of the [Red5 Pro Mobile SDK](https://www.red5pro.com/docs/streaming/).
+In addition to adding the `react-native-red5pro` library - and optionally `react-native-permissions` library - as [described above](#installation), there are additional project settings required, including the addition of the [Red5 Pro Mobile SDK](https://www.red5.net/live-streaming-sdks/).
 
 This section will describe how to setup your projects to integrate the [Red5 Pro Mobile SDK](https://www.red5pro.com/docs/streaming/) so you can use the `react-native-red5pro` library to display a video view for broadcasting and subscribing to a live stream.
 
